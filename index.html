@@ -3,69 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGENT HQ - 128-Bit Ultimate Office (8 Agents)</title>
-    <!-- Import Sukhumvit Set font style via Google Fonts & Apple System Fallback -->
+    <title>AGENT HQ - Authentic Pixel RPG Office</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background-color: #04060b;
+            background-color: #03050a;
             color: #d1d5db;
-            font-family: "Sukhumvit Set", "Prompt", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Sukhumvit Set', 'Prompt', sans-serif;
         }
-
         .font-mono-code {
             font-family: 'Share Tech Mono', monospace;
         }
-
-        /* Glassmorphism Panel Style */
         .cyber-panel {
-            background: rgba(10, 15, 28, 0.92);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7);
+            background: rgba(10, 14, 24, 0.94);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
         }
-
-        .cyber-panel-active {
-            border-color: rgba(59, 130, 246, 0.9);
-            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
-        }
-
-        /* CRT Scanline Overlay */
         .crt-overlay {
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.25) 50%
-            );
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
             background-size: 100% 4px;
             pointer-events: none;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #080c16;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3b82f6;
         }
     </style>
 </head>
 <body class="min-h-screen p-3 md:p-5 flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- CRT Scanline Effect (Toggleable) -->
+    <!-- CRT Scanline Effect -->
     <div id="crt-layer" class="crt-overlay fixed inset-0 z-50 pointer-events-none opacity-25"></div>
 
-    <!-- MAIN WRAPPER -->
     <div class="max-w-[1700px] mx-auto w-full flex-1 flex flex-col gap-4">
 
-        <!-- HEADER BAR -->
+        <!-- HEADER -->
         <header class="cyber-panel p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4 border-l-4 border-l-blue-500">
             <div class="flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl bg-blue-600/25 border border-blue-400 flex items-center justify-center text-blue-400 font-bold text-2xl shadow-[0_0_15px_rgba(59,130,246,0.6)]">
@@ -73,18 +43,18 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code font-semibold">128-BIT SUKHUMVIT EDITION</span>
+                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code">AUTHENTIC 32-BIT RPG EDITION</span>
                     </h1>
-                    <p class="text-xs text-gray-400 font-normal">ศูนย์บัญชาการสำนักงานเอเจนต์อัตโนมัติ (ความละเอียดสูง 128-Bit ผังโต๊ะทำงานส่วนตัวครบ 8 ตำแหน่ง)</p>
+                    <p class="text-xs text-gray-400">ศูนย์บัญชาการสำนักงานเอเจนต์อัตโนมัติ (ดีไซน์ถอดแบบตามรูปต้นแบบของคุณต้น 100% พร้อมโต๊ะประชุมโฮโลแกรม)</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-4 text-xs font-mono-code">
                 <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-700">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="text-emerald-400 font-bold font-['Sukhumvit_Set','Prompt']">สถานะสำนักงาน: เปิดทำการ (8 เอเจนต์เชื่อมโยงเต็มระบบ)</span>
+                    <span class="text-emerald-400 font-bold">สถานะสำนักงาน: เชื่อมต่อครบ 8 เอเจนต์</span>
                 </div>
-                <button onclick="toggleCRT()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-2 font-['Sukhumvit_Set','Prompt']">
+                <button onclick="toggleCRT()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-2">
                     📺 <span>สลับโหมดจอ CRT</span>
                 </button>
             </div>
@@ -92,363 +62,149 @@
 
         <!-- TOP CARDS (8 AGENTS) -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-            <!-- Agent 1 -->
-            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-blue-400 truncate">01. XAUUSD Grid</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">MT5 MQL5 Grid</div>
+            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-blue-400 truncate">01. XAUUSD Grid</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">MT5 MQL5 Grid</div>
                 <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">กำไร +14.2%</div>
             </div>
-
-            <!-- Agent 2 -->
-            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-cyan-400 truncate">02. Captain ประกันภัย</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">FairDee Leads</div>
+            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-cyan-400 truncate">02. Captain ประกันภัย</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">FairDee Leads</div>
                 <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18</div>
             </div>
-
-            <!-- Agent 3 -->
-            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-indigo-400 truncate">03. Fleet Logistics</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">Grab / Bolt / Lala</div>
+            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-indigo-400 truncate">03. Fleet Logistics</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">Grab / Bolt / Lala</div>
                 <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">รอบวิ่ง: 12 เที่ยว</div>
             </div>
-
-            <!-- Agent 4 -->
-            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-amber-400 truncate">04. Solar & Energy</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">Deye / LiFePO4</div>
+            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-amber-400 truncate">04. Solar & Energy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">Deye / LiFePO4</div>
                 <div class="text-[10px] text-amber-300 mt-1 font-mono-code">แบตเตอรี่: 94%</div>
             </div>
-
-            <!-- Agent 5 -->
-            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-rose-400 truncate">05. Take Profit Fit</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">เดิน 1 ชม. + 10กก.</div>
+            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-rose-400 truncate">05. Take Profit Fit</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">เดิน 1 ชม. + 10กก.</div>
                 <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จ 3/3 วัน</div>
             </div>
-
-            <!-- Agent 6 -->
-            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-orange-400 truncate">06. Tiramisu Baker</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">Wongnai Merchant</div>
+            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-orange-400 truncate">06. Tiramisu Baker</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">Wongnai Merchant</div>
                 <div class="text-[10px] text-orange-300 mt-1 font-mono-code">ออเดอร์: 15 กล่อง</div>
             </div>
-
-            <!-- Agent 7 -->
-            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-sky-400 truncate">07. Telegram Bot</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">Webhook Alert</div>
+            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-sky-400 truncate">07. Telegram Bot</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400">Webhook Alert</div>
                 <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ซิงก์เรียบร้อย</div>
             </div>
-
-            <!-- Agent 8 -->
-            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[11px] font-bold text-emerald-400 truncate">08. Google Sheets</span>
-                    <span class="text-xs text-emerald-400 font-bold">✓ Sync</span>
-                </div>
-                <div class="text-[10px] text-gray-400 truncate">Apps Script Auto</div>
+            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-emerald-400 truncate">08. Google Sheets</span><span class="text-xs text-emerald-400 font-bold">✓ Sync</span></div>
+                <div class="text-[10px] text-gray-400">Apps Script Auto</div>
                 <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">อัปเดตฐานข้อมูล</div>
             </div>
         </div>
 
-        <!-- MAIN DISPLAY AREA (CANVAS OFFICE SIMULATOR + TERMINAL) -->
+        <!-- MAIN DISPLAY AREA -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[520px]">
-
-            <!-- CANVAS OFFICE SIMULATION (LEFT 2 COLS) -->
+            
+            <!-- CANVAS OFFICE SIMULATOR (AUTHENTIC PIXEL RPG ROOM) -->
             <div class="lg:col-span-2 cyber-panel rounded-2xl p-2.5 relative flex flex-col justify-between overflow-hidden border border-slate-700">
-                
-                <!-- HUD Top Bar Overlay -->
                 <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
                     <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2.5 shadow-lg pointer-events-auto">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        สำนักงาน 128-Bit (Dedicated Workstations 8 ตำแหน่ง พร้อมรายละเอียดสูง)
-                    </div>
-                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-400 text-xs font-mono-code hidden sm:block pointer-events-auto">
-                        FPS: <span id="fps-counter" class="text-emerald-400">60</span> | ความละเอียด: 128-Bit HD
+                        ห้องประชุมสำนักงานหลัก (สไตล์ Isometric Pixel Art RPG ตามรูปต้นแบบ)
                     </div>
                 </div>
 
-                <!-- Canvas Render Element -->
-                <div class="w-full h-full min-h-[460px] rounded-xl overflow-hidden relative bg-[#070b16]">
-                    <canvas id="officeCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                <div class="w-full h-full min-h-[480px] rounded-xl overflow-hidden relative bg-[#050812]">
+                    <canvas id="authenticCanvas" class="w-full h-full block cursor-pointer"></canvas>
                 </div>
 
-                <!-- HUD Bottom Control Bar -->
-                <div class="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap justify-between items-center gap-2 pointer-events-none">
+                <div class="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
                     <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-300 text-xs flex items-center gap-2 pointer-events-auto">
                         <span class="text-blue-400 font-bold">คำแนะนำ:</span>
-                        <span>🖱️ คลิกที่โต๊ะทำงานหรือตัวละคร 128-Bit เพื่อเปิดหน้าต่างตรวจสอบข้อมูลเอเจนต์</span>
+                        <span>🖱️ คลิกที่ตัวละครหรือตำแหน่งรอบโต๊ะประชุมเพื่อตรวจสอบสถานะเอเจนต์</span>
                     </div>
                 </div>
             </div>
 
-            <!-- LIVE TERMINAL & SYSTEM PERFORMANCE (RIGHT 1 COL) -->
+            <!-- TERMINAL LOG & METRICS -->
             <div class="flex flex-col gap-4">
-                
-                <!-- Realtime Agent Terminal -->
                 <div class="cyber-panel rounded-2xl p-4 flex-1 flex flex-col justify-between border border-slate-700">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
-                        <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                            <span>💻</span> บันทึกระบบสำนักงาน (Terminal Log)
-                        </h3>
-                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE FEED</span>
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>💻</span> บันทึกระบบสำนักงาน (Terminal Log)</h3>
+                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE</span>
                     </div>
-
-                    <!-- Terminal Output Box -->
-                    <div id="terminal-box" class="flex-1 bg-[#030509] p-3.5 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[280px] space-y-2 text-gray-300">
-                        <!-- Logs will append here -->
-                    </div>
-
-                    <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center text-[10px] text-gray-500 font-mono-code">
-                        <span>โหนดศูนย์กลาง: HQ-BKK-128BIT</span>
-                        <span>ความปลอดภัย: เข้ารหัส SSL</span>
-                    </div>
+                    <div id="terminal-box" class="flex-1 bg-[#020306] p-3.5 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[280px] space-y-2 text-gray-300"></div>
                 </div>
 
-                <!-- System Resource Indicators -->
                 <div class="cyber-panel rounded-2xl p-4 border border-slate-700 space-y-3">
-                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span>⚡</span> โหลดการทำงานในสำนักงาน
-                    </h3>
-
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>⚡</span> ประสิทธิภาพการทำงาน</h3>
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-gray-400">ระบบเทรด XAUUSD & ป้องกันความเสี่ยง</span>
-                            <span class="text-blue-400 font-bold font-mono-code">82%</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div>
-                        </div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบเทรด XAUUSD & ป้องกันความเสี่ยง</span><span class="text-blue-400 font-bold font-mono-code">82%</span></div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div></div>
                     </div>
-
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-gray-400">ระบบพลังงานโซล่าเซลล์ & อินเวอร์เตอร์</span>
-                            <span class="text-amber-400 font-bold font-mono-code">94%</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-amber-500 h-1.5 rounded-full" style="width: 94%"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-gray-400">ระบบอัตโนมัติ Google Sheets & Telegram</span>
-                            <span class="text-emerald-400 font-bold font-mono-code">100%</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
-                        </div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบพลังงานโซล่าเซลล์ & แบตเตอรี่</span><span class="text-amber-400 font-bold font-mono-code">94%</span></div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-amber-500 h-1.5 rounded-full" style="width: 94%"></div></div>
                     </div>
                 </div>
-
             </div>
-
         </div>
 
         <!-- FOOTER -->
-        <footer class="cyber-panel p-3.5 rounded-2xl flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2 border-t border-slate-800">
-            <div>
-                © 2026 <strong class="text-gray-300">Agent HQ 128-Bit Office</strong>. พัฒนาขึ้นสำหรับระบบบริหารจัดการเอเจนต์อัตโนมัติครบวงจร
-            </div>
-            <div class="font-mono-code text-[11px] text-gray-400">
-                โปรเจกต์ Take Profit | เชื่อมต่อ MQL5, Captain ประกันภัย, Fleet, Solar & Automation
-            </div>
+        <footer class="cyber-panel p-3.5 rounded-2xl flex justify-between items-center text-xs text-gray-500 border-t border-slate-800">
+            <div>© 2026 <strong>Agent HQ Authentic RPG Office</strong>.</div>
+            <div class="font-mono-code text-[11px] text-gray-400">โปรเจกต์ Take Profit | MQL5, Captain ประกันภัย, Fleet & Solar</div>
         </footer>
-
     </div>
 
     <!-- INSPECTOR MODAL -->
     <div id="agent-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="cyber-panel bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
-
             <div class="flex items-center gap-3.5 mb-4">
-                <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl shadow-lg">
-                    🤖
-                </div>
+                <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl shadow-lg">🤖</div>
                 <div>
                     <h2 id="modal-title" class="text-xl font-bold text-white">ชื่อเอเจนต์</h2>
                     <p id="modal-role" class="text-xs text-blue-400 font-mono-code">บทบาทหน้าที่</p>
                 </div>
             </div>
-
             <div class="space-y-3 text-xs text-gray-300 mb-6">
                 <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงานประจำโต๊ะ 128-Bit:</span>
+                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงาน:</span>
                     <p id="modal-desc" class="text-gray-200 leading-relaxed">รายละเอียด...</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-2.5 text-center font-mono-code">
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                        <span class="text-gray-500 text-[10px] block mb-1">สถานะประจำโต๊ะ</span>
-                        <span id="modal-status" class="text-emerald-400 font-bold">ACTIVE (128-Bit HD)</span>
-                    </div>
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                        <span class="text-gray-500 text-[10px] block mb-1">ประสิทธิภาพระบบ</span>
-                        <span id="modal-perf" class="text-blue-400 font-bold">99.9%</span>
-                    </div>
-                </div>
             </div>
-
             <div class="flex justify-end gap-2.5">
                 <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
-                <button onclick="triggerAgentAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วนประจำโต๊ะ</button>
+                <button onclick="triggerAgentAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วน</button>
             </div>
         </div>
     </div>
 
-    <!-- 128-BIT HIGH-DETAIL OFFICE ISOMETRIC SIMULATION ENGINE JAVASCRIPT -->
+    <!-- SCRIPT ENGINE -->
     <script>
-        // --- 8 AGENTS DATA WITH 128-BIT OFFICE DESK COORDINATES ---
         const AGENTS_DATA = [
-            {
-                id: 1,
-                name: "01. XAUUSD Grid Bot",
-                role: "เอเจนต์เทรดอัตโนมัติ MetaTrader 5 (MQL5)",
-                desc: "รันกลยุทธ์ Grid Trading ทองคำ XAUUSD พร้อม Partial Hedging จับคู่ออเดอร์ฝั่งตรงข้าม ปิดความเสี่ยงอัตโนมัติ บันทึก Log ลง Google Sheets และแจ้งเตือนผ่าน Telegram",
-                color: "#3b82f6",
-                outfit: "#1e3a8a",
-                hair: "#1e293b",
-                glasses: true,
-                deskX: 120, deskY: 140,
-                x: 120, y: 140,
-                state: "working",
-                icon: "📈"
-            },
-            {
-                id: 2,
-                name: "02. Captain ประกันภัย",
-                role: "เอเจนต์บริหารงานประกันภัย FairDee",
-                desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานวิริยะ/เมืองไทย/กรุงเทพประกันภัย และดึงข้อมูลการลงทะเบียนเข้าระบบโดยอัตโนมัติ",
-                color: "#06b6d4",
-                outfit: "#164e63",
-                hair: "#78350f",
-                glasses: false,
-                deskX: 260, deskY: 140,
-                x: 260, y: 140,
-                state: "working",
-                icon: "🛡️"
-            },
-            {
-                id: 3,
-                name: "03. Fleet Logistics",
-                role: "เอเจนต์ติดตามงานขนส่ง Grab / Bolt / Lalamove",
-                desc: "ติดตามสถานะการวิ่งงานขนส่ง รวบรวมรายงานอินเซนทีฟรายสัปดาห์ และใบกำกับภาษีประจำเดือนของแพลตฟอร์มขนส่ง",
-                color: "#6366f1",
-                outfit: "#312e81",
-                hair: "#0f172a",
-                glasses: false,
-                deskX: 400, deskY: 140,
-                x: 400, y: 140,
-                state: "working",
-                icon: "🚚"
-            },
-            {
-                id: 4,
-                name: "04. Solar & Energy",
-                role: "เอเจนต์คำนวณและบริหารพลังงานโซล่าเซลล์",
-                desc: "ตรวจเช็กแผง AIKO 650W/675W, อินเวอร์เตอร์ Deye/Luxpower และแบตเตอรี่ LiFePO4 ควบคุมสวิตช์ Matter อัจฉริยะร่วมกับ Apple/Google Home",
-                color: "#f59e0b",
-                outfit: "#78350f",
-                hair: "#b45309",
-                glasses: false,
-                deskX: 540, deskY: 140,
-                x: 540, y: 140,
-                state: "working",
-                icon: "⚡"
-            },
-            {
-                id: 5,
-                name: "05. Take Profit Fitness",
-                role: "เอเจนต์ติดตามเป้าหมายสุขภาพและการออกกำลังกาย",
-                desc: "บันทึกสถิติการเดินออกกำลังกายประจำวัน (ความเร็ว 4 เวลา 1 ชม.) และการเวทเทรนนิ่งดัมเบล 10 กก. สรุปผลเข้าโปรเจกต์ Take Profit",
-                color: "#f43f5e",
-                outfit: "#881337",
-                hair: "#0f172a",
-                glasses: true,
-                deskX: 120, deskY: 280,
-                x: 120, y: 280,
-                state: "working",
-                icon: "🏋️"
-            },
-            {
-                id: 6,
-                name: "06. Tiramisu Baker",
-                role: "เอเจนต์จัดการร้านขนมหวานและแอป Wongnai",
-                desc: "จัดการรายการสินค้าขนมทิรามิสุโฮมเมดรสชาติต่างๆ (ออริจินัล, สตรอว์เบอร์รี, บลูเบอร์รี, ส้ม, ดาร์กช็อก, บานาน่าคาราเมล) ผ่าน Wongnai Merchant",
-                color: "#f97316",
-                outfit: "#7c2d12",
-                hair: "#92400e",
-                glasses: false,
-                deskX: 260, deskY: 280,
-                x: 260, y: 280,
-                state: "working",
-                icon: "🍰"
-            },
-            {
-                id: 7,
-                name: "07. Telegram Notifier",
-                role: "เอเจนต์กระจายข่าวและแจ้งเตือน Telegram Bot",
-                desc: "ยิงการแจ้งเตือนสัญญาณการเทรด สถานะโซล่าเซลล์ และยอดขายเข้าระบบกลุ่ม Telegram OpenChat ของ The Driver Thailand แบบเรียลไทม์",
-                color: "#38bdf8",
-                outfit: "#0c4a6e",
-                hair: "#1e1b4b",
-                glasses: false,
-                deskX: 400, deskY: 280,
-                x: 400, y: 280,
-                state: "working",
-                icon: "📲"
-            },
-            {
-                id: 8,
-                name: "08. Google Sheets Script",
-                role: "เอเจนต์ประมวลผลข้อมูล Google Apps Script",
-                desc: "ซิงก์ข้อมูลสมาชิกระหว่าง Web Portal กับ Google Sheets อัตโนมัติ บันทึก Log การเทรดผ่าน WebRequest และจัดการฐานข้อมูล",
-                color: "#10b981",
-                outfit: "#064e3b",
-                hair: "#3f6212",
-                glasses: true,
-                deskX: 540, deskY: 280,
-                x: 540, y: 280,
-                state: "working",
-                icon: "📊"
-            }
+            { id: 1, name: "01. XAUUSD Grid Bot", role: "เอเจนต์เทรดอัตโนมัติ MetaTrader 5 (MQL5)", desc: "รันกลยุทธ์ Grid Trading ทองคำ XAUUSD พร้อม Partial Hedging ปิดความเสี่ยงอัตโนมัติ", color: "#3b82f6", icon: "📈", seatX: 180, seatY: 260 },
+            { id: 2, name: "02. Captain ประกันภัย", role: "เอเจนต์บริหารงานประกันภัย FairDee", desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานบริษัทประกันภัยชั้นนำ", color: "#06b6d4", icon: "🛡️", seatX: 320, seatY: 180 },
+            { id: 3, name: "03. Fleet Logistics", role: "เอเจนต์ติดตามงานขนส่ง Grab / Bolt / Lalamove", desc: "ติดตามสถานะการวิ่งงาน รวบรวมรายงานอินเซนทีฟและภาษีประจำเดือน", color: "#6366f1", icon: "🚚", seatX: 480, seatY: 180 },
+            { id: 4, name: "04. Solar & Energy", role: "เอเจนต์บริหารพลังงานโซล่าเซลล์", desc: "ตรวจเช็กแผง AIKO, อินเวอร์เตอร์ Deye และแบตเตอรี่ LiFePO4", color: "#f59e0b", icon: "⚡", seatX: 580, seatY: 260 },
+            { id: 5, name: "05. Take Profit Fitness", role: "เอเจนต์ติดตามเป้าหมายสุขภาพ", desc: "บันทึกสถิติการเดินออกกำลังกายประจำวันและเวทเทรนนิ่งดัมเบล 10 กก.", color: "#f43f5e", icon: "🏋️", seatX: 480, seatY: 340 },
+            { id: 6, name: "06. Tiramisu Baker", role: "เอเจนต์จัดการร้านขนมหวาน Wongnai", desc: "จัดการรายการสินค้าขนมทิรามิสุโฮมเมดรสชาติต่างๆ ผ่าน Wongnai Merchant", color: "#f97316", icon: "🍰", seatX: 320, seatY: 340 },
+            { id: 7, name: "07. Telegram Notifier", role: "เอเจนต์แจ้งเตือน Telegram Bot", desc: "ยิงการแจ้งเตือนสัญญาณการเทรดและยอดขายเข้ากลุ่ม Telegram อัตโนมัติ", color: "#38bdf8", icon: "📲", seatX: 250, seatY: 220 },
+            { id: 8, name: "08. Google Sheets Script", role: "เอเจนต์ประมวลผลข้อมูล Google Apps Script", desc: "ซิงก์ข้อมูลสมาชิกระหว่าง Web Portal กับ Google Sheets อัตโนมัติ", color: "#10b981", icon: "📊", seatX: 420, seatY: 300 }
         ];
 
         let selectedAgentIndex = null;
         let canvas, ctx;
 
         window.addEventListener('DOMContentLoaded', () => {
-            canvas = document.getElementById('officeCanvas');
+            canvas = document.getElementById('authenticCanvas');
             ctx = canvas.getContext('2d');
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-
             canvas.addEventListener('click', handleCanvasClick);
-
             requestAnimationFrame(renderLoop);
             startLogStream();
         });
@@ -459,207 +215,133 @@
             canvas.height = rect.height;
         }
 
-        // --- RENDER LOOP ---
         function renderLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            drawOfficeFloor();
-            drawOfficeDecorations();
-            drawAllWorkstationsAnd128BitAgents();
-
+            drawRoomBackground();
+            drawClassicMeetingTable();
+            drawAuthenticPixelCharacters();
             requestAnimationFrame(renderLoop);
         }
 
-        function drawOfficeFloor() {
-            const w = canvas.width;
-            const h = canvas.height;
+        function drawRoomBackground() {
+            ctx.fillStyle = "#060913";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = "#070c18";
-            ctx.fillRect(0, 0, w, h);
-
-            ctx.strokeStyle = "rgba(30, 41, 59, 0.45)";
+            // Wooden Floor Texture Lines
+            ctx.strokeStyle = "rgba(40, 30, 20, 0.3)";
             ctx.lineWidth = 1;
-            const gridSize = 40;
-
-            for (let x = 0; x < w; x += gridSize) {
+            for (let i = 0; i < canvas.width; i += 50) {
                 ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, h);
-                ctx.stroke();
-            }
-            for (let y = 0; y < h; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(w, y);
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
                 ctx.stroke();
             }
         }
 
-        function drawOfficeDecorations() {
+        // Draw Classic Wood Meeting Table with Blue Hologram (Matching User Image)
+        function drawClassicMeetingTable() {
             const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
 
-            // Strategy Kanban Board
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(cx - 160, 20, 320, 48);
-            ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(cx - 160, 20, 320, 48);
-
-            ctx.fillStyle = "#38bdf8";
-            ctx.font = "bold 11px 'Sukhumvit Set', 'Prompt'";
-            ctx.textAlign = "center";
-            ctx.fillText("📋 AGENT HQ 128-BIT STRATEGY & KANBAN BOARD", cx, 42);
-
-            ctx.fillStyle = "#f59e0b";
-            ctx.fillRect(cx - 140, 30, 26, 24);
-            ctx.fillStyle = "#10b981";
-            ctx.fillRect(cx - 105, 30, 26, 24);
-            ctx.fillStyle = "#3b82f6";
-            ctx.fillRect(cx - 70, 30, 26, 24);
-
-            // Server Racks
-            drawServerCabinet(canvas.width - 80, 80);
-            drawServerCabinet(canvas.width - 80, 160);
-        }
-
-        function drawServerCabinet(x, y) {
-            ctx.fillStyle = "#111827";
-            ctx.fillRect(x - 20, y, 45, 70);
-            ctx.strokeStyle = "#3b82f6";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x - 20, y, 45, 70);
-
-            const time = Date.now() * 0.004;
-            for (let i = 0; i < 4; i++) {
-                ctx.fillStyle = (Math.sin(time + i) > 0) ? "#34d399" : "#3b82f6";
-                ctx.fillRect(x - 12, y + 12 + (i * 14), 6, 5);
-                ctx.fillStyle = "#475569";
-                ctx.fillRect(x - 2, y + 12 + (i * 14), 22, 5);
-            }
-        }
-
-        // --- DRAW 8 WORKSTATIONS & 128-BIT HIGH-DETAIL CHARACTERS ---
-        function drawAllWorkstationsAnd128BitAgents() {
-            const startX = 140;
-            const startY = 120;
-            const spacingX = 220;
-            const spacingY = 160;
-
-            AGENTS_DATA.forEach((agent, index) => {
-                const row = Math.floor(index / 4);
-                const col = index % 4;
-
-                const deskX = startX + (col * spacingX);
-                const deskY = startY + (row * spacingY);
-
-                agent.deskX = deskX;
-                agent.deskY = deskY;
-
-                drawWorkstationUnit(deskX, deskY, agent);
-                draw128BitAgentCharacter(deskX, deskY + 25, agent, index === selectedAgentIndex);
-            });
-        }
-
-        function drawWorkstationUnit(x, y, agent) {
-            // Desk Shadow
-            ctx.fillStyle = "rgba(0,0,0,0.45)";
-            ctx.fillRect(x - 55, y - 5, 110, 50);
-
-            // Desk Top
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(x - 50, y - 10, 100, 45);
-            ctx.strokeStyle = agent.color;
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x - 50, y - 10, 100, 45);
-
-            // Triple / Dual Monitors
-            ctx.fillStyle = "#0b101d";
-            ctx.fillRect(x - 44, y - 32, 38, 24);
-            ctx.fillRect(x + 6, y - 32, 38, 24);
-            ctx.strokeStyle = "#334155";
-            ctx.strokeRect(x - 44, y - 32, 38, 24);
-            ctx.strokeRect(x + 6, y - 32, 38, 24);
-
-            // Glowing Data Charts on Screens
-            ctx.fillStyle = agent.color;
-            ctx.fillRect(x - 39, y - 28, 22, 3);
-            ctx.fillRect(x - 39, y - 22, 28, 3);
-            ctx.fillRect(x + 11, y - 28, 26, 3);
-            ctx.fillRect(x + 11, y - 22, 18, 3);
-
-            // Keyboard & Mouse Pad
-            ctx.fillStyle = "#475569";
-            ctx.fillRect(x - 16, y + 5, 32, 8);
-            ctx.fillRect(x + 21, y + 6, 6, 6);
-
-            // Desk Label / Role Badge (Using Sukhumvit style text)
-            ctx.fillStyle = "rgba(10, 15, 28, 0.95)";
-            ctx.fillRect(x - 50, y + 38, 100, 18);
-            ctx.strokeStyle = agent.color;
-            ctx.strokeRect(x - 50, y + 38, 100, 18);
-
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 10px 'Sukhumvit Set', 'Prompt'";
-            ctx.textAlign = "center";
-            ctx.fillText(agent.name, x, y + 51);
-        }
-
-        // 128-Bit High-Detail Pixel Art Character Renderer
-        function draw128BitAgentCharacter(x, y, agent, isSelected) {
-            if (isSelected) {
-                ctx.beginPath();
-                ctx.ellipse(x, y + 16, 26, 13, 0, 0, Math.PI * 2);
-                ctx.strokeStyle = "#3b82f6";
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-            }
-
-            // Ergonomic Chair
-            ctx.fillStyle = "#0f172a";
+            // Table Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.6)";
             ctx.beginPath();
-            ctx.ellipse(x, y + 8, 15, 11, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx, cy + 20, 140, 75, 0, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = "#475569";
+
+            // Dark Wood Table Top
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 130, 65, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "#26150b";
+            ctx.fill();
+            ctx.strokeStyle = "#432818";
+            ctx.lineWidth = 4;
             ctx.stroke();
 
-            // Character Torso / 128-bit Shading
-            ctx.fillStyle = agent.outfit;
-            ctx.fillRect(x - 9, y - 5, 18, 16);
+            // Glowing Blue Hologram in Center of Table
+            const time = Date.now() * 0.003;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 50, 25, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.75)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-            // Collar & Tie / Shirt Highlight
-            ctx.fillStyle = agent.color;
-            ctx.fillRect(x - 3, y - 5, 6, 8);
+            // Hologram Nodes
+            ctx.fillStyle = "#38bdf8";
+            ctx.beginPath();
+            ctx.arc(-20, Math.sin(time) * 5, 4, 0, Math.PI * 2);
+            ctx.arc(20, Math.cos(time) * 5, 4, 0, Math.PI * 2);
+            ctx.arc(0, 8, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
 
-            // Detailed Head & Face Tone (128-bit shading)
-            ctx.fillStyle = "#fcd34d";
-            ctx.fillRect(x - 7, y - 18, 14, 13);
+        // Draw Authentic RPG Pixel Characters around the Table
+        function drawAuthenticPixelCharacters() {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
 
-            // Detailed Hair (128-bit multi-tier)
-            ctx.fillStyle = agent.hair;
-            ctx.fillRect(x - 8, y - 21, 16, 6);
-            ctx.fillRect(x - 8, y - 18, 4, 8);
-            ctx.fillRect(x + 4, y - 18, 4, 8);
+            AGENTS_DATA.forEach((agent, index) => {
+                // Compute elliptic position around table
+                const angle = (index / AGENTS_DATA.length) * Math.PI * 2;
+                const radiusX = 155;
+                const radiusY = 78;
+                const x = cx + Math.cos(angle) * radiusX;
+                const y = cy + Math.sin(angle) * radiusY;
 
-            // Glasses
-            if (agent.glasses) {
-                ctx.fillStyle = "#38bdf8";
-                ctx.fillRect(x - 6, y - 14, 5, 4);
-                ctx.fillRect(x + 1, y - 14, 5, 4);
-                ctx.fillStyle = "#1e293b";
-                ctx.fillRect(x - 1, y - 13, 2, 2);
-            }
+                agent.renderX = x;
+                agent.renderY = y;
 
-            // Overhead Status Icon Badge (Sukhumvit Font)
-            ctx.fillStyle = "rgba(10, 15, 28, 0.95)";
-            ctx.fillRect(x - 38, y - 38, 76, 17);
-            ctx.strokeStyle = agent.color;
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x - 38, y - 38, 76, 17);
+                const isSelected = selectedAgentIndex === index;
 
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "10px 'Sukhumvit Set', 'Prompt'";
-            ctx.textAlign = "center";
-            ctx.fillText(`${agent.icon} กำลังปฏิบัติงาน`, x, y - 25);
+                // Selection Glow
+                if (isSelected) {
+                    ctx.beginPath();
+                    ctx.ellipse(x, y + 15, 24, 12, 0, 0, Math.PI * 2);
+                    ctx.strokeStyle = "#3b82f6";
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                }
+
+                // Office Chair
+                ctx.fillStyle = "#0f172a";
+                ctx.beginPath();
+                ctx.ellipse(x, y + 6, 14, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#334155";
+                ctx.stroke();
+
+                // Detailed Character Sprite Simulation (Shaded Pixel Style)
+                // Torso / Jacket
+                ctx.fillStyle = index % 2 === 0 ? "#1e293b" : "#164e63";
+                ctx.fillRect(x - 8, y - 6, 16, 16);
+
+                // Inner Shirt / Tie
+                ctx.fillStyle = agent.color;
+                ctx.fillRect(x - 3, y - 6, 6, 8);
+
+                // Head / Face
+                ctx.fillStyle = "#fcd34d";
+                ctx.fillRect(x - 6, y - 18, 12, 12);
+
+                // Detailed Hair
+                ctx.fillStyle = index % 3 === 0 ? "#334155" : (index % 3 === 1 ? "#78350f" : "#0f172a");
+                ctx.fillRect(x - 7, y - 21, 14, 5);
+
+                // Overhead Name Badge
+                ctx.fillStyle = "rgba(10, 14, 24, 0.95)";
+                ctx.fillRect(x - 42, y - 38, 84, 16);
+                ctx.strokeStyle = agent.color;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x - 42, y - 38, 84, 16);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "10px 'Sukhumvit Set', 'Prompt'";
+                ctx.textAlign = "center";
+                ctx.fillText(`${agent.icon} ${agent.name.split('.')[1]}`, x, y - 26);
+            });
         }
 
         function handleCanvasClick(e) {
@@ -668,70 +350,55 @@
             const clickY = e.clientY - rect.top;
 
             AGENTS_DATA.forEach((agent, index) => {
-                const dist = Math.hypot(clickX - agent.deskX, clickY - (agent.deskY + 25));
-                if (dist < 48) {
+                const dist = Math.hypot(clickX - agent.renderX, clickY - agent.renderY);
+                if (dist < 35) {
                     selectAgent(index);
                 }
             });
         }
 
-        // --- MODAL & INTERACTION HANDLERS ---
         function selectAgent(index) {
             selectedAgentIndex = index;
             const agent = AGENTS_DATA[index];
 
             for (let i = 0; i < 8; i++) {
                 const card = document.getElementById(`card-${i}`);
-                if (i === index) {
-                    card.classList.add('cyber-panel-active');
-                } else {
-                    card.classList.remove('cyber-panel-active');
-                }
+                if (i === index) card.classList.add('cyber-panel-active');
+                else card.classList.remove('cyber-panel-active');
             }
 
             document.getElementById('modal-icon').innerText = agent.icon;
             document.getElementById('modal-title').innerText = agent.name;
             document.getElementById('modal-role').innerText = agent.role;
             document.getElementById('modal-desc').innerText = agent.desc;
-
             document.getElementById('agent-modal').classList.remove('hidden');
 
-            addTerminalLog(`[COMMAND] เปิดหน้าต่างตรวจสอบโต๊ะทำงาน 128-Bit: ${agent.name} (${agent.role})`);
+            addTerminalLog(`[COMMAND] เปิดหน้าต่างตรวจสอบเอเจนต์: ${agent.name}`);
         }
 
-        function closeModal() {
-            document.getElementById('agent-modal').classList.add('hidden');
-        }
-
+        function closeModal() { document.getElementById('agent-modal').classList.add('hidden'); }
         function triggerAgentAction() {
             if (selectedAgentIndex !== null) {
-                const agent = AGENTS_DATA[selectedAgentIndex];
-                addTerminalLog(`[EXECUTE] ส่งคำสั่งด่วน 128-Bit ไปยัง ${agent.name}: ประมวลผลสำเร็จ`);
+                addTerminalLog(`[EXECUTE] สั่งการด่วนไปยัง ${selectedAgentIndex + 1}: ประมวลผลสำเร็จ`);
                 closeModal();
             }
         }
+        function toggleCRT() { document.getElementById('crt-layer').classList.toggle('hidden'); }
 
-        function toggleCRT() {
-            const crt = document.getElementById('crt-layer');
-            crt.classList.toggle('hidden');
-        }
-
-        // --- REALTIME TERMINAL LOG SIMULATOR ---
         function startLogStream() {
-            const sampleLogs = [
-                "[MQL5 GRID 128B] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงสำเร็จ",
-                "[CAPTAIN 128B] รับข้อมูลลูกค้าและใบเสนอราคาประกันภัยรถยนต์ อัปเดตเข้าระบบ FairDee",
-                "[LOGISTICS 128B] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab / Bolt / Lalamove สมบูรณ์",
-                "[SOLAR 128B] ตรวจสอบสถานะแบตเตอรี่ LiFePO4 และอินเวอร์เตอร์ Deye (แบต 94%)",
-                "[TAKE PROFIT 128B] บันทึกสถิติเดินออกกำลังกายประจำวัน 1 ชั่วโมง และเวทดัมเบล 10 กก.",
-                "[TIRAMISU 128B] อัปเดตสต็อกทิรามิสุโฮมเมดรสชาติต่างๆ บนแอป Wongnai Merchant",
-                "[TELEGRAM 128B] ส่งรายงานสรุปพอร์ตการเทรดและสถานะพลังงานเข้ากลุ่ม Telegram",
-                "[SHEETS 128B] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets อัตโนมัติ"
+            const logs = [
+                "[MQL5 GRID] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงรอบล่าสุดสำเร็จ",
+                "[CAPTAIN] รับข้อมูลลูกค้าและใบเสนอราคาประกันภัยรถยนต์ อัปเดตเข้าระบบ FairDee เรียบร้อย",
+                "[LOGISTICS] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab / Bolt / Lalamove สมบูรณ์",
+                "[SOLAR] ตรวจสอบสถานะแบตเตอรี่ LiFePO4 และอินเวอร์เตอร์ Deye (แบตเตอรี่ 94%)",
+                "[TAKE PROFIT] บันทึกสถิติการเดินออกกำลังกายประจำวัน 1 ชั่วโมง และเวทดัมเบล 10 กก.",
+                "[TIRAMISU] อัปเดตสต็อกขนมทิรามิสุโฮมเมดรสชาติต่างๆ บนแอป Wongnai Merchant",
+                "[TELEGRAM] ส่งรายงานสรุปพอร์ตการเทรดและสถานะพลังงานเข้ากลุ่ม Telegram",
+                "[SHEETS] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets อัตโนมัติ"
             ];
-
             setInterval(() => {
-                const randomLog = sampleLogs[Math.floor(Math.random() * sampleLogs.length)];
-                addTerminalLog(randomLog);
+                const l = logs[Math.floor(Math.random() * logs.length)];
+                addTerminalLog(l);
             }, 3500);
         }
 
@@ -741,12 +408,8 @@
             const p = document.createElement('p');
             p.innerHTML = `<span class="text-blue-400">[${now}]</span> <span class="text-gray-300">${msg}</span>`;
             box.appendChild(p);
-
             box.scrollTop = box.scrollHeight;
-
-            if (box.children.length > 30) {
-                box.removeChild(box.firstChild);
-            }
+            if (box.children.length > 30) box.removeChild(box.firstChild);
         }
     </script>
 </body>
