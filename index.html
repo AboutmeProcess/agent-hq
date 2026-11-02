@@ -12,92 +12,13 @@
         <aside class="w-64 bg-gray-800 p-6 flex flex-col justify-between shrink-0">
             <div>
                 <h1 class="text-2xl font-bold mb-8 text-blue-400">Agent HQ</h1>
-                <nav class="space-y-4">
-                    <a href="#" class="block p-3 bg-blue-600 rounded-lg font-medium">Overview</a>
-                    <a href="#" class="block p-3 hover:bg-gray-700 rounded-lg font-medium transition">Finance</a>
-                    <a href="#" class="block p-3 hover:bg-gray-700 rounded-lg font-medium transition">Logistics</a>
+                <nav class="space-y-2" id="nav-menu">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left p-3 bg-blue-600 rounded-lg font-medium transition">Overview</button>
+                    <button onclick="switchTab('finance')" id="nav-finance" class="w-full text-left p-3 hover:bg-gray-700 rounded-lg font-medium transition text-gray-300">Finance</button>
+                    <button onclick="switchTab('logistics')" id="nav-logistics" class="w-full text-left p-3 hover:bg-gray-700 rounded-lg font-medium transition text-gray-300">Logistics</button>
                 </nav>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-8 overflow-y-auto">
-            <header class="mb-8 flex justify-between items-center">
-                <div>
-                    <h2 class="text-3xl font-bold">Dashboard Overview</h2>
-                    <p class="text-gray-400 mt-1">ยินดีต้อนรับเข้าสู่ระบบจัดการข้อมูล</p>
-                </div>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition flex items-center gap-2">
-                    <span>+</span> เพิ่ม Agent ใหม่
-                </button>
-            </header>
-
-            <!-- Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-gray-400 text-sm font-medium">Agent ทั้งหมด</h3>
-                    <p class="text-2xl font-bold mt-2 text-white">3 คน</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-gray-400 text-sm font-medium">สถานะการทำงาน</h3>
-                    <p class="text-2xl font-bold mt-2 text-green-400">2 Active</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-gray-400 text-sm font-medium">รายการที่รอดำเนินการ</h3>
-                    <p class="text-2xl font-bold mt-2 text-yellow-400">5 รายการ</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-gray-400 text-sm font-medium">สถานะระบบ</h3>
-                    <p class="text-2xl font-bold mt-2 text-blue-400">Online</p>
-                </div>
-            </div>
-
-            <!-- Agent List Table -->
-            <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
-                <h3 class="text-xl font-bold mb-4">รายชื่อ Agent ในระบบ</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-300">
-                        <thead class="bg-gray-700/50 text-gray-400 uppercase text-xs">
-                            <tr>
-                                <th class="p-3 rounded-l-lg">Agent</th>
-                                <th class="p-3">บทบาท / หน้าที่</th>
-                                <th class="p-3">สถานะ</th>
-                                <th class="p-3 text-right rounded-r-lg">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            <tr>
-                                <td class="p-3 flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white text-xs">A1</div>
-                                    <span class="font-medium text-white">Agent Alpha</span>
-                                </td>
-                                <td class="p-3">ดูแลระบบขนส่ง (Logistics)</td>
-                                <td class="p-3"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Active</span></td>
-                                <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center font-bold text-white text-xs">A2</div>
-                                    <span class="font-medium text-white">Agent Bravo</span>
-                                </td>
-                                <td class="p-3">คำนวณบัญชี (Finance)</td>
-                                <td class="p-3"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Active</span></td>
-                                <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center font-bold text-white text-xs">A3</div>
-                                    <span class="font-medium text-white">Agent Charlie</span>
-                                </td>
-                                <td class="p-3">ส่งการแจ้งเตือน (Telegram Bot)</td>
-                                <td class="p-3"><span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded-md text-xs font-medium">Offline</span></td>
-                                <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-</body>
-</html>
+        <main class="flex-1 p-
