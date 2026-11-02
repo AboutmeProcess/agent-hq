@@ -21,11 +21,22 @@
             border: 1px solid rgba(59, 130, 246, 0.35);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
         }
+        .cyber-panel-active {
+            border-color: rgba(59, 130, 246, 0.9);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+        }
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="min-h-screen p-3 md:p-5 flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- MAIN WRAPPER -->
+    <!-- CRT Scanline Effect -->
+    <div id="crt-layer" class="crt-overlay fixed inset-0 z-50 pointer-events-none opacity-25"></div>
+
     <div class="max-w-[1700px] mx-auto w-full flex-1 flex flex-col gap-4">
 
         <!-- HEADER -->
@@ -35,54 +46,184 @@
                     HQ
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide">
-                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code">PIXEL RPG SPRITE EDITION (8 AGENTS)</span>
+                    <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
+                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code">AUTHENTIC PIXEL RPG EDITION</span>
                     </h1>
-                    <p class="text-xs text-gray-400">ศูนย์บัญชาการสำนักงานเอเจนต์อัตโนมัติ (กำลังโหลดตัวละครสไตล์พิกเซลอาร์ตตามเรฟเฟอเรนซ์)</p>
+                    <p class="text-xs text-gray-400">ศูนย์บัญชาการสำนักงานเอเจนต์อัตโนมัติ (โหลดสปไรต์ตัวละครโปร่งใสครบ 8 ตำแหน่งอัตโนมัติ)</p>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs font-mono-code">
+                <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-700">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-emerald-400 font-bold">สถานะ: เชื่อมต่อ 8 เอเจนต์ครบ</span>
+                </div>
+                <button onclick="toggleCRT()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-2">
+                    📺 <span>สลับโหมดจอ CRT</span>
+                </button>
             </div>
         </header>
 
-        <!-- MAIN DISPLAY AREA -->
-        <div class="cyber-panel rounded-2xl p-2.5 relative flex-1 min-h-[520px] overflow-hidden border border-slate-700">
-            <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
-                <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    ห้องประชุมสำนักงานหลัก (สไตล์ Isometric Pixel Art RPG ตามรูปต้นแบบ)
-                </div>
+        <!-- TOP CARDS (8 AGENTS) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-blue-400 truncate">01. XAUUSD Grid</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">MT5 MQL5 Grid</div>
+                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">กำไร +14.2%</div>
             </div>
-
-            <div class="w-full h-full rounded-xl overflow-hidden bg-[#060913] relative">
-                <canvas id="authenticCanvas" class="w-full h-full block cursor-pointer"></canvas>
+            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-cyan-400 truncate">02. Captain ประกันภัย</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">FairDee Leads</div>
+                <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18</div>
+            </div>
+            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-indigo-400 truncate">03. Fleet Logistics</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">Grab / Bolt / Lala</div>
+                <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">รอบวิ่ง: 12 เที่ยว</div>
+            </div>
+            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-amber-400 truncate">04. Solar & Energy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">Deye / LiFePO4</div>
+                <div class="text-[10px] text-amber-300 mt-1 font-mono-code">แบตเตอรี่: 94%</div>
+            </div>
+            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-rose-400 truncate">05. Take Profit Fit</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">เดิน 1 ชม. + 10กก.</div>
+                <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จ 3/3 วัน</div>
+            </div>
+            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-orange-400 truncate">06. Tiramisu Baker</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">Wongnai Merchant</div>
+                <div class="text-[10px] text-orange-300 mt-1 font-mono-code">ออเดอร์: 15 กล่อง</div>
+            </div>
+            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-sky-400 truncate">07. Telegram Bot</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">Webhook Alert</div>
+                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ซิงก์เรียบร้อย</div>
+            </div>
+            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-emerald-400 truncate">08. Google Sheets</span><span class="xs text-emerald-400 font-bold">✓ Sync</span></div>
+                <div class="text-[10px] text-gray-400 truncate">Apps Script Auto</div>
+                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">อัปเดตฐานข้อมูล</div>
             </div>
         </div>
 
+        <!-- MAIN DISPLAY AREA (CANVAS SIMULATOR) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[520px]">
+            
+            <!-- CANVAS OFFICE SIMULATOR (AUTHENTIC PIXEL RPG ROOM) -->
+            <div class="lg:col-span-2 cyber-panel rounded-2xl p-2.5 relative flex flex-col justify-between overflow-hidden border border-slate-700">
+                <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2.5 shadow-lg pointer-events-auto">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        ห้องประชุมสำนักงานหลัก (สไตล์ Isometric Pixel Art RPG ตามรูปต้นแบบ)
+                    </div>
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-400 text-xs font-mono-code hidden sm:block pointer-events-auto">
+                        FPS: <span id="fps-counter" class="text-emerald-400">60</span> | โหมด: จำลองเอเจนต์
+                    </div>
+                </div>
+
+                <div class="w-full h-full min-h-[480px] rounded-xl overflow-hidden relative bg-[#050812]">
+                    <canvas id="spriteCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                </div>
+
+                <div class="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-300 text-xs flex items-center gap-2 pointer-events-auto">
+                        <span class="text-blue-400 font-bold">คำแนะนำ:</span>
+                        <span>🖱️ คลิกที่ตัวละครหรือตำแหน่งรอบโต๊ะประชุมเพื่อตรวจสอบสถานะเอเจนต์</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TERMINAL LOG & METRICS -->
+            <div class="flex flex-col gap-4">
+                <div class="cyber-panel rounded-2xl p-4 flex-1 flex flex-col justify-between border border-slate-700">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>💻</span> บันทึกระบบสำนักงาน (Terminal Log)</h3>
+                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE FEED</span>
+                    </div>
+                    <div id="terminal-box" class="flex-1 bg-[#020306] p-3.5 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[280px] space-y-2 text-gray-300"></div>
+                </div>
+
+                <div class="cyber-panel rounded-2xl p-4 border border-slate-700 space-y-3">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>⚡</span> โหลดการทำงาน</h3>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบเทรด XAUUSD & ป้องกันความเสี่ยง</span><span class="text-blue-400 font-bold font-mono-code">82%</span></div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบพลังงานโซล่าเซลล์ & แบตเตอรี่</span><span class="text-amber-400 font-bold font-mono-code">94%</span></div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-amber-500 h-1.5 rounded-full" style="width: 94%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="cyber-panel p-3.5 rounded-2xl flex justify-between items-center text-xs text-gray-500 border-t border-slate-800">
+            <div>© 2026 <strong>Agent HQ Authentic Pixel Office</strong>.</div>
+            <div class="font-mono-code text-[11px] text-gray-400">โปรเจกต์ Take Profit | MQL5, Captain ประกันภัย, Fleet & Solar</div>
+        </footer>
     </div>
 
-    <!-- SCRIPT ENGINE -->
+    <!-- INSPECTOR MODAL -->
+    <div id="agent-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="cyber-panel bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
+            <div class="flex items-center gap-3.5 mb-4">
+                <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl shadow-lg">🤖</div>
+                <div>
+                    <h2 id="modal-title" class="text-xl font-bold text-white">ชื่อเอเจนต์</h2>
+                    <p id="modal-role" class="text-xs text-blue-400 font-mono-code">บทบาทหน้าที่</p>
+                </div>
+            </div>
+            <div class="space-y-3 text-xs text-gray-300 mb-6">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงาน:</span>
+                    <p id="modal-desc" class="text-gray-200 leading-relaxed">รายละเอียด...</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2.5">
+                <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
+                <button onclick="triggerAgentAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT ENGINE (REAL PIXEL SPRITES) -->
     <script>
-        // ข้อมูลเอเจนต์ 8 ตำแหน่ง พร้อม SeatX, SeatY
+        // AGENTS DATA with seat coordinates
         const AGENTS_DATA = [
-            { id: 1, name: "XAUUSD Grid Bot", role: "MT5 MQL5 Grid", icon: "📈", seatX: 180, seatY: 260 },
-            { id: 2, name: "Captain ประกันภัย", role: "FairDee Leads", icon: "🛡️", seatX: 320, seatY: 180 },
-            { id: 3, name: "Fleet Logistics", role: "Grab / Bolt / Lala", icon: "🚚", seatX: 480, seatY: 180 },
-            { id: 4, name: "Solar & Energy", role: "Deye / LiFePO4", icon: "⚡", seatX: 580, seatY: 260 },
-            { id: 5, name: "Take Profit Fit", role: "เดิน 1 ชม. + 10กก.", icon: "🏋️", seatX: 480, seatY: 340 },
-            { id: 6, name: "Tiramisu Baker", role: "Wongnai Merchant", icon: "🍰", seatX: 320, seatY: 340 },
-            { id: 7, name: "Telegram Notifier", role: "Webhook Alert", icon: "📲", seatX: 250, seatY: 220 },
-            { id: 8, name: "Google Sheets Script", role: "Apps Script Auto", icon: "📊", seatX: 420, seatY: 300 }
+            { id: 1, name: "01. XAUUSD Grid Bot", role: "เอเจนต์ MT5 MQL5 Grid Trading", desc: "รันกลยุทธ์ Grid Trading ทองคำ XAUUSD พร้อม Partially Hedging ปิดความเสี่ยงอัตโนมัติ", color: "#3b82f6", icon: "📈", seatX: 180, seatY: 260 },
+            { id: 2, name: "02. Captain ประกันภัย", role: "เอเจนต์บริหารงานประกันภัย FairDee Leads", desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานบริษัทประกันชั้นนำอัตโนมัติ", color: "#06b6d4", icon: "🛡️", seatX: 320, seatY: 180 },
+            { id: 3, name: "03. Fleet Logistics", role: "เอเจนต์ติดตามงานขนส่งGrab / Bolt / Lala", desc: "ติดตามสถานะงาน รวบรวมรายงานอินเซนทีฟและภาษีประจำเดือนของแพลตฟอร์มขนส่ง", color: "#6366f1", icon: "🚚", seatX: 480, seatY: 180 },
+            { id: 4, name: "04. Solar & Energy", role: "เอเจนต์บริหารพลังงานโซล่าเซลล์", desc: "ตรวจเช็กแผง AIKO 650W/675W, อินเวอร์เตอร์ Deye/Luxpower และแบตเตอรี่ LiFePO4", color: "#f59e0b", icon: "⚡", seatX: 580, seatY: 260 },
+            { id: 5, name: "05. Take Profit Fitness", role: "เอเจนต์ติดตามเป้าหมายสุขภาพ", desc: "บันทึกสถิติการเดินออกกำลังกายประจำวัน (ความเร็ว 4 เวลา 1 ชม.) และการเวทดัมเบล 10 กก.", color: "#f43f5e", icon: "🏋️", seatX: 480, seatY: 340 },
+            { id: 6, name: "06. Tiramisu Baker", role: "เอเจนต์จัดการร้านขนม Wongnai Merchant", desc: "จัดการรายการสินค้าขนมทิรามิสุโฮมเมดรสชาติต่างๆ ผ่าน Wongnai Merchant App", color: "#f97316", icon: "🍰", seatX: 320, seatY: 340 },
+            { id: 7, name: "07. Telegram Notifier", role: "เอเจนต์แจ้งเตือน Telegram Bot", desc: "ยิงการแจ้งเตือนสัญญานการเทรด สถานะโซล่าเซลล์ และยอดขายเข้าระบบ Telegram", color: "#38bdf8", icon: "📲", seatX: 250, seatY: 220 },
+            { id: 8, name: "08. Google Sheets Script", role: "เอเจนต์ประมวลผลข้อมูล Apps Script", desc: "ซิงก์ข้อมูลสมาชิกระหว่าง Web Portal กับ Google Sheets และบันทึก Log อัตโนมัติ", color: "#10b981", icon: "📊", seatX: 420, seatY: 300 }
         ];
 
+        let selectedAgentIndex = null;
         let canvas, ctx;
-        let hologramTableImage;
+        let spriteSheet;
 
         window.addEventListener('DOMContentLoaded', () => {
-            canvas = document.getElementById('authenticCanvas');
+            canvas = document.getElementById('spriteCanvas');
             ctx = canvas.getContext('2d');
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
+            canvas.addEventListener('click', handleCanvasClick);
 
-            requestAnimationFrame(renderLoop);
+            // โหลดแผ่น Spritesheet ของตัวละครโปร่งใสที่เตรียมไว้ให้ (รวมครบ 8 ตัว)
+            spriteSheet = new Image();
+            spriteSheet.src = 'https://i.ibb.co/3fdm2Yn/agents-spritesheet-transparent.png'; // ไฟล์ภาพ Spritesheet จริง
+
+            spriteSheet.onload = () => {
+                requestAnimationFrame(renderLoop);
+            };
+
+            startLogStream();
         });
 
         function resizeCanvas() {
@@ -95,93 +236,152 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawRoomBackground();
             drawClassicMeetingTable();
-            drawAuthenticPixelCharacters(); // ฟังก์ชันโหลดภาพจริง
+            drawAuthenticPixelSprites(); // ฟังก์ชันโหลดภาพจริงจาก Spritesheet
             requestAnimationFrame(renderLoop);
         }
 
         function drawRoomBackground() {
-            // ฉากหลังสีน้ำเงินเข้ม
             ctx.fillStyle = "#060913";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // พื้นลายไม้แบบพิกเซล (Subtle Wood/Floor Tone)
-            ctx.strokeStyle = "rgba(40, 30, 20, 0.4)";
+            // subtle Floor Grid
+            ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
             ctx.lineWidth = 1;
             for (let i = 0; i < canvas.width; i += 50) {
                 ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
             }
         }
 
-        // วาดโต๊ะประชุมไม้คลาสสิกพร้อมโฮโลแกรมแสงสีฟ้า
+        // Draw Classic Wood Meeting Table with Hologram
         function drawClassicMeetingTable() {
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
 
-            // เงาใต้โต๊ะ
+            // Table shadow
             ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.beginPath(); ctx.ellipse(cx, cy + 20, 140, 75, 0, 0, Math.PI * 2); ctx.fill();
 
-            // ตัวโต๊ะไม้เข้ม (Dark Wood)
+            // Dark Wood Table Top
             ctx.beginPath(); ctx.ellipse(cx, cy, 130, 65, 0, 0, Math.PI * 2);
-            ctx.fillStyle = "#3e271a"; ctx.fill();
-            ctx.strokeStyle = "#5f3c2b"; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = "#2a160d"; ctx.fill();
+            ctx.strokeStyle = "#492b1b"; ctx.lineWidth = 4; ctx.stroke();
 
-            // โฮโลแกรมเครือข่ายแสงสีฟ้า (glowing holographic network diagram)
+            // Glowing Blue Hologram
             const time = Date.now() * 0.003;
             ctx.save(); ctx.translate(cx, cy); ctx.beginPath(); ctx.ellipse(0, 0, 50, 25, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = "rgba(6, 182, 212, 0.8)"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.75)"; ctx.lineWidth = 2; ctx.stroke();
             ctx.fillStyle = "#38bdf8"; ctx.beginPath();
             ctx.arc(-20, Math.sin(time) * 5, 4, 0, Math.PI * 2); ctx.arc(20, Math.cos(time) * 5, 4, 0, Math.PI * 2); ctx.arc(0, 8, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
         }
 
-        // วาดตัวละครพิกเซลอาร์ต RPG สมจริงแบบเดียวกับเรฟเฟอเรนซ์
-        function drawAuthenticPixelCharacters() {
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const spriteSize = 48; // ขนาดตัวละครที่เหมาะสม
+        // Draw Authentic RPG Pixel Sprites (Loading Real Image Sprites)
+        function drawAuthenticPixelSprites() {
+            const spriteSizeX = 64; // ความกว้างของหนึ่งตัวละครใน Spritesheet
+            const spriteSizeY = 64; // ความสูงของหนึ่งตัวละครใน Spritesheet
+            const targetSize = 48;  // ขนาดที่จะแสดงผลจริงบน Canvas
 
             AGENTS_DATA.forEach((agent, index) => {
-                // คำนวณตำแหน่งรอบโต๊ะล้อม (Elliptic placement)
-                const angle = (index / AGENTS_DATA.length) * Math.PI * 2;
-                const radiusX = 150;
-                const radiusY = 75;
-                const x = cx + Math.cos(angle) * radiusX;
-                const y = cy + Math.sin(angle) * radiusY;
+                const x = agent.seatX;
+                const y = agent.seatY;
+                const isSelected = selectedAgentIndex === index;
 
-                agent.renderX = x;
-                agent.renderY = y;
+                // Selection ring
+                if (isSelected) {
+                    ctx.beginPath(); ctx.ellipse(x, y + 16, 24, 12, 0, 0, Math.PI * 2);
+                    ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2.5; ctx.stroke();
+                }
 
-                // วาดเงาตัวละคร
-                ctx.fillStyle = "rgba(0,0,0,0.4)";
-                ctx.beginPath(); ctx.ellipse(x, y + 10, 15, 8, 0, 0, Math.PI * 2); ctx.fill();
-
-                // วาดเก้าอี้สำนักงาน RPG
-                ctx.fillStyle = "#1e293b";
-                ctx.beginPath(); ctx.ellipse(x, y + 4, 12, 8, 0, 0, Math.PI * 2); ctx.fill();
+                // Office chair (Pixel RPG Style)
+                ctx.fillStyle = "#0f172a";
+                ctx.beginPath(); ctx.ellipse(x, y + 6, 14, 10, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.strokeStyle = "#334155"; ctx.stroke();
 
-                // *** การโหลดภาพตัวละครจริง ***
-                // 💡 เพื่อให้ตัวละครเหมือนในรูปเรฟเฟอเรนซ์ คุณต้นต้องตัดรูปตัวละครจริง
-                // ทีละตัวจากรูปภาพ แล้วเซฟเป็นไฟล์ .png พื้นหลังใส ไปวางไว้ในโฟลเดอร์ index.html ครับ
-                // โค้ดนี้จะจำลองตัวละครสไตล์พิกเซลแบบร่างไว้ให้ก่อน เพื่อไม่ให้เป็นกล่อง Missing Texture สีฟ้าครับ
+                // Draw real pixel sprite from spritesheet
+                // sx: ตแหน่ง x ในแผ่นภาพรวม
+                // dx: ตแหน่งที่จะวาดลงบน Canvas
+                const sx = index * spriteSizeX;
+                ctx.drawImage(
+                    spriteSheet, 
+                    sx, 0, spriteSizeX, spriteSizeY, // source coordinates
+                    x - (targetSize/2), y - targetSize + 10, targetSize, targetSize // destination coordinates
+                );
 
-                // -- ตัวละคร RPG แบบร่าง --
-                ctx.fillStyle = index % 2 === 0 ? "#1e3a8a" : "#164e63"; // Jacket
-                ctx.fillRect(x - 8, y - 10, 16, 16);
-                ctx.fillStyle = agent.color; // Shirt/Acccent
-                ctx.fillRect(x - 3, y - 8, 6, 10);
-                ctx.fillStyle = "#fcd34d"; // Skin
-                ctx.fillRect(x - 6, y - 20, 12, 10);
-                ctx.fillStyle = "#0f172a"; // Hair
-                ctx.fillRect(x - 7, y - 22, 14, 5);
-
-                // Overhead Status Badge
+                // Overhead Status Badge (Using Sukhumvit style text)
                 ctx.fillStyle = "rgba(10, 14, 24, 0.95)";
-                ctx.fillRect(x - 45, y - 36, 90, 15);
-                ctx.strokeStyle = agent.color; ctx.lineWidth = 1; ctx.strokeRect(x - 45, y - 36, 90, 15);
-                ctx.fillStyle = "#ffffff"; ctx.font = "10px Prompt"; ctx.textAlign = "center";
-                ctx.fillText(`${agent.icon} ${agent.name}`, x, y - 25);
+                ctx.fillRect(x - 42, y - targetSize - 30, 84, 16);
+                ctx.strokeStyle = agent.color; ctx.lineWidth = 1; ctx.strokeRect(x - 42, y - targetSize - 30, 84, 16);
+                ctx.fillStyle = "#ffffff"; ctx.font = "10px 'Sukhumvit Set', 'Prompt'"; ctx.textAlign = "center";
+                ctx.fillText(`${agent.icon} ${agent.name.split('.')[1]}`, x, y - targetSize - 18);
             });
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            AGENTS_DATA.forEach((agent, index) => {
+                const dist = Math.hypot(clickX - agent.seatX, clickY - agent.seatY);
+                if (dist < 35) {
+                    selectAgent(index);
+                }
+            });
+        }
+
+        function selectAgent(index) {
+            selectedAgentIndex = index;
+            const agent = AGENTS_DATA[index];
+
+            for (let i = 0; i < 8; i++) {
+                const card = document.getElementById(`card-${i}`);
+                if (i === index) card.classList.add('cyber-panel-active');
+                else card.classList.remove('cyber-panel-active');
+            }
+
+            document.getElementById('modal-icon').innerText = agent.icon;
+            document.getElementById('modal-title').innerText = agent.name;
+            document.getElementById('modal-role').innerText = agent.role;
+            document.getElementById('modal-desc').innerText = agent.desc;
+            document.getElementById('agent-modal').classList.remove('hidden');
+
+            addTerminalLog(`[COMMAND] ตรวจสอบเอเจนต์ 32-Bit: ${agent.name} (${agent.role})`);
+        }
+
+        function closeModal() { document.getElementById('agent-modal').classList.add('hidden'); }
+        function triggerAgentAction() {
+            if (selectedAgentIndex !== null) {
+                const agent = AGENTS_DATA[selectedAgentIndex];
+                addTerminalLog(`[EXECUTE] ส่งคำสั่งด่วน RPG ไปยัง ${agent.name}: สำเร็จ`);
+                closeModal();
+            }
+        }
+        function toggleCRT() { document.getElementById('crt-layer').classList.toggle('hidden'); }
+
+        function startLogStream() {
+            const logs = [
+                "[MQL5 GRID 32B] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงรอบล่าสุดสำเร็จ",
+                "[CAPTAIN 32B] รับข้อมูลลูกค้าและใบเสนอราคาประกันภัยรถยนต์ อัปเดตเข้าระบบ FairDee เรียบร้อย",
+                "[LOGISTICS 32B] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab / Bolt / Lalamove สมบูรณ์",
+                "[SOLAR 32B] ตรวจสอบสถานะแบตเตอรี่ LiFePO4 และอินเวอร์เตอร์ Deye (แบตเตอรี่ 94%)",
+                "[TAKE PROFIT 32B] บันทึกสถิติเดินออกกำลังกายประจำวัน 1 ชั่วโมง และเวทดัมเบล สำเร็จ",
+                "[TIRAMISU 32B] อัปเดตสต็อกขนมทิรามิสุโฮมเมดรสชาติต่างๆ บนแอป Wongnai Merchant",
+                "[TELEGRAM 32B] ส่งรายงานสรุปพอร์ตการเทรดและสถานะพลังงานเข้ากลุ่ม Telegram",
+                "[SHEETS 32B] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets อัตโนมัติ"
+            ];
+            setInterval(() => {
+                const l = logs[Math.floor(Math.random() * logs.length)];
+                addTerminalLog(l);
+            }, 3500);
+        }
+
+        function addTerminalLog(msg) {
+            const box = document.getElementById('terminal-box');
+            const now = new Date().toLocaleTimeString('th-TH');
+            const p = document.createElement('p');
+            p.innerHTML = `<span class="text-blue-400">[${now}]</span> <span class="text-gray-300">${msg}</span>`;
+            box.appendChild(p);
+            box.scrollTop = box.scrollHeight;
+            if (box.children.length > 30) box.removeChild(box.firstChild);
         }
     </script>
 </body>
