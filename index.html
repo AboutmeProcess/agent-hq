@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGENT HQ - Command Center (8 Agents)</title>
+    <title>AGENT HQ - Ultimate Office Command Center (8 Agents)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
         
         body {
-            background-color: #080c14;
+            background-color: #060911;
             color: #d1d5db;
             font-family: 'Kanit', sans-serif;
         }
@@ -20,34 +20,33 @@
 
         /* Glassmorphism Panel Style */
         .cyber-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background: rgba(13, 18, 32, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
         .cyber-panel-active {
-            border-color: rgba(59, 130, 246, 0.6);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
         }
 
         /* CRT Scanline Overlay */
         .crt-overlay {
             background: linear-gradient(
                 rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.25) 50%
+                rgba(0, 0, 0, 0.3) 50%
             );
             background-size: 100% 4px;
             pointer-events: none;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #0b0f19;
         }
         ::-webkit-scrollbar-thumb {
             background: #1e293b;
@@ -61,70 +60,70 @@
 <body class="min-h-screen p-3 md:p-5 flex flex-col justify-between relative overflow-x-hidden">
 
     <!-- CRT Scanline Effect (Toggleable) -->
-    <div id="crt-layer" class="crt-overlay fixed inset-0 z-50 pointer-events-none opacity-40"></div>
+    <div id="crt-layer" class="crt-overlay fixed inset-0 z-50 pointer-events-none opacity-30"></div>
 
     <!-- MAIN WRAPPER -->
-    <div class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col gap-4">
+    <div class="max-w-[1700px] mx-auto w-full flex-1 flex flex-col gap-4">
 
         <!-- HEADER BAR -->
-        <header class="cyber-panel p-4 rounded-xl flex flex-wrap justify-between items-center gap-4 border-l-4 border-l-blue-500">
+        <header class="cyber-panel p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4 border-l-4 border-l-blue-500">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-600/20 border border-blue-400 flex items-center justify-center text-blue-400 font-bold text-xl shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+                <div class="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-400 flex items-center justify-center text-blue-400 font-bold text-2xl shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                     HQ
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                        AGENT HQ <span class="text-xs px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-500/40 font-mono-code">v2.5 ISOMETRIC 32-BIT</span>
+                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/60 text-blue-300 border border-blue-500/40 font-mono-code">ULTIMATE OFFICE v3.0</span>
                     </h1>
-                    <p class="text-xs text-gray-400">ระบบศูนย์บัญชาการปฏิบัติการเอเจนต์อัตโนมัติ (8 เอเจนต์เชื่อมโยงสมบูรณ์)</p>
+                    <p class="text-xs text-gray-400">ศูนย์บัญชาการสำนักงานเอเจนต์อัตโนมัติ (ผังโต๊ะทำงานส่วนตัว 8 ตำแหน่ง พร้อมระบบจำลองแบบเรียลไทม์)</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-4 text-xs font-mono-code">
-                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700">
+                <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-700">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="text-emerald-400 font-bold">สถานะระบบ: ปกติ</span>
+                    <span class="text-emerald-400 font-bold">สถานะสำนักงาน: เปิดทำการ (8/8 เอเจนต์สแตนด์บาย)</span>
                 </div>
-                <button onclick="toggleCRT()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-1.5">
-                    📺 <span>สลับโหมด CRT</span>
+                <button onclick="toggleCRT()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-2">
+                    📺 <span>สลับโหมดจอ CRT</span>
                 </button>
             </div>
         </header>
 
-        <!-- TOP METRICS & AGENT STATUS CARDS (8 AGENTS) -->
+        <!-- TOP CARDS (8 AGENTS) -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
             <!-- Agent 1 -->
-            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-blue-400 truncate">01. XAUUSD Grid</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
                 </div>
                 <div class="text-[10px] text-gray-400 truncate">MT5 MQL5 Grid</div>
-                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">กำไรสะสม +14.2%</div>
+                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">กำไร +14.2%</div>
             </div>
 
             <!-- Agent 2 -->
-            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-cyan-400 truncate">02. Captain ประกันภัย</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
                 </div>
-                <div class="text-[10px] text-gray-400 truncate">FairDee Lead Sync</div>
-                <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18 รายงาน</div>
+                <div class="text-[10px] text-gray-400 truncate">FairDee Leads</div>
+                <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18</div>
             </div>
 
             <!-- Agent 3 -->
-            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-indigo-400 truncate">03. Fleet Logistics</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
                 </div>
-                <div class="text-[10px] text-gray-400 truncate">Grab/Bolt/Lalamove</div>
+                <div class="text-[10px] text-gray-400 truncate">Grab / Bolt / Lala</div>
                 <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">รอบวิ่ง: 12 เที่ยว</div>
             </div>
 
             <!-- Agent 4 -->
-            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-amber-400 truncate">04. Solar & Energy</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
@@ -134,17 +133,17 @@
             </div>
 
             <!-- Agent 5 -->
-            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-rose-400 truncate">05. Take Profit Fit</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
                 </div>
-                <div class="text-[10px] text-gray-400 truncate">เดิน 1 ชม. + 10kg</div>
-                <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จแล้ว: 3/3 วัน</div>
+                <div class="text-[10px] text-gray-400 truncate">เดิน 1 ชม. + 10กก.</div>
+                <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จ 3/3 วัน</div>
             </div>
 
             <!-- Agent 6 -->
-            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-orange-400 truncate">06. Tiramisu Baker</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
@@ -154,56 +153,55 @@
             </div>
 
             <!-- Agent 7 -->
-            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-sky-400 truncate">07. Telegram Bot</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
                 </div>
                 <div class="text-[10px] text-gray-400 truncate">Webhook Alert</div>
-                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ส่งการแจ้งเตือนแล้ว</div>
+                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ซิงก์เรียบร้อย</div>
             </div>
 
             <!-- Agent 8 -->
-            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-[11px] font-bold text-emerald-400 truncate">08. Google Sheets</span>
                     <span class="text-xs text-emerald-400 font-bold">✓ Sync</span>
                 </div>
                 <div class="text-[10px] text-gray-400 truncate">Apps Script Auto</div>
-                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">อัปเดตสมาชิกแล้ว</div>
+                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">อัปเดตฐานข้อมูล</div>
             </div>
         </div>
 
-        <!-- MAIN DISPLAY AREA (CANVAS SIMULATOR + LOG TERMINAL) -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[480px]">
+        <!-- MAIN DISPLAY AREA (CANVAS OFFICE SIMULATOR + TERMINAL) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[520px]">
 
-            <!-- CANVAS ISOMETRIC AGENT COMMAND CENTER (LEFT 2 COLS) -->
-            <div class="lg:col-span-2 cyber-panel rounded-2xl p-2 relative flex flex-col justify-between overflow-hidden group border border-slate-700">
+            <!-- CANVAS OFFICE SIMULATION (LEFT 2 COLS) -->
+            <div class="lg:col-span-2 cyber-panel rounded-2xl p-2.5 relative flex flex-col justify-between overflow-hidden border border-slate-700">
                 
                 <!-- HUD Top Bar Overlay -->
                 <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
-                    <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2 shadow-lg pointer-events-auto">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        จำลองศูนย์ปฏิบัติการเอเจนต์แบบเรียลไทม์ (จำลองตัวละคร 32-Bit)
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2.5 shadow-lg pointer-events-auto">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        ผังสำนักงานเอเจนต์ส่วนตัว (Dedicated Workstations 8 ตำแหน่ง)
                     </div>
-                    <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700 text-gray-400 text-xs font-mono-code hidden sm:block pointer-events-auto">
-                        FPS: <span id="fps-counter" class="text-emerald-400">60</span> | โซน: ห้องวางแผนและเซิร์ฟเวอร์
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-400 text-xs font-mono-code hidden sm:block pointer-events-auto">
+                        FPS: <span id="fps-counter" class="text-emerald-400">60</span> | โซน: ออฟฟิศหลัก
                     </div>
                 </div>
 
                 <!-- Canvas Render Element -->
-                <div class="w-full h-full min-h-[420px] rounded-xl overflow-hidden relative bg-[#0d1322]">
-                    <canvas id="isometricCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                <div class="w-full h-full min-h-[460px] rounded-xl overflow-hidden relative bg-[#090e1a]">
+                    <canvas id="officeCanvas" class="w-full h-full block cursor-pointer"></canvas>
                 </div>
 
                 <!-- HUD Bottom Control Bar -->
                 <div class="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap justify-between items-center gap-2 pointer-events-none">
-                    <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 text-xs flex items-center gap-3 pointer-events-auto">
-                        <span class="text-gray-400">คำแนะนำ:</span>
-                        <span>🖱️ คลิกที่ตัวละครเอเจนต์เพื่อตรวจสอบข้อมูล</span>
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-300 text-xs flex items-center gap-2 pointer-events-auto">
+                        <span class="text-blue-400 font-bold">คำแนะนำ:</span>
+                        <span>🖱️ คลิกที่โต๊ะทำงานหรือตัวละครเพื่อเปิดหน้าต่างตรวจสอบเอเจนต์</span>
                     </div>
                 </div>
-
             </div>
 
             <!-- LIVE TERMINAL & SYSTEM PERFORMANCE (RIGHT 1 COL) -->
@@ -213,41 +211,41 @@
                 <div class="cyber-panel rounded-2xl p-4 flex-1 flex flex-col justify-between border border-slate-700">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
                         <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                            <span>💻</span> บันทึกระบบการทำงาน (Terminal Log)
+                            <span>💻</span> บันทึกระบบสำนักงาน (Terminal Log)
                         </h3>
-                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE STREAM</span>
+                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE FEED</span>
                     </div>
 
                     <!-- Terminal Output Box -->
-                    <div id="terminal-box" class="flex-1 bg-[#050811] p-3 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[260px] space-y-2 text-gray-300">
-                        <!-- Logs will append here dynamically -->
+                    <div id="terminal-box" class="flex-1 bg-[#04060b] p-3.5 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[280px] space-y-2 text-gray-300">
+                        <!-- Logs will append here -->
                     </div>
 
                     <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center text-[10px] text-gray-500 font-mono-code">
-                        <span>เซิร์ฟเวอร์หลัก: HQ-BKK-01</span>
-                        <span>ความหน่วงระบบ: 12ms</span>
+                        <span>โหนดศูนย์กลาง: HQ-BKK-WORKSTATIONS</span>
+                        <span>ความปลอดภัย: เข้ารหัส SSL</span>
                     </div>
                 </div>
 
                 <!-- System Resource Indicators -->
                 <div class="cyber-panel rounded-2xl p-4 border border-slate-700 space-y-3">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span>⚡</span> การใช้ทรัพยากรของเอเจนต์
+                        <span>⚡</span> โหลดการทำงานในสำนักงาน
                     </h3>
 
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="text-gray-400">ระบบเทรด MQL5 Trading Workload</span>
-                            <span class="text-blue-400 font-bold font-mono-code">78%</span>
+                            <span class="text-gray-400">ระบบเทรด XAUUSD & ป้องกันความเสี่ยง</span>
+                            <span class="text-blue-400 font-bold font-mono-code">82%</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 78%"></div>
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div>
                         </div>
                     </div>
 
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="text-gray-400">ระบบสำรองพลังงานโซล่าเซลล์ (Batteries)</span>
+                            <span class="text-gray-400">ระบบพลังงานโซล่าเซลล์ & อินเวอร์เตอร์</span>
                             <span class="text-amber-400 font-bold font-mono-code">94%</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
@@ -257,7 +255,7 @@
 
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="text-gray-400">การรับส่งข้อมูล Google Sheets & Telegram</span>
+                            <span class="text-gray-400">ระบบอัตโนมัติ Google Sheets & Telegram</span>
                             <span class="text-emerald-400 font-bold font-mono-code">100%</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
@@ -271,24 +269,24 @@
         </div>
 
         <!-- FOOTER -->
-        <footer class="cyber-panel p-3 rounded-xl flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2 border-t border-slate-800">
+        <footer class="cyber-panel p-3.5 rounded-2xl flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2 border-t border-slate-800">
             <div>
-                © 2026 <strong class="text-gray-300">Agent HQ Command Center</strong>. พัฒนาขึ้นสำหรับระบบบริหารจัดการเอเจนต์อัตโนมัติ
+                © 2026 <strong class="text-gray-300">Agent HQ Ultimate Office</strong>. พัฒนาขึ้นสำหรับระบบบริหารจัดการเอเจนต์อัตโนมัติครบวงจร
             </div>
             <div class="font-mono-code text-[11px] text-gray-400">
-                โปรเจกต์ Take Profit | เชื่อมต่อระบบหลัก: MQL5, Captain ประกันภัย, Fleet & Solar
+                โปรเจกต์ Take Profit | เชื่อมต่อ MQL5, Captain ประกันภัย, Fleet, Solar & Automation
             </div>
         </footer>
 
     </div>
 
-    <!-- INSPECTOR MODAL FOR AGENT DETAILS -->
-    <div id="agent-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <!-- INSPECTOR MODAL -->
+    <div id="agent-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="cyber-panel bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">✕</button>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
 
-            <div class="flex items-center gap-3 mb-4">
-                <div id="modal-icon" class="w-12 h-12 rounded-xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-2xl">
+            <div class="flex items-center gap-3.5 mb-4">
+                <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl shadow-lg">
                     🤖
                 </div>
                 <div>
@@ -298,102 +296,102 @@
             </div>
 
             <div class="space-y-3 text-xs text-gray-300 mb-6">
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
-                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงานปัจจุบัน:</span>
-                    <p id="modal-desc" class="text-gray-200">รายละเอียด...</p>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงานประจำโต๊ะ:</span>
+                    <p id="modal-desc" class="text-gray-200 leading-relaxed">รายละเอียด...</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 text-center font-mono-code">
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <span class="text-gray-500 text-[10px] block">สถานะการทำงาน</span>
-                        <span id="modal-status" class="text-emerald-400 font-bold">ACTIVE</span>
+                <div class="grid grid-cols-2 gap-2.5 text-center font-mono-code">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <span class="text-gray-500 text-[10px] block mb-1">สถานะประจำโต๊ะ</span>
+                        <span id="modal-status" class="text-emerald-400 font-bold">ACTIVE (ทำงานที่โต๊ะ)</span>
                     </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <span class="text-gray-500 text-[10px] block">ประสิทธิภาพระบบ</span>
-                        <span id="modal-perf" class="text-blue-400 font-bold">99.8%</span>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <span class="text-gray-500 text-[10px] block mb-1">ประสิทธิภาพระบบ</span>
+                        <span id="modal-perf" class="text-blue-400 font-bold">99.9%</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2">
-                <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
-                <button onclick="triggerAgentAction()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งงานเอเจนต์ทันที</button>
+            <div class="flex justify-end gap-2.5">
+                <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
+                <button onclick="triggerAgentAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วนประจำโต๊ะ</button>
             </div>
         </div>
     </div>
 
-    <!-- CANVAS ISOMETRIC SIMULATION ENGINE JAVASCRIPT -->
+    <!-- ULTIMATE OFFICE ISOMETRIC SIMULATION ENGINE JAVASCRIPT -->
     <script>
-        // --- 8 AGENTS DEFINITION DATA ---
+        // --- 8 AGENTS DATA WITH DEDICATED OFFICE DESK COORDINATES ---
         const AGENTS_DATA = [
             {
                 id: 1,
                 name: "01. XAUUSD Grid Bot",
                 role: "เอเจนต์เทรดอัตโนมัติ MetaTrader 5 (MQL5)",
-                desc: "รันกลยุทธ์ Grid Trading สำหรับทองคำ XAUUSD พร้อมระบบ Partial Hedging จับคู่ออเดอร์ฝั่งตรงข้ามเพื่อปิดความเสี่ยง บันทึกข้อมูลลง Google Sheets และแจ้งเตือนผ่าน Telegram",
+                desc: "รันกลยุทธ์ Grid Trading ทองคำ XAUUSD พร้อม Partial Hedging จับคู่ออเดอร์ฝั่งตรงข้าม ปิดความเสี่ยงอัตโนมัติ บันทึก Log ลง Google Sheets และแจ้งเตือนผ่าน Telegram",
                 color: "#3b82f6",
                 outfit: "#1e3a8a",
-                hair: "#334155",
+                hair: "#1e293b",
                 glasses: true,
-                x: 180, y: 160,
-                targetX: 180, targetY: 160,
+                deskX: 120, deskY: 140, // Dedicated Desk Position
+                x: 120, y: 140,
                 state: "working",
                 icon: "📈"
             },
             {
                 id: 2,
                 name: "02. Captain ประกันภัย",
-                role: "เอเจนต์บริหารจัดการงานประกันภัย FairDee",
+                role: "เอเจนต์บริหารงานประกันภัย FairDee",
                 desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานวิริยะ/เมืองไทย/กรุงเทพประกันภัย และดึงข้อมูลการลงทะเบียนเข้าระบบโดยอัตโนมัติ",
                 color: "#06b6d4",
                 outfit: "#164e63",
                 hair: "#78350f",
                 glasses: false,
-                x: 320, y: 220,
-                targetX: 320, targetY: 220,
-                state: "meeting",
+                deskX: 260, deskY: 140,
+                x: 260, y: 140,
+                state: "working",
                 icon: "🛡️"
             },
             {
                 id: 3,
                 name: "03. Fleet Logistics",
-                role: "เอเจนต์ติดตามงานขนส่งGrab / Bolt / Lalamove",
+                role: "เอเจนต์ติดตามงานขนส่ง Grab / Bolt / Lalamove",
                 desc: "ติดตามสถานะการวิ่งงานขนส่ง รวบรวมรายงานอินเซนทีฟรายสัปดาห์ และใบกำกับภาษีประจำเดือนของแพลตฟอร์มขนส่ง",
                 color: "#6366f1",
                 outfit: "#312e81",
-                hair: "#1e293b",
+                hair: "#0f172a",
                 glasses: false,
-                x: 380, y: 180,
-                targetX: 380, targetY: 180,
-                state: "meeting",
+                deskX: 400, deskY: 140,
+                x: 400, y: 140,
+                state: "working",
                 icon: "🚚"
             },
             {
                 id: 4,
                 name: "04. Solar & Energy",
                 role: "เอเจนต์คำนวณและบริหารพลังงานโซล่าเซลล์",
-                desc: "ตรวจเช็กสถานะแผง AIKO N-Type 650W/675W, อินเวอร์เตอร์ Deye/Luxpower และระบบแบตเตอรี่ LiFePO4 ควบคุมสวิตช์ Matter ร่วมกับ Apple/Google Home",
+                desc: "ตรวจเช็กแผง AIKO 650W/675W, อินเวอร์เตอร์ Deye/Luxpower และแบตเตอรี่ LiFePO4 ควบคุมสวิตช์ Matter อัจฉริยะร่วมกับ Apple/Google Home",
                 color: "#f59e0b",
                 outfit: "#78350f",
                 hair: "#b45309",
                 glasses: false,
-                x: 480, y: 120,
-                targetX: 480, targetY: 120,
-                state: "checking_servers",
+                deskX: 540, deskY: 140,
+                x: 540, y: 140,
+                state: "working",
                 icon: "⚡"
             },
             {
                 id: 5,
                 name: "05. Take Profit Fitness",
                 role: "เอเจนต์ติดตามเป้าหมายสุขภาพและการออกกำลังกาย",
-                desc: "บันทึกสถิติการเดินออกกำลังกายประจำวัน (ความเร็ว 4 เวลา 1 ชม.) และการเวทเทรนนิ่งด้วยดัมเบล 10 กก. สรุปผลเข้าโปรเจกต์ Take Profit",
+                desc: "บันทึกสถิติการเดินออกกำลังกายประจำวัน (ความเร็ว 4 เวลา 1 ชม.) และการเวทเทรนนิ่งดัมเบล 10 กก. สรุปผลเข้าโปรเจกต์ Take Profit",
                 color: "#f43f5e",
                 outfit: "#881337",
                 hair: "#0f172a",
                 glasses: true,
-                x: 280, y: 180,
-                targetX: 280, targetY: 180,
-                state: "meeting",
+                deskX: 120, deskY: 280, // Bottom Row Desks
+                x: 120, y: 280,
+                state: "working",
                 icon: "🏋️"
             },
             {
@@ -405,23 +403,23 @@
                 outfit: "#7c2d12",
                 hair: "#92400e",
                 glasses: false,
-                x: 100, y: 280,
-                targetX: 100, targetY: 280,
-                state: "coffee_break",
+                deskX: 260, deskY: 280,
+                x: 260, y: 280,
+                state: "working",
                 icon: "🍰"
             },
             {
                 id: 7,
                 name: "07. Telegram Notifier",
                 role: "เอเจนต์กระจายข่าวและแจ้งเตือน Telegram Bot",
-                desc: "ยิงการแจ้งเตือนสัญญานการเทรด สถานะโซล่าเซลล์ และยอดขายเข้าระบบกลุ่ม Telegram OpenChat ของ The Driver Thailand แบบเรียลไทม์",
+                desc: "ยิงการแจ้งเตือนสัญญาณการเทรด สถานะโซล่าเซลล์ และยอดขายเข้าระบบกลุ่ม Telegram OpenChat ของ The Driver Thailand แบบเรียลไทม์",
                 color: "#38bdf8",
                 outfit: "#0c4a6e",
                 hair: "#1e1b4b",
                 glasses: false,
-                x: 340, y: 140,
-                targetX: 340, targetY: 140,
-                state: "meeting",
+                deskX: 400, deskY: 280,
+                x: 400, y: 280,
+                state: "working",
                 icon: "📲"
             },
             {
@@ -433,40 +431,24 @@
                 outfit: "#064e3b",
                 hair: "#3f6212",
                 glasses: true,
-                x: 140, y: 180,
-                targetX: 140, targetY: 180,
+                deskX: 540, deskY: 280,
+                x: 540, y: 280,
                 state: "working",
                 icon: "📊"
             }
         ];
 
-        // --- WAYPOINTS FOR CHARACTER MOVEMENT ---
-        const WAYPOINTS = [
-            { name: "desk_left", x: 140, y: 180 },
-            { name: "desk_right", x: 180, y: 160 },
-            { name: "meeting_1", x: 280, y: 180 },
-            { name: "meeting_2", x: 320, y: 220 },
-            { name: "meeting_3", x: 380, y: 180 },
-            { name: "meeting_4", x: 340, y: 140 },
-            { name: "servers", x: 480, y: 120 },
-            { name: "coffee", x: 100, y: 280 }
-        ];
-
         let selectedAgentIndex = null;
         let canvas, ctx;
-        let animationFrameId;
 
-        // Initialize Canvas & App
         window.addEventListener('DOMContentLoaded', () => {
-            canvas = document.getElementById('isometricCanvas');
+            canvas = document.getElementById('officeCanvas');
             ctx = canvas.getContext('2d');
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
-            // Add Click Interaction on Canvas Characters
             canvas.addEventListener('click', handleCanvasClick);
 
-            // Start Animation Loop & Log Stream
             requestAnimationFrame(renderLoop);
             startLogStream();
         });
@@ -477,310 +459,242 @@
             canvas.height = rect.height;
         }
 
-        // --- ISOMETRIC RENDERING ENGINE ---
+        // --- MAIN RENDER LOOP ---
         function renderLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Background & Isometric Floor Grid
-            drawIsometricRoom();
+            drawOfficeFloor();
+            drawOfficeDecorations(); // Whiteboards, Meeting Tables, Server Racks
+            drawAllWorkstationsAndAgents();
 
-            // Draw Furniture (Server Racks, Holographic Meeting Table, Workstations, Coffee Corner)
-            drawFurniture();
-
-            // Update & Draw 8 Characters
-            updateAndDrawCharacters();
-
-            animationFrameId = requestAnimationFrame(renderLoop);
+            requestAnimationFrame(renderLoop);
         }
 
-        // Draw Isometric Grid Room Floor
-        function drawIsometricRoom() {
-            const originX = canvas.width / 2;
-            const originY = 80;
-            const tileW = 56;
-            const tileH = 28;
-            const gridSize = 10;
+        // Draw Office Floor Grid
+        function drawOfficeFloor() {
+            const w = canvas.width;
+            const h = canvas.height;
 
-            // Floor Tiles
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    const x = originX + (c - r) * (tileW / 2);
-                    const y = originY + (c + r) * (tileH / 2);
+            // Background Floor Tone
+            ctx.fillStyle = "#0b101d";
+            ctx.fillRect(0, 0, w, h);
 
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + tileW / 2, y + tileH / 2);
-                    ctx.lineTo(x, y + tileH);
-                    ctx.lineTo(x - tileW / 2, y + tileH / 2);
-                    ctx.closePath();
+            // Subtle Wood/Tile Grid Lines
+            ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
+            ctx.lineWidth = 1;
+            const gridSize = 40;
 
-                    // Alternate Tile Patterns
-                    if ((r + c) % 2 === 0) {
-                        ctx.fillStyle = "#111827";
-                    } else {
-                        ctx.fillStyle = "#0f172a";
-                    }
-                    ctx.fill();
-                    ctx.strokeStyle = "rgba(30, 41, 59, 0.5)";
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
+            for (let x = 0; x < w; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
             }
-
-            // Neon Conduit Accent Lines on Floor
-            ctx.beginPath();
-            ctx.moveTo(originX, originY + tileH);
-            ctx.lineTo(originX + 4 * (tileW / 2), originY + 5 * (tileH / 2));
-            ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            for (let y = 0; y < h; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
         }
 
-        // Draw Furniture Elements matching User's Provided Image Layout
-        function drawFurniture() {
-            const originX = canvas.width / 2;
-            const originY = 80;
+        // Draw Office Background Elements (Whiteboards, Server Racks, Central Table)
+        function drawOfficeDecorations() {
+            const cx = canvas.width / 2;
 
-            // 1. SERVER RACK ARRAY (Top Right Area)
-            drawServerRack(originX + 180, originY + 70);
-            drawServerRack(originX + 220, originY + 90);
-
-            // 2. CENTER HOLOGRAPHIC MEETING TABLE (Matching the Image)
-            drawHologramTable(originX, originY + 160);
-
-            // 3. WORKSTATIONS (Left Area)
-            drawWorkstation(originX - 160, originY + 140);
-
-            // 4. COFFEE & LOUNGE CORNER (Bottom Left)
-            drawCoffeeCorner(originX - 180, originY + 230);
-        }
-
-        // Server Cabinet Renderer
-        function drawServerRack(x, y) {
-            // Shadow
-            ctx.fillStyle = "rgba(0,0,0,0.4)";
-            ctx.beginPath();
-            ctx.ellipse(x, y + 40, 25, 12, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Main Tower
+            // 1. Wall Whiteboard / Strategy Board (Top Wall Center)
             ctx.fillStyle = "#1e293b";
-            ctx.fillRect(x - 20, y - 40, 40, 70);
+            ctx.fillRect(cx - 150, 20, 300, 45);
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cx - 150, 20, 300, 45);
+
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "11px Kanit";
+            ctx.textAlign = "center";
+            ctx.fillText("📋 AGENT HQ STRATEGY & WORKFLOW KANBAN BOARD", cx, 42);
+
+            // Small sticky notes on whiteboard
+            ctx.fillStyle = "#f59e0b";
+            ctx.fillRect(cx - 130, 28, 25, 22);
+            ctx.fillStyle = "#10b981";
+            ctx.fillRect(cx - 95, 28, 25, 22);
+            ctx.fillStyle = "#3b82f6";
+            ctx.fillRect(cx - 60, 28, 25, 22);
+
+            // 2. Server Racks (Right Side Wall)
+            drawServerCabinet(canvas.width - 80, 80);
+            drawServerCabinet(canvas.width - 80, 160);
+        }
+
+        function drawServerCabinet(x, y) {
+            ctx.fillStyle = "#111827";
+            ctx.fillRect(x - 20, y, 45, 70);
             ctx.strokeStyle = "#3b82f6";
             ctx.lineWidth = 1;
-            ctx.strokeRect(x - 20, y - 40, 40, 70);
+            ctx.strokeRect(x - 20, y, 45, 70);
 
-            // Blinking Status LEDs
-            const time = Date.now() * 0.005;
-            for (let i = 0; i < 5; i++) {
+            // LEDs
+            const time = Date.now() * 0.004;
+            for (let i = 0; i < 4; i++) {
                 ctx.fillStyle = (Math.sin(time + i) > 0) ? "#34d399" : "#3b82f6";
-                ctx.fillRect(x - 14, y - 30 + (i * 12), 6, 4);
-
-                ctx.fillStyle = "#64748b";
-                ctx.fillRect(x - 4, y - 30 + (i * 12), 22, 4);
+                ctx.fillRect(x - 12, y + 12 + (i * 14), 6, 5);
+                ctx.fillStyle = "#475569";
+                ctx.fillRect(x - 2, y + 12 + (i * 14), 22, 5);
             }
         }
 
-        // Center Hologram Table Renderer (Exact match to User Image)
-        function drawHologramTable(x, y) {
-            // Table Wooden Base Shadow
-            ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.beginPath();
-            ctx.ellipse(x, y + 25, 75, 40, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Table Top (Rich Wooden Texture)
-            ctx.beginPath();
-            ctx.ellipse(x, y, 70, 35, 0, 0, Math.PI * 2);
-            ctx.fillStyle = "#331e14";
-            ctx.fill();
-            ctx.strokeStyle = "#543322";
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Holographic Network Diagram Projection (Glow Effect)
-            const time = Date.now() * 0.003;
-            ctx.save();
-            ctx.translate(x, y - 10);
-
-            // Cyan Hologram Outer Ring
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 40, 20, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = "rgba(6, 182, 212, 0.7)";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Floating Nodes
-            const nodeOffset = Math.sin(time) * 4;
-            ctx.fillStyle = "#06b6d4";
-            ctx.beginPath();
-            ctx.arc(-15, -5 + nodeOffset, 4, 0, Math.PI * 2);
-            ctx.arc(15, -5 - nodeOffset, 4, 0, Math.PI * 2);
-            ctx.arc(0, 8 + nodeOffset, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Connecting Hologram Beam Lines
-            ctx.beginPath();
-            ctx.moveTo(-15, -5 + nodeOffset);
-            ctx.lineTo(0, 8 + nodeOffset);
-            ctx.lineTo(15, -5 - nodeOffset);
-            ctx.strokeStyle = "rgba(56, 189, 248, 0.8)";
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.restore();
-
-            // 4 Office Chairs Around Table (Matching User Picture)
-            drawOfficeChair(x - 65, y - 10); // Left
-            drawOfficeChair(x + 65, y - 10); // Right
-            drawOfficeChair(x - 25, y - 30); // Top
-            drawOfficeChair(x + 25, y + 25); // Bottom
-        }
-
-        // Office Chair Renderer
-        function drawOfficeChair(x, y) {
-            ctx.fillStyle = "#0f172a";
-            ctx.beginPath();
-            ctx.ellipse(x, y, 12, 8, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#334155";
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            // Backrest
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(x - 10, y - 14, 20, 10);
-        }
-
-        // Workstation Renderer
-        function drawWorkstation(x, y) {
-            // Desk Surface
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(x - 30, y - 15, 60, 30);
-            ctx.strokeStyle = "#475569";
-            ctx.strokeRect(x - 30, y - 15, 60, 30);
-
-            // Dual Monitors
-            ctx.fillStyle = "#3b82f6";
-            ctx.fillRect(x - 25, y - 28, 22, 12);
-            ctx.fillRect(x + 3, y - 28, 22, 12);
-        }
-
-        // Coffee Machine Corner Renderer
-        function drawCoffeeCorner(x, y) {
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(x - 15, y - 15, 30, 20);
-            ctx.fillStyle = "#f97316";
-            ctx.fillRect(x - 10, y - 25, 12, 12);
-        }
-
-        // --- HIGH-DETAIL 32-BIT PIXEL ART AGENT CHARACTER DRAWING ---
-        function updateAndDrawCharacters() {
-            const originX = canvas.width / 2;
-            const originY = 80;
+        // --- DRAW 8 DEDICATED WORKSTATIONS AND CHARACTERS ---
+        function drawAllWorkstationsAndAgents() {
+            // Layout offsets based on canvas size
+            const startX = 140;
+            const startY = 120;
+            const spacingX = 220;
+            const spacingY = 160;
 
             AGENTS_DATA.forEach((agent, index) => {
-                // Character Waypoint Animation Logic
-                if (Math.random() < 0.005) { // Random chance to move to new station
-                    const randomWaypoint = WAYPOINTS[Math.floor(Math.random() * WAYPOINTS.length)];
-                    agent.targetX = randomWaypoint.x;
-                    agent.targetY = randomWaypoint.y;
-                }
+                // Compute grid row & col (4 per row)
+                const row = Math.floor(index / 4);
+                const col = index % 4;
 
-                // Smooth position interpolation
-                agent.x += (agent.targetX - agent.x) * 0.03;
-                agent.y += (agent.targetY - agent.y) * 0.03;
+                const deskX = startX + (col * spacingX);
+                const deskY = startY + (row * spacingY);
 
-                const screenX = originX + (agent.x - agent.y) * 0.8;
-                const screenY = originY + (agent.x + agent.y) * 0.4;
+                agent.deskX = deskX;
+                agent.deskY = deskY;
 
-                // Draw Drop Shadow
-                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-                ctx.beginPath();
-                ctx.ellipse(screenX, screenY + 16, 10, 5, 0, 0, Math.PI * 2);
-                ctx.fill();
+                // 1. Draw Desk & Computers
+                drawWorkstationUnit(deskX, deskY, agent);
 
-                // Character High-Detail Body Rendering
-                const isSelected = selectedAgentIndex === index;
-
-                // Selection Ring Effect
-                if (isSelected) {
-                    ctx.beginPath();
-                    ctx.ellipse(screenX, screenY + 16, 16, 8, 0, 0, Math.PI * 2);
-                    ctx.strokeStyle = "#3b82f6";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-
-                // 1. Legs & Pants
-                ctx.fillStyle = "#1e293b";
-                ctx.fillRect(screenX - 4, screenY + 4, 3, 10);
-                ctx.fillRect(screenX + 1, screenY + 4, 3, 10);
-
-                // 2. Torso & Outfit (Matching Specific Agent Clothing Color)
-                ctx.fillStyle = agent.outfit;
-                ctx.fillRect(screenX - 6, screenY - 6, 12, 12);
-
-                // Collar / Shirt Accent
-                ctx.fillStyle = agent.color;
-                ctx.fillRect(screenX - 2, screenY - 6, 4, 6);
-
-                // 3. Head & Face Skin
-                ctx.fillStyle = "#fcd34d"; // Skin tone
-                ctx.fillRect(screenX - 5, screenY - 16, 10, 10);
-
-                // 4. Detailed Hair Style (32-Bit Style)
-                ctx.fillStyle = agent.hair;
-                ctx.fillRect(screenX - 6, screenY - 19, 12, 5); // Hair top
-                ctx.fillRect(screenX - 6, screenY - 16, 3, 6);  // Side hair
-
-                // Glasses (if applicable)
-                if (agent.glasses) {
-                    ctx.fillStyle = "#38bdf8";
-                    ctx.fillRect(screenX - 4, screenY - 13, 3, 2);
-                    ctx.fillRect(screenX + 1, screenY - 13, 3, 2);
-                }
-
-                // 5. Floating Agent Tag & Icon Overhead
-                ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-                ctx.fillRect(screenX - 35, screenY - 36, 70, 15);
-                ctx.strokeStyle = agent.color;
-                ctx.lineWidth = 1;
-                ctx.strokeRect(screenX - 35, screenY - 36, 70, 15);
-
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "10px Kanit";
-                ctx.textAlign = "center";
-                ctx.fillText(`${agent.icon} ${agent.name.split('.')[1] || agent.name}`, screenX, screenY - 25);
+                // 2. Draw Agent Character sitting/standing at desk
+                drawAgentCharacter(deskX, deskY + 25, agent, index === selectedAgentIndex);
             });
         }
 
-        // Handle Clicking on Character in Canvas
+        // Detailed Desk Unit Renderer
+        function drawWorkstationUnit(x, y, agent) {
+            // Desk Surface Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.4)";
+            ctx.fillRect(x - 55, y - 5, 110, 50);
+
+            // Wooden/Dark Tech Desk
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(x - 50, y - 10, 100, 45);
+            ctx.strokeStyle = agent.color;
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x - 50, y - 10, 100, 45);
+
+            // Dual Monitors with Glowing Code/Charts
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(x - 42, y - 32, 35, 22);
+            ctx.fillRect(x + 7, y - 32, 35, 22);
+            ctx.strokeStyle = "#334155";
+            ctx.strokeRect(x - 42, y - 32, 35, 22);
+            ctx.strokeRect(x + 7, y - 32, 35, 22);
+
+            // Screen Glow Lines
+            ctx.fillStyle = agent.color;
+            ctx.fillRect(x - 38, y - 28, 20, 3);
+            ctx.fillRect(x - 38, y - 22, 26, 3);
+            ctx.fillRect(x + 11, y - 28, 24, 3);
+
+            // Keyboard & Mouse
+            ctx.fillStyle = "#475569";
+            ctx.fillRect(x - 15, y + 5, 30, 8);
+            ctx.fillRect(x + 20, y + 6, 6, 6);
+
+            // Desk Label / Role Badge
+            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+            ctx.fillRect(x - 50, y + 38, 100, 18);
+            ctx.strokeStyle = agent.color;
+            ctx.strokeRect(x - 50, y + 38, 100, 18);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 10px Kanit";
+            ctx.textAlign = "center";
+            ctx.fillText(agent.name, x, y + 51);
+        }
+
+        // Detailed 32-Bit Pixel Art Character at Desk
+        function drawAgentCharacter(x, y, agent, isSelected) {
+            // Selection Ring
+            if (isSelected) {
+                ctx.beginPath();
+                ctx.ellipse(x, y + 16, 24, 12, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = "#3b82f6";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Office Chair
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.ellipse(x, y + 8, 14, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#334155";
+            ctx.stroke();
+            // Chair Backrest
+            ctx.fillStyle = "#1e293b00";
+            ctx.fillRect(x - 12, y - 8, 24, 14);
+
+            // Character Body (Jacket / Outfit)
+            ctx.fillStyle = agent.outfit;
+            ctx.fillRect(x - 8, y - 4, 16, 14);
+
+            // Shirt collar / Tie accent
+            ctx.fillStyle = agent.color;
+            ctx.fillRect(x - 3, y - 4, 6, 6);
+
+            // Head & Skin
+            ctx.fillStyle = "#fcd34d";
+            ctx.fillRect(x - 6, y - 16, 12, 12);
+
+            // Hair
+            ctx.fillStyle = agent.hair;
+            ctx.fillRect(x - 7, y - 19, 14, 5);
+            ctx.fillRect(x - 7, y - 16, 3, 6);
+
+            // Glasses
+            if (agent.glasses) {
+                ctx.fillStyle = "#38bdf8";
+                ctx.fillRect(x - 5, y - 13, 4, 3);
+                ctx.fillRect(x + 1, y - 13, 4, 3);
+            }
+
+            // Overhead Status Icon Badge
+            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+            ctx.fillRect(x - 36, y - 36, 72, 16);
+            ctx.strokeStyle = agent.color;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - 36, y - 36, 72, 16);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "10px Kanit";
+            ctx.textAlign = "center";
+            ctx.fillText(`${agent.icon} ทำงานอยู่ที่โต๊ะ`, x, y - 24);
+        }
+
+        // Handle Click on Canvas Workstations
         function handleCanvasClick(e) {
             const rect = canvas.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            const originX = canvas.width / 2;
-            const originY = 80;
-
             AGENTS_DATA.forEach((agent, index) => {
-                const screenX = originX + (agent.x - agent.y) * 0.8;
-                const screenY = originY + (agent.x + agent.y) * 0.4;
-
-                const dist = Math.hypot(clickX - screenX, clickY - screenY);
-                if (dist < 25) {
+                // Check if click is near agent desk area
+                const dist = Math.hypot(clickX - agent.deskX, clickY - (agent.deskY + 25));
+                if (dist < 45) {
                     selectAgent(index);
                 }
             });
         }
 
-        // --- INTERACTION & MODAL HANDLERS ---
+        // --- MODAL & INTERACTION HANDLERS ---
         function selectAgent(index) {
             selectedAgentIndex = index;
             const agent = AGENTS_DATA[index];
 
-            // Highlight Cards UI
+            // Highlight top card
             for (let i = 0; i < 8; i++) {
                 const card = document.getElementById(`card-${i}`);
                 if (i === index) {
@@ -790,17 +704,15 @@
                 }
             }
 
-            // Populate Modal Info
+            // Populate Modal
             document.getElementById('modal-icon').innerText = agent.icon;
             document.getElementById('modal-title').innerText = agent.name;
             document.getElementById('modal-role').innerText = agent.role;
             document.getElementById('modal-desc').innerText = agent.desc;
 
-            // Show Modal
             document.getElementById('agent-modal').classList.remove('hidden');
 
-            // Log selection
-            addTerminalLog(`[COMMAND] ทำการเลือกเอเจนต์: ${agent.name} (${agent.role})`);
+            addTerminalLog(`[COMMAND] เปิดหน้าต่างตรวจสอบโต๊ะทำงาน: ${agent.name} (${agent.role})`);
         }
 
         function closeModal() {
@@ -810,12 +722,11 @@
         function triggerAgentAction() {
             if (selectedAgentIndex !== null) {
                 const agent = AGENTS_DATA[selectedAgentIndex];
-                addTerminalLog(`[EXECUTE] สั่งการด่วนไปยัง ${agent.name}: ประมวลผลงานปัจจุบันสำเร็จ`);
+                addTerminalLog(`[EXECUTE] ส่งคำสั่งด่วนไปยัง ${agent.name} ที่โต๊ะทำงาน: ประมวลผลสำเร็จ`);
                 closeModal();
             }
         }
 
-        // Toggle CRT Filter
         function toggleCRT() {
             const crt = document.getElementById('crt-layer');
             crt.classList.toggle('hidden');
@@ -824,14 +735,14 @@
         // --- REALTIME TERMINAL LOG SIMULATOR ---
         function startLogStream() {
             const sampleLogs = [
-                "[MQL5 GRID] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงสำเร็จ",
-                "[CAPTAIN] รับข้อมูลผู้ขอใบเสนอราคาประกันภัยรถยนต์ ปรับสถานะเข้า FairDee",
-                "[LOGISTICS] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab/Bolt สมบูรณ์",
-                "[SOLAR ENERGY] สลับโหมดแบตเตอรี่ LiFePO4 ทำงานร่วมกับ Deye Inverter (แบต 94%)",
-                "[TAKE PROFIT] บันทึกสถิติเดินออกกำลังกายประจำวัน 1 ชั่วโมง สำเร็จเรียบร้อย",
-                "[TIRAMISU BAKER] อัปเดตสต็อกทิรามิสุรสสตรอว์เบอร์รี & บลูเบอร์รี ในระบบ Wongnai",
-                "[TELEGRAM] ส่งรายงานสรุปพอร์ตการเทรดและสถานะเข้ากลุ่ม Telegram OpenChat",
-                "[SHEETS SCRIPT] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets อัตโนมัติ"
+                "[MQL5 GRID] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงที่โต๊ะทำงาน #01 สำเร็จ",
+                "[CAPTAIN] รับข้อมูลลูกค้าและใบเสนอราคาประกันภัยรถยนต์ อัปเดตเข้าระบบ FairDee เรียบร้อย",
+                "[LOGISTICS] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab / Bolt / Lalamove ที่โต๊ะ #03 สำเร็จ",
+                "[SOLAR ENERGY] ตรวจสอบสถานะแบตเตอรี่ LiFePO4 และอินเวอร์เตอร์ Deye (แบต 94%)",
+                "[TAKE PROFIT] บันทึกสถิติเดินออกกำลังกายประจำวัน 1 ชั่วโมง และเวทดัมเบล 10 กก. สำเร็จ",
+                "[TIRAMISU BAKER] อัปเดตสต็อกทิรามิสุโฮมเมดรสชาติต่างๆ บนแอป Wongnai Merchant",
+                "[TELEGRAM] ส่งรายงานสรุปพอร์ตการเทรดและสถานะพลังงานเข้ากลุ่ม Telegram OpenChat",
+                "[SHEETS SCRIPT] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets สมบูรณ์แบบ"
             ];
 
             setInterval(() => {
@@ -847,10 +758,8 @@
             p.innerHTML = `<span class="text-blue-400">[${now}]</span> <span class="text-gray-300">${msg}</span>`;
             box.appendChild(p);
 
-            // Auto scroll to bottom
             box.scrollTop = box.scrollHeight;
 
-            // Keep max 30 log lines
             if (box.children.length > 30) {
                 box.removeChild(box.firstChild);
             }
