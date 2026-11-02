@@ -21,4 +21,199 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- SECTION: Overview -->
+            <div id="section-overview">
+                <header class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold">Dashboard Overview</h2>
+                        <p class="text-gray-400 mt-1">ภาพรวมระบบจัดการและติดตาม Agent</p>
+                    </div>
+                    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition flex items-center gap-2">
+                        <span>+</span> เพิ่ม Agent ใหม่
+                    </button>
+                </header>
+
+                <!-- Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-gray-400 text-sm font-medium">Agent ทั้งหมด</h3>
+                        <p id="total-agent-count" class="text-2xl font-bold mt-2 text-white">3 คน</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-gray-400 text-sm font-medium">สถานะการทำงาน</h3>
+                        <p class="text-2xl font-bold mt-2 text-green-400">2 Active</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-gray-400 text-sm font-medium">รายการที่รอดำเนินการ</h3>
+                        <p class="text-2xl font-bold mt-2 text-yellow-400">5 รายการ</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-gray-400 text-sm font-medium">สถานะระบบ</h3>
+                        <p class="text-2xl font-bold mt-2 text-blue-400">Online</p>
+                    </div>
+                </div>
+
+                <!-- Agent List Table -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                    <h3 class="text-xl font-bold mb-4">รายชื่อ Agent ในระบบ</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-300">
+                            <thead class="bg-gray-700/50 text-gray-400 uppercase text-xs">
+                                <tr>
+                                    <th class="p-3 rounded-l-lg">Agent</th>
+                                    <th class="p-3">บทบาท / หน้าที่</th>
+                                    <th class="p-3">สถานะ</th>
+                                    <th class="p-3 text-right rounded-r-lg">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agent-table-body" class="divide-y divide-gray-700">
+                                <tr>
+                                    <td class="p-3 flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white text-xs">A1</div>
+                                        <span class="font-medium text-white">Agent Alpha</span>
+                                    </td>
+                                    <td class="p-3">ดูแลระบบขนส่ง (Logistics)</td>
+                                    <td class="p-3"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Active</span></td>
+                                    <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center font-bold text-white text-xs">A2</div>
+                                        <span class="font-medium text-white">Agent Bravo</span>
+                                    </td>
+                                    <td class="p-3">คำนวณบัญชี (Finance)</td>
+                                    <td class="p-3"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Active</span></td>
+                                    <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center font-bold text-white text-xs">A3</div>
+                                        <span class="font-medium text-white">Agent Charlie</span>
+                                    </td>
+                                    <td class="p-3">ส่งการแจ้งเตือน (Telegram Bot)</td>
+                                    <td class="p-3"><span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded-md text-xs font-medium">Offline</span></td>
+                                    <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: Finance -->
+            <div id="section-finance" class="hidden">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold">Finance Management</h2>
+                    <p class="text-gray-400 mt-1">จัดการข้อมูลการเงินและรายรับ-รายจ่าย</p>
+                </header>
+                <div class="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center text-gray-400">
+                    <p class="text-lg">💰 ส่วนงาน Finance กำลังอยู่ระหว่างการพัฒนา</p>
+                </div>
+            </div>
+
+            <!-- SECTION: Logistics -->
+            <div id="section-logistics" class="hidden">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold">Logistics & Fleet</h2>
+                    <p class="text-gray-400 mt-1">ติดตามสถานะงานขนส่งและการเดินทาง</p>
+                </header>
+                <div class="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center text-gray-400">
+                    <p class="text-lg">🚚 ส่วนงาน Logistics กำลังอยู่ระหว่างการพัฒนา</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL: Add Agent -->
+    <div id="agent-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">เพิ่ม Agent ใหม่</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">ชื่อ Agent</label>
+                    <input type="text" id="input-name" placeholder="เช่น Agent Delta" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">บทบาท / หน้าที่</label>
+                    <input type="text" id="input-role" placeholder="เช่น ระบบเทรด หรือ บัญชี" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">สถานะ</label>
+                    <select id="input-status" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="Active">Active</option>
+                        <option value="Offline">Offline</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition">ยกเลิก</button>
+                <button onclick="addAgent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function switchTab(tab) {
+            ['overview', 'finance', 'logistics'].forEach(t => {
+                document.getElementById(`section-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('bg-blue-600', 'text-white');
+                document.getElementById(`nav-${t}`).classList.add('hover:bg-gray-700', 'text-gray-300');
+            });
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+            document.getElementById(`nav-${tab}`).classList.add('bg-blue-600', 'text-white');
+            document.getElementById(`nav-${tab}`).classList.remove('hover:bg-gray-700', 'text-gray-300');
+        }
+
+        function openModal() {
+            document.getElementById('agent-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('agent-modal').classList.add('hidden');
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-role').value = '';
+        }
+
+        function addAgent() {
+            const name = document.getElementById('input-name').value.trim();
+            const role = document.getElementById('input-role').value.trim();
+            const status = document.getElementById('input-status').value;
+
+            if (!name || !role) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            const tbody = document.getElementById('agent-table-body');
+            const newRow = document.createElement('tr');
+            
+            const isGreen = status === 'Active';
+            const badgeClass = isGreen ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400';
+            const initial = name.charAt(0).toUpperCase();
+
+            newRow.innerHTML = `
+                <td class="p-3 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-white text-xs">${initial}</div>
+                    <span class="font-medium text-white">${name}</span>
+                </td>
+                <td class="p-3">${role}</td>
+                <td class="p-3"><span class="px-2 py-1 ${badgeClass} rounded-md text-xs font-medium">${status}</span></td>
+                <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
+            `;
+
+            tbody.appendChild(newRow);
+            
+            // Update total count
+            const countElem = document.getElementById('total-agent-count');
+            const currentCount = tbody.children.length;
+            countElem.innerText = `${currentCount} คน`;
+
+            closeModal();
+        }
+    </script>
+</body>
+</html>
