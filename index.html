@@ -3,217 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent HQ Dashboard</title>
+    <title>AGENT HQ - Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #cbd5e1;
+            font-family: monospace, ui-monospace, SFMono-Regular;
+        }
+        .glow-border {
+            border: 1px solid #1e293b;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .glow-text-green { text-shadow: 0 0 5px rgba(34, 197, 94, 0.5); }
+        .glow-text-blue { text-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 p-6 flex flex-col justify-between shrink-0">
-            <div>
-                <h1 class="text-2xl font-bold mb-8 text-blue-400">Agent HQ</h1>
-                <nav class="space-y-2" id="nav-menu">
-                    <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left p-3 bg-blue-600 rounded-lg font-medium transition">Overview</button>
-                    <button onclick="switchTab('finance')" id="nav-finance" class="w-full text-left p-3 hover:bg-gray-700 rounded-lg font-medium transition text-gray-300">Finance</button>
-                    <button onclick="switchTab('logistics')" id="nav-logistics" class="w-full text-left p-3 hover:bg-gray-700 rounded-lg font-medium transition text-gray-300">Logistics</button>
-                </nav>
-            </div>
-        </aside>
+<body class="p-4 bg-[#090d16] text-xs">
 
-        <!-- Main Content -->
-        <main class="flex-1 p-8 overflow-y-auto">
-            
-            <!-- SECTION: Overview -->
-            <div id="section-overview">
-                <header class="mb-8 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-3xl font-bold">Dashboard Overview</h2>
-                        <p class="text-gray-400 mt-1">ภาพรวมระบบจัดการและติดตาม Agent</p>
-                    </div>
-                    <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition flex items-center gap-2">
-                        <span>+</span> เพิ่ม Agent ใหม่
-                    </button>
-                </header>
-
-                <!-- Cards Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-gray-400 text-sm font-medium">Agent ทั้งหมด</h3>
-                        <p id="total-agent-count" class="text-2xl font-bold mt-2 text-white">3 คน</p>
-                    </div>
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-gray-400 text-sm font-medium">สถานะการทำงาน</h3>
-                        <p class="text-2xl font-bold mt-2 text-green-400">2 Active</p>
-                    </div>
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-gray-400 text-sm font-medium">รายการที่รอดำเนินการ</h3>
-                        <p class="text-2xl font-bold mt-2 text-yellow-400">5 รายการ</p>
-                    </div>
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-gray-400 text-sm font-medium">สถานะระบบ</h3>
-                        <p class="text-2xl font-bold mt-2 text-blue-400">Online</p>
-                    </div>
-                </div>
-
-                <!-- Agent List Table -->
-                <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
-                    <h3 class="text-xl font-bold mb-4">รายชื่อ Agent ในระบบ</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-300">
-                            <thead class="bg-gray-700/50 text-gray-400 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3 rounded-l-lg">Agent</th>
-                                    <th class="p-3">บทบาท / หน้าที่</th>
-                                    <th class="p-3">สถานะ</th>
-                                    <th class="p-3 text-right rounded-r-lg">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agent-table-body" class="divide-y divide-gray-700">
-                                <tr>
-                                    <td class="p-3 flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white text-xs">A1</div>
-                                        <span class="font-medium text-white">Agent Alpha</span>
-                                    </td>
-                                    <td class="p-3">ดูแลระบบขนส่ง (Logistics)</td>
-                                    <td class="p-3"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Active</span></td>
-                                    <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center font-bold text-white text-xs">A2</div>
-                                        <span class="font-medium text-white">Agent Bravo</span>
-                                    </td>
-                                    <td class="p-3">คำนวณบัญชี (Finance)</td>
-                                    <td class="p-3"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Active</span></td>
-                                    <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center font-bold text-white text-xs">A3</div>
-                                        <span class="font-medium text-white">Agent Charlie</span>
-                                    </td>
-                                    <td class="p-3">ส่งการแจ้งเตือน (Telegram Bot)</td>
-                                    <td class="p-3"><span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded-md text-xs font-medium">Offline</span></td>
-                                    <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION: Finance -->
-            <div id="section-finance" class="hidden">
-                <header class="mb-8">
-                    <h2 class="text-3xl font-bold">Finance Management</h2>
-                    <p class="text-gray-400 mt-1">จัดการข้อมูลการเงินและรายรับ-รายจ่าย</p>
-                </header>
-                <div class="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center text-gray-400">
-                    <p class="text-lg">💰 ส่วนงาน Finance กำลังอยู่ระหว่างการพัฒนา</p>
-                </div>
-            </div>
-
-            <!-- SECTION: Logistics -->
-            <div id="section-logistics" class="hidden">
-                <header class="mb-8">
-                    <h2 class="text-3xl font-bold">Logistics & Fleet</h2>
-                    <p class="text-gray-400 mt-1">ติดตามสถานะงานขนส่งและการเดินทาง</p>
-                </header>
-                <div class="bg-gray-800 p-8 rounded-xl border border-gray-700 text-center text-gray-400">
-                    <p class="text-lg">🚚 ส่วนงาน Logistics กำลังอยู่ระหว่างการพัฒนา</p>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- MODAL: Add Agent -->
-    <div id="agent-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold mb-4">เพิ่ม Agent ใหม่</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">ชื่อ Agent</label>
-                    <input type="text" id="input-name" placeholder="เช่น Agent Delta" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">บทบาท / หน้าที่</label>
-                    <input type="text" id="input-role" placeholder="เช่น ระบบเทรด หรือ บัญชี" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">สถานะ</label>
-                    <select id="input-status" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
-                        <option value="Active">Active</option>
-                        <option value="Offline">Offline</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="closeModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition">ยกเลิก</button>
-                <button onclick="addAgent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition">บันทึก</button>
-            </div>
+    <!-- HEADER TITLE -->
+    <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
+        <h1 class="text-2xl font-black tracking-widest text-white glow-text-blue flex items-center gap-2">
+            <span class="text-blue-500">❖</span> AGENT HQ
+        </h1>
+        <div class="text-gray-500 text-[10px]">
+            SYSTEM TIME: <span class="text-blue-400">2026-05-18 10:24:31</span> | LOCATION: BANGKOK HQ
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        function switchTab(tab) {
-            ['overview', 'finance', 'logistics'].forEach(t => {
-                document.getElementById(`section-${t}`).classList.add('hidden');
-                document.getElementById(`nav-${t}`).classList.remove('bg-blue-600', 'text-white');
-                document.getElementById(`nav-${t}`).classList.add('hover:bg-gray-700', 'text-gray-300');
-            });
-            document.getElementById(`section-${tab}`).classList.remove('hidden');
-            document.getElementById(`nav-${tab}`).classList.add('bg-blue-600', 'text-white');
-            document.getElementById(`nav-${tab}`).classList.remove('hover:bg-gray-700', 'text-gray-300');
-        }
+    <!-- TOP METRICS GRID (5 CARDS) -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+        
+        <!-- CARD 1: MOSS -->
+        <div class="bg-[#111827] p-3 rounded border border-gray-800 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-white flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> MOSS
+                    </span>
+                    <span class="text-[10px] bg-green-950 text-green-400 px-1.5 py-0.5 rounded border border-green-800">● ONLINE</span>
+                </div>
+                <div class="space-y-1 text-gray-400">
+                    <div class="flex justify-between"><span>Agents</span><span class="text-white font-bold">12</span></div>
+                    <div class="flex justify-between"><span>Tasks</span><span class="text-white font-bold">128</span></div>
+                </div>
+            </div>
+            <!-- Mini Sparkline Graph -->
+            <div class="mt-3 pt-2 border-t border-gray-800 flex items-end gap-1 h-6">
+                <div class="bg-green-500/30 w-full h-[40%]"></div>
+                <div class="bg-green-500/50 w-full h-[70%]"></div>
+                <div class="bg-green-500/40 w-full h-[50%]"></div>
+                <div class="bg-green-500/80 w-full h-[90%]"></div>
+                <div class="bg-green-500 w-full h-[100%]"></div>
+            </div>
+        </div>
 
-        function openModal() {
-            document.getElementById('agent-modal').classList.remove('hidden');
-        }
+        <!-- CARD 2: Managed API -->
+        <div class="bg-[#111827] p-3 rounded border border-gray-800 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-white flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span> Managed API
+                    </span>
+                    <span class="text-[10px] bg-green-950 text-green-400 px-1.5 py-0.5 rounded border border-green-800">● HEALTHY</span>
+                </div>
+                <div class="space-y-1 text-gray-400">
+                    <div class="flex justify-between"><span>Endpoints</span><span class="text-white font-bold">24</span></div>
+                    <div class="flex justify-between"><span>QPS</span><span class="text-white font-bold">1.2k</span></div>
+                </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 flex items-end gap-1 h-6">
+                <div class="bg-blue-500/30 w-full h-[30%]"></div>
+                <div class="bg-blue-500/60 w-full h-[60%]"></div>
+                <div class="bg-blue-500/80 w-full h-[80%]"></div>
+                <div class="bg-blue-500/50 w-full h-[40%]"></div>
+                <div class="bg-blue-500 w-full h-[75%]"></div>
+            </div>
+        </div>
 
-        function closeModal() {
-            document.getElementById('agent-modal').classList.add('hidden');
-            document.getElementById('input-name').value = '';
-            document.getElementById('input-role').value = '';
-        }
+        <!-- CARD 3: Weights -->
+        <div class="bg-[#111827] p-3 rounded border border-gray-800 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-white flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> Weights
+                    </span>
+                    <span class="text-[10px] bg-blue-950 text-blue-400 px-1.5 py-0.5 rounded border border-blue-800">● SYNCED</span>
+                </div>
+                <div class="space-y-1 text-gray-400">
+                    <div class="flex justify-between"><span>Models</span><span class="text-white font-bold">8</span></div>
+                    <div class="flex justify-between"><span>Params</span><span class="text-white font-bold">438</span></div>
+                </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 flex items-end gap-1 h-6">
+                <div class="bg-purple-500/40 w-full h-[50%]"></div>
+                <div class="bg-purple-500/70 w-full h-[70%]"></div>
+                <div class="bg-purple-500/90 w-full h-[90%]"></div>
+                <div class="bg-purple-500/60 w-full h-[60%]"></div>
+                <div class="bg-purple-500 w-full h-[85%]"></div>
+            </div>
+        </div>
 
-        function addAgent() {
-            const name = document.getElementById('input-name').value.trim();
-            const role = document.getElementById('input-role').value.trim();
-            const status = document.getElementById('input-status').value;
+        <!-- CARD 4: IdleSpec -->
+        <div class="bg-[#111827] p-3 rounded border border-gray-800 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-white flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span> IdleSpec
+                    </span>
+                    <span class="text-[10px] bg-yellow-950 text-yellow-400 px-1.5 py-0.5 rounded border border-yellow-800">● PLANNING</span>
+                </div>
+                <div class="space-y-1 text-gray-400">
+                    <div class="flex justify-between"><span>Specs</span><span class="text-white font-bold">16</span></div>
+                    <div class="flex justify-between"><span>Queues</span><span class="text-white font-bold">7</span></div>
+                </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 flex items-end gap-1 h-6">
+                <div class="bg-yellow-500/30 w-full h-[20%]"></div>
+                <div class="bg-yellow-500/50 w-full h-[50%]"></div>
+                <div class="bg-yellow-500/40 w-full h-[35%]"></div>
+                <div class="bg-yellow-500/80 w-full h-[80%]"></div>
+                <div class="bg-yellow-500 w-full h-[65%]"></div>
+            </div>
+        </div>
 
-            if (!name || !role) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                return;
-            }
+        <!-- CARD 5: LCGuard -->
+        <div class="bg-[#111827] p-3 rounded border border-gray-800 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-white flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span> LCGuard
+                    </span>
+                    <span class="text-[10px] bg-green-950 text-green-400 px-1.5 py-0.5 rounded border border-green-800">● ACTIVE</span>
+                </div>
+                <div class="space-y-1 text-gray-400">
+                    <div class="flex justify-between"><span>Policies</span><span class="text-white font-bold">36</span></div>
+                    <div class="flex justify-between"><span>Alerts</span><span class="text-white font-bold text-red-400">2</span></div>
+                </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 flex items-end gap-1 h-6">
+                <div class="bg-cyan-500/40 w-full h-[60%]"></div>
+                <div class="bg-cyan-500/60 w-full h-[70%]"></div>
+                <div class="bg-cyan-500/30 w-full h-[40%]"></div>
+                <div class="bg-cyan-500/90 w-full h-[95%]"></div>
+                <div class="bg-cyan-500 w-full h-[70%]"></div>
+            </div>
+        </div>
 
-            const tbody = document.getElementById('agent-table-body');
-            const newRow = document.createElement('tr');
+    </div>
+
+    <!-- MAIN MIDDLE PANEL: WORKFLOW & SYSTEM STATUS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
+        
+        <!-- WORKFLOW PANEL (LEFT 2 COLUMNS) -->
+        <div class="lg:col-span-2 bg-[#111827] p-4 rounded border border-gray-800">
+            <div class="text-xs font-bold text-gray-400 mb-4 tracking-wider">WORKFLOW ORCHESTRATION</div>
             
-            const isGreen = status === 'Active';
-            const badgeClass = isGreen ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400';
-            const initial = name.charAt(0).toUpperCase();
+            <div class="flex flex-col items-center justify-center space-y-4 py-4">
+                <!-- Top Pipeline -->
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <div class="bg-blue-900/40 border border-blue-500 text-blue-300 font-bold px-3 py-1.5 rounded">User</div>
+                    <span class="text-gray-600">➔</span>
+                    <div class="bg-purple-900/40 border border-purple-500 text-purple-300 font-bold px-3 py-1.5 rounded">Planner</div>
+                    <span class="text-gray-600">➔</span>
+                    <div class="bg-blue-900/40 border border-blue-500 text-blue-300 font-bold px-3 py-1.5 rounded">Executor</div>
+                    <span class="text-gray-600">➔</span>
+                    <div class="bg-indigo-900/40 border border-indigo-500 text-indigo-300 font-bold px-3 py-1.5 rounded">Evaluator</div>
+                    <span class="text-gray-600">➔</span>
+                    <div class="bg-cyan-900/40 border border-cyan-500 text-cyan-300 font-bold px-3 py-1.5 rounded">Memory</div>
+                </div>
 
-            newRow.innerHTML = `
-                <td class="p-3 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-white text-xs">${initial}</div>
-                    <span class="font-medium text-white">${name}</span>
-                </td>
-                <td class="p-3">${role}</td>
-                <td class="p-3"><span class="px-2 py-1 ${badgeClass} rounded-md text-xs font-medium">${status}</span></td>
-                <td class="p-3 text-right"><button class="text-blue-400 hover:text-blue-300">แก้ไข</button></td>
-            `;
+                <!-- Vertical Connections -->
+                <div class="flex gap-12 text-gray-600">
+                    <span>↓</span>
+                    <span>↓</span>
+                    <span>↓</span>
+                </div>
 
-            tbody.appendChild(newRow);
-            
-            // Update total count
-            const countElem = document.getElementById('total-agent-count');
-            const currentCount = tbody.children.length;
-            countElem.innerText = `${currentCount} คน`;
+                <!-- Sub Modules -->
+                <div class="flex items-center gap-4 flex-wrap justify-center">
+                    <div class="bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1 rounded text-xs">Retriever</div>
+                    <div class="bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1 rounded text-xs">Tools</div>
+                    <div class="bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1 rounded text-xs">Guardrails</div>
+                </div>
+            </div>
+        </div>
 
-            closeModal();
-        }
-    </script>
+        <!-- SYSTEM STATUS PANEL (RIGHT 1 COLUMN) -->
+        <div class="bg-[#111827] p-4 rounded border border-gray-800 flex flex-col justify-between">
+            <div class="text-xs font-bold text-gray-400 mb-3 tracking-wider">SYSTEM STATUS</div>
+            <div class="space-y-2.5">
+                <div>
+                    <div class="flex justify-between mb-1 text-[11px]"><span>Compute</span><span class="text-blue-400 font-bold">82%</span></div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1 text-[11px]"><span>Memory</span><span class="text-green-400 font-bold">71%</span></div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width: 71%"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1 text-[11px]"><span>Disk</span><span class="text-yellow-400 font-bold">64%</span></div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5"><div class="bg-yellow-500 h-1.5 rounded-full" style="width: 64%"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1 text-[11px]"><span>Network</span><span class="text-cyan-400 font-bold">68%</span></div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5"><div class="bg-cyan-500 h-1.5 rounded-full" style="width: 68%"></div></div>
+                </div>
+            </div>
+            <div class="mt-4 pt-2 border-t border-gray-800 flex justify-between text-gray-400 text-[11px]">
+                <span>Agents: <strong class="text-white">12/16</strong></span>
+                <span>Uptime: <strong class="text-white">7d 14h</strong></span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM EVENT BAR -->
+    <div class="bg-[#111827] p-2.5 rounded border border-gray-800 flex flex-wrap justify-between items-center text-xs gap-2">
+        <div class="flex items-center gap-4">
+            <span class="font-bold text-gray-400 uppercase tracking-wider">EVENTS</span>
+            <span class="flex items-center gap-1 text-blue-400"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Info <strong class="text-white">128</strong></span>
+            <span class="flex items-center gap-1 text-green-400"><span class="w-2 h-2 rounded-full bg-green-500"></span> Success <strong class="text-white">342</strong></span>
+            <span class="flex items-center gap-1 text-yellow-400"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Warning <strong class="text-white">7</strong></span>
+            <span class="flex items-center gap-1 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500"></span> Error <strong class="text-white">3</strong></span>
+        </div>
+        <div class="text-gray-500 text-[10px]">
+            Last updated: <span class="text-gray-300">10:24:31</span>
+        </div>
+    </div>
+
 </body>
 </html>
