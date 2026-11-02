@@ -1,954 +1,860 @@
 <!DOCTYPE html>
-<html lang="th" class="h-full bg-[#070a11]">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGENT HQ - Pixel Command Center</title>
-    <!-- Tailwind CSS -->
+    <title>AGENT HQ - Command Center (8 Agents)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            bg: '#070a11',
-                            panel: '#0e1526',
-                            border: '#1b2a4a',
-                            accent: '#3b82f6',
-                            green: '#10b981',
-                            purple: '#8b5cf6',
-                            yellow: '#f59e0b',
-                            red: '#ef4444'
-                        }
-                    },
-                    fontFamily: {
-                        mono: ['Courier New', 'Consolas', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        body {
-            font-family: 'Courier New', Consolas, monospace;
-            background-color: #070a11;
-            color: #cbd5e1;
-            user-select: none;
-        }
-        .glow-text-blue { text-shadow: 0 0 8px rgba(59, 130, 246, 0.7); }
-        .glow-text-green { text-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
-        .glow-border { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 0 12px rgba(59, 130, 246, 0.15); }
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
         
-        /* Pixel perfect canvas rendering */
-        canvas {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
+        body {
+            background-color: #080c14;
+            color: #d1d5db;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .font-mono-code {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Glassmorphism Panel Style */
+        .cyber-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .cyber-panel-active {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        /* CRT Scanline Overlay */
+        .crt-overlay {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #070a11; }
-        ::-webkit-scrollbar-thumb { background: #1b2a4a; border-radius: 2px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
     </style>
 </head>
-<body class="h-full flex flex-col overflow-hidden text-xs">
+<body class="min-h-screen p-3 md:p-5 flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- TOP HEADER -->
-    <header class="bg-cyber-panel border-b border-cyber-border px-4 py-2 flex justify-between items-center shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full bg-blue-500 animate-ping"></div>
-            <h1 class="text-base md:text-lg font-black tracking-wider text-white glow-text-blue flex items-center gap-2">
-                <span>❖ AGENT HQ</span>
-                <span class="text-xs bg-blue-900/60 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30 font-normal">SIMULATION v2.6</span>
-            </h1>
-        </div>
+    <!-- CRT Scanline Effect (Toggleable) -->
+    <div id="crt-layer" class="crt-overlay fixed inset-0 z-50 pointer-events-none opacity-40"></div>
 
-        <div class="hidden md:flex items-center gap-6 text-[11px] text-gray-400">
-            <div>AGENTS: <span class="text-green-400 font-bold">8 / 8 ACTIVE</span></div>
-            <div>ORCHESTRATION: <span class="text-blue-400 font-bold">AUTO-RUNNING</span></div>
-            <div>TIME: <span id="clock" class="text-gray-200">10:24:31</span></div>
-        </div>
+    <!-- MAIN WRAPPER -->
+    <div class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col gap-4">
 
-        <div class="flex gap-2">
-            <button onclick="resetAgentsPos()" class="bg-blue-950 hover:bg-blue-900 text-blue-300 border border-blue-700/50 px-2.5 py-1 rounded transition text-[10px] flex items-center gap-1">
-                <i class="fa-solid fa-arrows-rotate"></i> Reset Agents
-            </button>
-            <button onclick="toggleAudio()" id="sound-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2.5 py-1 rounded transition text-[10px] flex items-center gap-1">
-                <i class="fa-solid fa-volume-xmark" id="sound-icon"></i> Sound Off
-            </button>
-        </div>
-    </header>
-
-    <!-- 8 AGENT CARDS GRID (TOP BAR) -->
-    <section class="p-2 bg-[#0a0f1d] border-b border-cyber-border shrink-0">
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5" id="agent-cards">
-            <!-- Dynamically populated by JS -->
-        </div>
-    </section>
-
-    <!-- MAIN DASHBOARD CONTENT -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-2 p-2 overflow-hidden min-h-0">
-        
-        <!-- CANVAS ISOMETRIC AGENT SIMULATION (3 COLUMNS) -->
-        <div class="lg:col-span-3 bg-cyber-panel rounded border border-cyber-border relative flex flex-col overflow-hidden min-h-[350px]">
-            <!-- Canvas HUD Header -->
-            <div class="absolute top-2 left-2 z-10 bg-black/80 backdrop-blur border border-blue-500/40 px-3 py-1.5 rounded flex items-center gap-2 text-blue-300 font-bold text-[11px]">
-                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                <span>COMMAND CENTER LIVE ISOMETRIC VIEW</span>
-                <span class="text-gray-400 font-normal text-[10px] hidden sm:inline">| Click character to inspect</span>
-            </div>
-
-            <!-- Instructions Overlay -->
-            <div class="absolute bottom-2 left-2 z-10 bg-black/80 backdrop-blur border border-gray-800 px-2.5 py-1 rounded text-gray-400 text-[10px] hidden sm:flex gap-3">
-                <span><i class="fa-solid fa-mouse-pointer text-blue-400"></i> Click Agent = View Details</span>
-                <span><i class="fa-solid fa-person-walking text-green-400"></i> Auto-pathfinding to stations</span>
-            </div>
-
-            <!-- Canvas Element -->
-            <div class="w-full h-full flex items-center justify-center relative overflow-hidden bg-[#050811]" id="canvas-container">
-                <canvas id="isoCanvas" class="cursor-pointer"></canvas>
-            </div>
-        </div>
-
-        <!-- RIGHT PANEL: SYSTEM METRICS & SELECTED AGENT BRIEF (1 COLUMN) -->
-        <div class="flex flex-col gap-2 min-h-0 overflow-y-auto">
-            
-            <!-- SELECTED AGENT SUMMARY CARD -->
-            <div class="bg-cyber-panel p-3 rounded border border-cyber-border flex flex-col gap-2" id="selected-agent-card">
-                <div class="flex justify-between items-center border-b border-gray-800 pb-1.5">
-                    <span class="font-bold text-white flex items-center gap-2">
-                        <span id="selected-avatar" class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-black bg-blue-400">A1</span>
-                        <span id="selected-name">01. XAUUSD Grid Bot</span>
-                    </span>
-                    <span id="selected-status" class="text-[9px] px-1.5 py-0.5 rounded bg-green-950 text-green-400 border border-green-800">ACTIVE</span>
-                </div>
-
-                <div class="text-gray-400 space-y-1 text-[11px]">
-                    <div>Role: <span id="selected-role" class="text-gray-200">MT5 MQL5 Grid Trading</span></div>
-                    <div>Location: <span id="selected-loc" class="text-blue-400">Workstation #1</span></div>
-                    <div>Current Task: <span id="selected-task" class="text-yellow-400">Executing Hedging Algorithm</span></div>
-                </div>
-
-                <div class="pt-2 border-t border-gray-800/80 space-y-1.5">
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-0.5"><span>Workload Load</span><span id="selected-cpu" class="text-blue-400">42%</span></div>
-                        <div class="w-full bg-gray-900 rounded-full h-1.5"><div id="selected-cpu-bar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 42%"></div></div>
-                    </div>
-                </div>
-
-                <button onclick="openAgentModal(selectedAgentId)" class="mt-1 w-full py-1.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 rounded border border-blue-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-magnifying-glass"></i> Open Full Inspection Modal
-                </button>
-            </div>
-
-            <!-- SYSTEM INFRASTRUCTURE MONITOR -->
-            <div class="bg-cyber-panel p-3 rounded border border-cyber-border space-y-2.5 flex-1">
-                <div class="font-bold text-gray-300 border-b border-gray-800 pb-1 flex justify-between items-center">
-                    <span>HQ SYSTEM METRICS</span>
-                    <i class="fa-solid fa-microchip text-blue-400"></i>
-                </div>
-
-                <div class="space-y-2">
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-1"><span>Trading Grid Compute</span><span class="text-blue-400 font-bold">88%</span></div>
-                        <div class="w-full bg-gray-900 rounded-full h-1.5"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 88%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-1"><span>Solar Energy Capacity</span><span class="text-green-400 font-bold">95%</span></div>
-                        <div class="w-full bg-gray-900 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width: 95%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-1"><span>Google Sheets API Quota</span><span class="text-yellow-400 font-bold">34%</span></div>
-                        <div class="w-full bg-gray-900 rounded-full h-1.5"><div class="bg-yellow-500 h-1.5 rounded-full" style="width: 34%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-1"><span>Telegram Webhook Sync</span><span class="text-emerald-400 font-bold">100%</span></div>
-                        <div class="w-full bg-gray-900 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div></div>
-                    </div>
-                </div>
-
-                <div class="mt-3 p-2 bg-black/40 rounded border border-gray-800 text-[10px] text-gray-400">
-                    <span class="text-green-400 font-bold">● SYSTEM HEALTH:</span> All 8 agents online. No critical deadlocks detected in main queue.
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- BOTTOM LIVE TERMINAL LOGS -->
-    <footer class="h-28 bg-cyber-panel border-t border-cyber-border p-2 flex flex-col shrink-0">
-        <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 border-b border-gray-800 pb-1 mb-1">
-            <span class="flex items-center gap-2">
-                <i class="fa-solid fa-terminal text-green-400"></i> LIVE HQ SYSTEM TERMINAL LOGS
-            </span>
+        <!-- HEADER BAR -->
+        <header class="cyber-panel p-4 rounded-xl flex flex-wrap justify-between items-center gap-4 border-l-4 border-l-blue-500">
             <div class="flex items-center gap-3">
-                <span class="text-gray-500">Auto-scrolling</span>
-                <button onclick="clearLogs()" class="hover:text-white transition"><i class="fa-solid fa-trash"></i> Clear</button>
+                <div class="w-10 h-10 rounded-lg bg-blue-600/20 border border-blue-400 flex items-center justify-center text-blue-400 font-bold text-xl shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+                    HQ
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
+                        AGENT HQ <span class="text-xs px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-500/40 font-mono-code">v2.5 ISOMETRIC 32-BIT</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">ระบบศูนย์บัญชาการปฏิบัติการเอเจนต์อัตโนมัติ (8 เอเจนต์เชื่อมโยงสมบูรณ์)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs font-mono-code">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-emerald-400 font-bold">สถานะระบบ: ปกติ</span>
+                </div>
+                <button onclick="toggleCRT()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-1.5">
+                    📺 <span>สลับโหมด CRT</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- TOP METRICS & AGENT STATUS CARDS (8 AGENTS) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+            <!-- Agent 1 -->
+            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-blue-400 truncate">01. XAUUSD Grid</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">MT5 MQL5 Grid</div>
+                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">กำไรสะสม +14.2%</div>
+            </div>
+
+            <!-- Agent 2 -->
+            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-cyan-400 truncate">02. Captain ประกันภัย</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">FairDee Lead Sync</div>
+                <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18 รายงาน</div>
+            </div>
+
+            <!-- Agent 3 -->
+            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-indigo-400 truncate">03. Fleet Logistics</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">Grab/Bolt/Lalamove</div>
+                <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">รอบวิ่ง: 12 เที่ยว</div>
+            </div>
+
+            <!-- Agent 4 -->
+            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-amber-400 truncate">04. Solar & Energy</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">Deye / LiFePO4</div>
+                <div class="text-[10px] text-amber-300 mt-1 font-mono-code">แบตเตอรี่: 94%</div>
+            </div>
+
+            <!-- Agent 5 -->
+            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-rose-400 truncate">05. Take Profit Fit</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">เดิน 1 ชม. + 10kg</div>
+                <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จแล้ว: 3/3 วัน</div>
+            </div>
+
+            <!-- Agent 6 -->
+            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-orange-400 truncate">06. Tiramisu Baker</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">Wongnai Merchant</div>
+                <div class="text-[10px] text-orange-300 mt-1 font-mono-code">ออเดอร์: 15 กล่อง</div>
+            </div>
+
+            <!-- Agent 7 -->
+            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-sky-400 truncate">07. Telegram Bot</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">Webhook Alert</div>
+                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ส่งการแจ้งเตือนแล้ว</div>
+            </div>
+
+            <!-- Agent 8 -->
+            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-2.5 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[11px] font-bold text-emerald-400 truncate">08. Google Sheets</span>
+                    <span class="text-xs text-emerald-400 font-bold">✓ Sync</span>
+                </div>
+                <div class="text-[10px] text-gray-400 truncate">Apps Script Auto</div>
+                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">อัปเดตสมาชิกแล้ว</div>
             </div>
         </div>
-        <div id="terminal-logs" class="flex-1 overflow-y-auto space-y-1 font-mono text-[10px] pr-2">
-            <!-- Dynamically populated live logs -->
+
+        <!-- MAIN DISPLAY AREA (CANVAS SIMULATOR + LOG TERMINAL) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[480px]">
+
+            <!-- CANVAS ISOMETRIC AGENT COMMAND CENTER (LEFT 2 COLS) -->
+            <div class="lg:col-span-2 cyber-panel rounded-2xl p-2 relative flex flex-col justify-between overflow-hidden group border border-slate-700">
+                
+                <!-- HUD Top Bar Overlay -->
+                <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2 shadow-lg pointer-events-auto">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        จำลองศูนย์ปฏิบัติการเอเจนต์แบบเรียลไทม์ (จำลองตัวละคร 32-Bit)
+                    </div>
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700 text-gray-400 text-xs font-mono-code hidden sm:block pointer-events-auto">
+                        FPS: <span id="fps-counter" class="text-emerald-400">60</span> | โซน: ห้องวางแผนและเซิร์ฟเวอร์
+                    </div>
+                </div>
+
+                <!-- Canvas Render Element -->
+                <div class="w-full h-full min-h-[420px] rounded-xl overflow-hidden relative bg-[#0d1322]">
+                    <canvas id="isometricCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                </div>
+
+                <!-- HUD Bottom Control Bar -->
+                <div class="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap justify-between items-center gap-2 pointer-events-none">
+                    <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700 text-gray-300 text-xs flex items-center gap-3 pointer-events-auto">
+                        <span class="text-gray-400">คำแนะนำ:</span>
+                        <span>🖱️ คลิกที่ตัวละครเอเจนต์เพื่อตรวจสอบข้อมูล</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- LIVE TERMINAL & SYSTEM PERFORMANCE (RIGHT 1 COL) -->
+            <div class="flex flex-col gap-4">
+                
+                <!-- Realtime Agent Terminal -->
+                <div class="cyber-panel rounded-2xl p-4 flex-1 flex flex-col justify-between border border-slate-700">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                            <span>💻</span> บันทึกระบบการทำงาน (Terminal Log)
+                        </h3>
+                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE STREAM</span>
+                    </div>
+
+                    <!-- Terminal Output Box -->
+                    <div id="terminal-box" class="flex-1 bg-[#050811] p-3 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[260px] space-y-2 text-gray-300">
+                        <!-- Logs will append here dynamically -->
+                    </div>
+
+                    <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center text-[10px] text-gray-500 font-mono-code">
+                        <span>เซิร์ฟเวอร์หลัก: HQ-BKK-01</span>
+                        <span>ความหน่วงระบบ: 12ms</span>
+                    </div>
+                </div>
+
+                <!-- System Resource Indicators -->
+                <div class="cyber-panel rounded-2xl p-4 border border-slate-700 space-y-3">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <span>⚡</span> การใช้ทรัพยากรของเอเจนต์
+                    </h3>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">ระบบเทรด MQL5 Trading Workload</span>
+                            <span class="text-blue-400 font-bold font-mono-code">78%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 78%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">ระบบสำรองพลังงานโซล่าเซลล์ (Batteries)</span>
+                            <span class="text-amber-400 font-bold font-mono-code">94%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-amber-500 h-1.5 rounded-full" style="width: 94%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">การรับส่งข้อมูล Google Sheets & Telegram</span>
+                            <span class="text-emerald-400 font-bold font-mono-code">100%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-    </footer>
 
-    <!-- AGENT FULL DETAIL MODAL -->
-    <div id="agent-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-cyber-panel border border-blue-500/50 rounded-lg w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <!-- Modal Header -->
-            <div class="bg-blue-950/60 p-3 border-b border-blue-500/30 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <div id="modal-avatar" class="w-6 h-6 rounded flex items-center justify-center font-bold text-xs text-black bg-blue-400">A1</div>
-                    <h3 id="modal-title" class="text-sm font-bold text-white">01. XAUUSD Grid Bot</h3>
+        <!-- FOOTER -->
+        <footer class="cyber-panel p-3 rounded-xl flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2 border-t border-slate-800">
+            <div>
+                © 2026 <strong class="text-gray-300">Agent HQ Command Center</strong>. พัฒนาขึ้นสำหรับระบบบริหารจัดการเอเจนต์อัตโนมัติ
+            </div>
+            <div class="font-mono-code text-[11px] text-gray-400">
+                โปรเจกต์ Take Profit | เชื่อมต่อระบบหลัก: MQL5, Captain ประกันภัย, Fleet & Solar
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- INSPECTOR MODAL FOR AGENT DETAILS -->
+    <div id="agent-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="cyber-panel bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">✕</button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div id="modal-icon" class="w-12 h-12 rounded-xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-2xl">
+                    🤖
                 </div>
-                <button onclick="closeAgentModal()" class="text-gray-400 hover:text-white text-base px-2">✕</button>
+                <div>
+                    <h2 id="modal-title" class="text-xl font-bold text-white">ชื่อเอเจนต์</h2>
+                    <p id="modal-role" class="text-xs text-blue-400 font-mono-code">บทบาทหน้าที่</p>
+                </div>
             </div>
 
-            <!-- Modal Body -->
-            <div class="p-4 overflow-y-auto space-y-4">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div class="bg-black/50 p-2 rounded border border-gray-800">
-                        <div class="text-gray-500 text-[10px]">STATUS</div>
-                        <div id="modal-status-text" class="text-green-400 font-bold text-xs">ONLINE</div>
-                    </div>
-                    <div class="bg-black/50 p-2 rounded border border-gray-800">
-                        <div class="text-gray-500 text-[10px]">CURRENT STATION</div>
-                        <div id="modal-station-text" class="text-blue-400 font-bold text-xs">Desk #1</div>
-                    </div>
-                    <div class="bg-black/50 p-2 rounded border border-gray-800">
-                        <div class="text-gray-500 text-[10px]">TASKS COMPLETED</div>
-                        <div id="modal-tasks-count" class="text-purple-400 font-bold text-xs">1,284</div>
-                    </div>
-                    <div class="bg-black/50 p-2 rounded border border-gray-800">
-                        <div class="text-gray-500 text-[10px]">CPU / MEMORY</div>
-                        <div id="modal-specs" class="text-yellow-400 font-bold text-xs">38% / 128MB</div>
-                    </div>
+            <div class="space-y-3 text-xs text-gray-300 mb-6">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงานปัจจุบัน:</span>
+                    <p id="modal-desc" class="text-gray-200">รายละเอียด...</p>
                 </div>
 
-                <div class="space-y-1">
-                    <label class="text-gray-400 text-[10px] font-bold">DESCRIPTION & RESPONSIBILITY</label>
-                    <p id="modal-desc" class="text-gray-300 bg-black/40 p-2.5 rounded border border-gray-800 text-xs leading-relaxed">
-                        Automated MQL5 Grid trading system monitoring XAUUSD gold pairs. Executes risk management & partial hedging orders.
-                    </p>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-gray-400 text-[10px] font-bold">AGENT RECENT ACTIVITY LOGS</label>
-                    <div id="modal-agent-logs" class="bg-black p-3 rounded border border-gray-800 h-36 overflow-y-auto font-mono text-[10px] space-y-1">
-                        <!-- Agent specific logs -->
+                <div class="grid grid-cols-2 gap-2 text-center font-mono-code">
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-gray-500 text-[10px] block">สถานะการทำงาน</span>
+                        <span id="modal-status" class="text-emerald-400 font-bold">ACTIVE</span>
+                    </div>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-gray-500 text-[10px] block">ประสิทธิภาพระบบ</span>
+                        <span id="modal-perf" class="text-blue-400 font-bold">99.8%</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Modal Footer -->
-            <div class="p-3 bg-black/40 border-t border-gray-800 flex justify-end gap-2">
-                <button onclick="triggerAgentAction()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded text-xs transition">
-                    <i class="fa-solid fa-bolt"></i> Trigger Immediate Sync
-                </button>
-                <button onclick="closeAgentModal()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs transition">
-                    Close
-                </button>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
+                <button onclick="triggerAgentAction()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งงานเอเจนต์ทันที</button>
             </div>
         </div>
     </div>
 
-    <!-- AUDIO SOUND EFFECTS (SYNTHESIZED WEB AUDIO API) -->
+    <!-- CANVAS ISOMETRIC SIMULATION ENGINE JAVASCRIPT -->
     <script>
-        // Simple Web Audio Synthesizer for Retro SFX
-        let audioEnabled = false;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function toggleAudio() {
-            audioEnabled = !audioEnabled;
-            const btn = document.getElementById('sound-btn');
-            const icon = document.getElementById('sound-icon');
-            if (audioEnabled) {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                btn.classList.replace('text-gray-300', 'text-green-400');
-                btn.classList.replace('border-gray-700', 'border-green-600');
-                icon.className = "fa-solid fa-volume-high";
-                btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> Sound On`;
-                playBeep(800, 0.05);
-            } else {
-                btn.classList.replace('text-green-400', 'text-gray-300');
-                btn.classList.replace('border-green-600', 'border-gray-700');
-                btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i> Sound Off`;
-            }
-        }
-
-        function playBeep(freq = 440, type = 'sine', duration = 0.08) {
-            if (!audioEnabled) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
-        }
-    </script>
-
-    <!-- DASHBOARD LOGIC & CANVAS SIMULATION -->
-    <script>
-        // -------------------------------------------------------------
-        // 1. DATA DEFINITION: 8 ACTIVE AGENTS
-        // -------------------------------------------------------------
-        const AGENTS = [
-            {
-                id: 0,
-                code: "01",
-                name: "XAUUSD Grid Bot",
-                role: "MT5 MQL5 Trading Engine",
-                desc: "Monitors real-time gold XAUUSD prices, executes grid trading algorithms, and applies partial hedging risk parameters.",
-                color: "#3b82f6", // Blue
-                shirtColor: "#2563eb",
-                pantsColor: "#1e3a8a",
-                skinColor: "#fca5a5",
-                hairColor: "#1e293b",
-                status: "ACTIVE",
-                tasksCompleted: 4821,
-                cpu: 82,
-                currentTask: "Calculating Partial Hedging Thresholds...",
-                currentStation: "Desk 1"
-            },
+        // --- 8 AGENTS DEFINITION DATA ---
+        const AGENTS_DATA = [
             {
                 id: 1,
-                code: "02",
-                name: "Captain ประกันภัย",
-                role: "Lead Acquisition & FairDee",
-                desc: "Fetches vehicle insurance quotes from FairDee API, handles customer queries, and generates automated policy proposals.",
-                color: "#10b981", // Green
-                shirtColor: "#059669",
-                pantsColor: "#064e3b",
-                skinColor: "#fcd34d",
-                hairColor: "#451a03",
-                status: "ACTIVE",
-                tasksCompleted: 1240,
-                cpu: 45,
-                currentTask: "Polling FairDee Insurance API...",
-                currentStation: "Desk 2"
+                name: "01. XAUUSD Grid Bot",
+                role: "เอเจนต์เทรดอัตโนมัติ MetaTrader 5 (MQL5)",
+                desc: "รันกลยุทธ์ Grid Trading สำหรับทองคำ XAUUSD พร้อมระบบ Partial Hedging จับคู่ออเดอร์ฝั่งตรงข้ามเพื่อปิดความเสี่ยง บันทึกข้อมูลลง Google Sheets และแจ้งเตือนผ่าน Telegram",
+                color: "#3b82f6",
+                outfit: "#1e3a8a",
+                hair: "#334155",
+                glasses: true,
+                x: 180, y: 160,
+                targetX: 180, targetY: 160,
+                state: "working",
+                icon: "📈"
             },
             {
                 id: 2,
-                code: "03",
-                name: "Logistics Fleet",
-                role: "Grab / Bolt / Lalamove Sync",
-                desc: "Optimizes delivery routes, monitors driver dispatch for Grab, Bolt, and Lalamove, and calculates delivery fees.",
-                color: "#06b6d4", // Cyan
-                shirtColor: "#0891b2",
-                pantsColor: "#164e63",
-                skinColor: "#fdba74",
-                hairColor: "#0f172a",
-                status: "ACTIVE",
-                tasksCompleted: 389,
-                cpu: 61,
-                currentTask: "Re-routing Express Fleet Vehicles...",
-                currentStation: "Desk 3"
+                name: "02. Captain ประกันภัย",
+                role: "เอเจนต์บริหารจัดการงานประกันภัย FairDee",
+                desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานวิริยะ/เมืองไทย/กรุงเทพประกันภัย และดึงข้อมูลการลงทะเบียนเข้าระบบโดยอัตโนมัติ",
+                color: "#06b6d4",
+                outfit: "#164e63",
+                hair: "#78350f",
+                glasses: false,
+                x: 320, y: 220,
+                targetX: 320, targetY: 220,
+                state: "meeting",
+                icon: "🛡️"
             },
             {
                 id: 3,
-                code: "04",
-                name: "Solar & Energy",
-                role: "Deye Inverter & LiFePO4",
-                desc: "Tracks rooftop solar panel generation, battery SOC levels, power consumption, and controls grid feedback.",
-                color: "#eab308", // Yellow
-                shirtColor: "#ca8a04",
-                pantsColor: "#713f12",
-                skinColor: "#fca5a5",
-                hairColor: "#7c2d12",
-                status: "ACTIVE",
-                tasksCompleted: 8932,
-                cpu: 30,
-                currentTask: "Battery Storage at 95% - Grid Bypass Active",
-                currentStation: "Power Rack"
+                name: "03. Fleet Logistics",
+                role: "เอเจนต์ติดตามงานขนส่งGrab / Bolt / Lalamove",
+                desc: "ติดตามสถานะการวิ่งงานขนส่ง รวบรวมรายงานอินเซนทีฟรายสัปดาห์ และใบกำกับภาษีประจำเดือนของแพลตฟอร์มขนส่ง",
+                color: "#6366f1",
+                outfit: "#312e81",
+                hair: "#1e293b",
+                glasses: false,
+                x: 380, y: 180,
+                targetX: 380, targetY: 180,
+                state: "meeting",
+                icon: "🚚"
             },
             {
                 id: 4,
-                code: "05",
-                name: "Take Profit Fitness",
-                role: "Daily Health & Activity Tracker",
-                desc: "Schedules workout routines, tracks daily step counts, logs 10kg dumbbell sets, and reminds breaks.",
-                color: "#a855f7", // Purple
-                shirtColor: "#9333ea",
-                pantsColor: "#581c87",
-                skinColor: "#fcd34d",
-                hairColor: "#312e81",
-                status: "ACTIVE",
-                tasksCompleted: 154,
-                cpu: 25,
-                currentTask: "Logging Daily Step Goal Achievement",
-                currentStation: "Coffee Bar"
+                name: "04. Solar & Energy",
+                role: "เอเจนต์คำนวณและบริหารพลังงานโซล่าเซลล์",
+                desc: "ตรวจเช็กสถานะแผง AIKO N-Type 650W/675W, อินเวอร์เตอร์ Deye/Luxpower และระบบแบตเตอรี่ LiFePO4 ควบคุมสวิตช์ Matter ร่วมกับ Apple/Google Home",
+                color: "#f59e0b",
+                outfit: "#78350f",
+                hair: "#b45309",
+                glasses: false,
+                x: 480, y: 120,
+                targetX: 480, targetY: 120,
+                state: "checking_servers",
+                icon: "⚡"
             },
             {
                 id: 5,
-                code: "06",
-                name: "Tiramisu Baker",
-                role: "Wongnai & Dessert Menu Bot",
-                desc: "Manages bakery recipe inventory, checks customer reviews on Wongnai, and sends promotional alerts.",
-                color: "#ec4899", // Pink
-                shirtColor: "#db2777",
-                pantsColor: "#831843",
-                skinColor: "#fcd34d",
-                hairColor: "#831843",
-                status: "ACTIVE",
-                tasksCompleted: 612,
-                cpu: 38,
-                currentTask: "Updating Daily Tiramisu Special Inventory",
-                currentStation: "Coffee Bar"
+                name: "05. Take Profit Fitness",
+                role: "เอเจนต์ติดตามเป้าหมายสุขภาพและการออกกำลังกาย",
+                desc: "บันทึกสถิติการเดินออกกำลังกายประจำวัน (ความเร็ว 4 เวลา 1 ชม.) และการเวทเทรนนิ่งด้วยดัมเบล 10 กก. สรุปผลเข้าโปรเจกต์ Take Profit",
+                color: "#f43f5e",
+                outfit: "#881337",
+                hair: "#0f172a",
+                glasses: true,
+                x: 280, y: 180,
+                targetX: 280, targetY: 180,
+                state: "meeting",
+                icon: "🏋️"
             },
             {
                 id: 6,
-                code: "07",
-                name: "Telegram Notifier",
-                role: "Webhook & Emergency Alert Bot",
-                desc: "Central notification dispatch engine. Routes error alerts and operational summaries directly to Telegram channels.",
-                color: "#f97316", // Orange
-                shirtColor: "#ea580c",
-                pantsColor: "#7c2d12",
-                skinColor: "#fca5a5",
-                hairColor: "#18181b",
-                status: "ACTIVE",
-                tasksCompleted: 15420,
-                cpu: 52,
-                currentTask: "Dispatching Summary Log to Telegram",
-                currentStation: "Server Room"
+                name: "06. Tiramisu Baker",
+                role: "เอเจนต์จัดการร้านขนมหวานและแอป Wongnai",
+                desc: "จัดการรายการสินค้าขนมทิรามิสุโฮมเมดรสชาติต่างๆ (ออริจินัล, สตรอว์เบอร์รี, บลูเบอร์รี, ส้ม, ดาร์กช็อก, บานาน่าคาราเมล) ผ่าน Wongnai Merchant",
+                color: "#f97316",
+                outfit: "#7c2d12",
+                hair: "#92400e",
+                glasses: false,
+                x: 100, y: 280,
+                targetX: 100, targetY: 280,
+                state: "coffee_break",
+                icon: "🍰"
             },
             {
                 id: 7,
-                code: "08",
-                name: "Google Sheets Script",
-                role: "Automation & Member Database Sync",
-                desc: "Executes Google Apps Script triggers to synchronize customer leads, accounting entries, and inventory data.",
-                color: "#6366f1", // Indigo
-                shirtColor: "#4f46e5",
-                pantsColor: "#312e81",
-                skinColor: "#fdba74",
-                hairColor: "#451a03",
-                status: "ACTIVE",
-                tasksCompleted: 9812,
-                cpu: 40,
-                currentTask: "Syncing Member Database Entries...",
-                currentStation: "Server Room"
+                name: "07. Telegram Notifier",
+                role: "เอเจนต์กระจายข่าวและแจ้งเตือน Telegram Bot",
+                desc: "ยิงการแจ้งเตือนสัญญานการเทรด สถานะโซล่าเซลล์ และยอดขายเข้าระบบกลุ่ม Telegram OpenChat ของ The Driver Thailand แบบเรียลไทม์",
+                color: "#38bdf8",
+                outfit: "#0c4a6e",
+                hair: "#1e1b4b",
+                glasses: false,
+                x: 340, y: 140,
+                targetX: 340, targetY: 140,
+                state: "meeting",
+                icon: "📲"
+            },
+            {
+                id: 8,
+                name: "08. Google Sheets Script",
+                role: "เอเจนต์ประมวลผลข้อมูล Google Apps Script",
+                desc: "ซิงก์ข้อมูลสมาชิกระหว่าง Web Portal กับ Google Sheets อัตโนมัติ บันทึก Log การเทรดผ่าน WebRequest และจัดการฐานข้อมูล",
+                color: "#10b981",
+                outfit: "#064e3b",
+                hair: "#3f6212",
+                glasses: true,
+                x: 140, y: 180,
+                targetX: 140, targetY: 180,
+                state: "working",
+                icon: "📊"
             }
         ];
 
-        let selectedAgentId = 0;
-
-        // -------------------------------------------------------------
-        // 2. UI INITIALIZATION & UPDATES
-        // -------------------------------------------------------------
-        function initTopCards() {
-            const container = document.getElementById('agent-cards');
-            container.innerHTML = '';
-
-            AGENTS.forEach((agent) => {
-                const card = document.createElement('div');
-                card.id = `card-agent-${agent.id}`;
-                card.className = `p-2 rounded border border-cyber-border bg-cyber-panel hover:border-blue-500/50 cursor-pointer transition flex flex-col justify-between ${agent.id === selectedAgentId ? 'glow-border border-blue-500 bg-blue-950/20' : ''}`;
-                card.onclick = () => selectAgent(agent.id);
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold text-white text-[10px] truncate flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${agent.color}"></span>
-                            ${agent.code}. ${agent.name.split(' ')[0]}
-                        </span>
-                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                    </div>
-                    <div class="text-gray-400 text-[9px] truncate">${agent.role}</div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function selectAgent(id) {
-            selectedAgentId = id;
-            const agent = AGENTS[id];
-
-            // Highlight top card
-            AGENTS.forEach(a => {
-                const el = document.getElementById(`card-agent-${a.id}`);
-                if (el) {
-                    if (a.id === id) {
-                        el.className = "p-2 rounded border border-blue-500 bg-blue-950/30 glow-border cursor-pointer transition flex flex-col justify-between";
-                    } else {
-                        el.className = "p-2 rounded border border-cyber-border bg-cyber-panel hover:border-blue-500/50 cursor-pointer transition flex flex-col justify-between";
-                    }
-                }
-            });
-
-            // Update Right Side Summary
-            document.getElementById('selected-avatar').innerText = agent.code;
-            document.getElementById('selected-avatar').style.backgroundColor = agent.color;
-            document.getElementById('selected-name').innerText = `${agent.code}. ${agent.name}`;
-            document.getElementById('selected-role').innerText = agent.role;
-            document.getElementById('selected-task').innerText = agent.currentTask;
-            document.getElementById('selected-loc').innerText = agent.currentStation;
-            document.getElementById('selected-cpu').innerText = `${agent.cpu}%`;
-            document.getElementById('selected-cpu-bar').style.width = `${agent.cpu}%`;
-
-            playBeep(600 + id * 50, 'sine', 0.05);
-        }
-
-        // -------------------------------------------------------------
-        // 3. ISOMETRIC CANVAS ENGINE
-        // -------------------------------------------------------------
-        const canvas = document.getElementById('isoCanvas');
-        const ctx = canvas.getContext('2d');
-        const canvasContainer = document.getElementById('canvas-container');
-
-        // Tile dimensions
-        const TILE_WIDTH = 54;
-        const TILE_HEIGHT = 27;
-        const GRID_SIZE = 12; // 12x12 Isometric Room
-
-        let originX = 0;
-        let originY = 0;
-
-        // Waypoints & Stations in Isometric Grid (x, y)
-        const STATIONS = [
-            { name: "Desk 1", x: 2, y: 2 },
-            { name: "Desk 2", x: 2, y: 5 },
-            { name: "Desk 3", x: 2, y: 8 },
-            { name: "Server Room", x: 9, y: 2 },
-            { name: "Power Rack", x: 9, y: 5 },
-            { name: "Coffee Bar", x: 9, y: 9 },
-            { name: "Center Hub", x: 5, y: 5 },
-            { name: "Planning Desk", x: 6, y: 8 }
+        // --- WAYPOINTS FOR CHARACTER MOVEMENT ---
+        const WAYPOINTS = [
+            { name: "desk_left", x: 140, y: 180 },
+            { name: "desk_right", x: 180, y: 160 },
+            { name: "meeting_1", x: 280, y: 180 },
+            { name: "meeting_2", x: 320, y: 220 },
+            { name: "meeting_3", x: 380, y: 180 },
+            { name: "meeting_4", x: 340, y: 140 },
+            { name: "servers", x: 480, y: 120 },
+            { name: "coffee", x: 100, y: 280 }
         ];
 
-        // Character Objects
-        class Character {
-            constructor(agentData) {
-                this.data = agentData;
-                this.gridX = Math.floor(Math.random() * (GRID_SIZE - 2)) + 1;
-                this.gridY = Math.floor(Math.random() * (GRID_SIZE - 2)) + 1;
-                
-                // Pixel positions
-                this.x = 0;
-                this.y = 0;
-                this.targetX = this.gridX;
-                this.targetY = this.gridY;
-                
-                this.speed = 0.015 + Math.random() * 0.01;
-                this.progress = 1; // 1 means arrived
-                this.isMoving = false;
-                this.facing = 'down';
-                this.stepAnim = 0;
+        let selectedAgentIndex = null;
+        let canvas, ctx;
+        let animationFrameId;
 
-                this.setNewTarget();
-            }
+        // Initialize Canvas & App
+        window.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('isometricCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
 
-            setNewTarget() {
-                // Pick a random station or random floor tile
-                const targetStation = STATIONS[Math.floor(Math.random() * STATIONS.length)];
-                this.targetX = targetStation.x;
-                this.targetY = targetStation.y;
-                this.startX = this.gridX;
-                this.startY = this.gridY;
-                this.progress = 0;
-                this.isMoving = true;
-                this.data.currentStation = targetStation.name;
-            }
+            // Add Click Interaction on Canvas Characters
+            canvas.addEventListener('click', handleCanvasClick);
 
-            update() {
-                if (this.isMoving) {
-                    this.progress += this.speed;
-                    this.stepAnim += 0.2;
-
-                    if (this.progress >= 1) {
-                        this.progress = 1;
-                        this.gridX = this.targetX;
-                        this.gridY = this.targetY;
-                        this.isMoving = false;
-                        
-                        // Wait randomly at station before moving again
-                        setTimeout(() => {
-                            if (Math.random() > 0.3) this.setNewTarget();
-                        }, 3000 + Math.random() * 4000);
-                    } else {
-                        this.gridX = this.startX + (this.targetX - this.startX) * this.progress;
-                        this.gridY = this.startY + (this.targetY - this.startY) * this.progress;
-                    }
-                }
-
-                // Update isometric screen coordinate
-                const iso = gridToIso(this.gridX, this.gridY);
-                this.x = iso.x;
-                this.y = iso.y;
-            }
-
-            draw() {
-                // Draw Character Pixel Art
-                ctx.save();
-                ctx.translate(this.x, this.y - 12);
-
-                // Highlight circle if selected
-                if (this.data.id === selectedAgentId) {
-                    ctx.beginPath();
-                    ctx.ellipse(0, 10, 16, 8, 0, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
-                    ctx.fill();
-                    ctx.strokeStyle = '#3b82f6';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                }
-
-                // Shadow
-                ctx.beginPath();
-                ctx.ellipse(0, 8, 10, 5, 0, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                ctx.fill();
-
-                // Legs walking animation offset
-                const legOffset = this.isMoving ? Math.sin(this.stepAnim) * 3 : 0;
-
-                // Legs
-                ctx.fillStyle = this.data.pantsColor;
-                ctx.fillRect(-4, -2 + legOffset, 3, 9);
-                ctx.fillRect(1, -2 - legOffset, 3, 9);
-
-                // Body / Shirt
-                ctx.fillStyle = this.data.shirtColor;
-                ctx.fillRect(-6, -11, 12, 10);
-
-                // Head / Skin
-                ctx.fillStyle = this.data.skinColor;
-                ctx.fillRect(-5, -20, 10, 9);
-
-                // Hair
-                ctx.fillStyle = this.data.hairColor;
-                ctx.fillRect(-6, -22, 12, 4);
-
-                // Floating Tag Badge
-                ctx.restore();
-
-                // Draw Name Tag above head
-                ctx.save();
-                ctx.font = 'bold 9px monospace';
-                const tagText = `${this.data.code}. ${this.data.name.split(' ')[0]}`;
-                const textWidth = ctx.measureText(tagText).width;
-
-                ctx.fillStyle = 'rgba(7, 10, 17, 0.85)';
-                ctx.fillRect(this.x - textWidth / 2 - 4, this.y - 42, textWidth + 8, 14);
-                
-                ctx.strokeStyle = this.data.color;
-                ctx.lineWidth = 1;
-                ctx.strokeRect(this.x - textWidth / 2 - 4, this.y - 42, textWidth + 8, 14);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(tagText, this.x - textWidth / 2, this.y - 32);
-                ctx.restore();
-            }
-        }
-
-        let characters = [];
+            // Start Animation Loop & Log Stream
+            requestAnimationFrame(renderLoop);
+            startLogStream();
+        });
 
         function resizeCanvas() {
-            canvas.width = canvasContainer.clientWidth;
-            canvas.height = canvasContainer.clientHeight;
-
-            originX = canvas.width / 2;
-            originY = canvas.height / 2 - (GRID_SIZE * TILE_HEIGHT) / 3;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
         }
 
-        function gridToIso(x, y) {
-            return {
-                x: originX + (x - y) * (TILE_WIDTH / 2),
-                y: originY + (x + y) * (TILE_HEIGHT / 2)
-            };
+        // --- ISOMETRIC RENDERING ENGINE ---
+        function renderLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Background & Isometric Floor Grid
+            drawIsometricRoom();
+
+            // Draw Furniture (Server Racks, Holographic Meeting Table, Workstations, Coffee Corner)
+            drawFurniture();
+
+            // Update & Draw 8 Characters
+            updateAndDrawCharacters();
+
+            animationFrameId = requestAnimationFrame(renderLoop);
         }
 
-        // Render Isometric Floor & Furniture
+        // Draw Isometric Grid Room Floor
         function drawIsometricRoom() {
-            // Draw Tiles
-            for (let x = 0; x < GRID_SIZE; x++) {
-                for (let y = 0; y < GRID_SIZE; y++) {
-                    const iso = gridToIso(x, y);
+            const originX = canvas.width / 2;
+            const originY = 80;
+            const tileW = 56;
+            const tileH = 28;
+            const gridSize = 10;
 
-                    // Tile color pattern
-                    const isEven = (x + y) % 2 === 0;
-                    let topColor = isEven ? '#0f172a' : '#1e293b';
-                    let strokeColor = '#1b2a4a';
+            // Floor Tiles
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const x = originX + (c - r) * (tileW / 2);
+                    const y = originY + (c + r) * (tileH / 2);
 
-                    // Draw Isometric Tile
                     ctx.beginPath();
-                    ctx.moveTo(iso.x, iso.y);
-                    ctx.lineTo(iso.x + TILE_WIDTH / 2, iso.y + TILE_HEIGHT / 2);
-                    ctx.lineTo(iso.x, iso.y + TILE_HEIGHT);
-                    ctx.lineTo(iso.x - TILE_WIDTH / 2, iso.y + TILE_HEIGHT / 2);
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + tileW / 2, y + tileH / 2);
+                    ctx.lineTo(x, y + tileH);
+                    ctx.lineTo(x - tileW / 2, y + tileH / 2);
                     ctx.closePath();
 
-                    ctx.fillStyle = topColor;
+                    // Alternate Tile Patterns
+                    if ((r + c) % 2 === 0) {
+                        ctx.fillStyle = "#111827";
+                    } else {
+                        ctx.fillStyle = "#0f172a";
+                    }
                     ctx.fill();
-                    ctx.strokeStyle = strokeColor;
-                    ctx.lineWidth = 0.5;
+                    ctx.strokeStyle = "rgba(30, 41, 59, 0.5)";
+                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
             }
 
-            // Draw Furniture / Objects
-            drawServerRack(gridToIso(9, 1));
-            drawServerRack(gridToIso(10, 1));
-            drawDesk(gridToIso(2, 2), "MQL5 Gold");
-            drawDesk(gridToIso(2, 5), "Insurance");
-            drawDesk(gridToIso(2, 8), "Logistics");
-            drawCoffeeBar(gridToIso(9, 9));
-            drawPlant(gridToIso(0, 0));
-            drawPlant(gridToIso(0, 11));
+            // Neon Conduit Accent Lines on Floor
+            ctx.beginPath();
+            ctx.moveTo(originX, originY + tileH);
+            ctx.lineTo(originX + 4 * (tileW / 2), originY + 5 * (tileH / 2));
+            ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
 
-        function drawServerRack(iso) {
-            ctx.save();
-            ctx.translate(iso.x, iso.y);
+        // Draw Furniture Elements matching User's Provided Image Layout
+        function drawFurniture() {
+            const originX = canvas.width / 2;
+            const originY = 80;
 
-            // Front/Side block
-            ctx.fillStyle = '#090d16';
-            ctx.beginPath();
-            ctx.moveTo(0, -30);
-            ctx.lineTo(TILE_WIDTH / 2, -30 + TILE_HEIGHT / 2);
-            ctx.lineTo(0, TILE_HEIGHT);
-            ctx.lineTo(-TILE_WIDTH / 2, -30 + TILE_HEIGHT / 2);
-            ctx.closePath();
-            ctx.fill();
+            // 1. SERVER RACK ARRAY (Top Right Area)
+            drawServerRack(originX + 180, originY + 70);
+            drawServerRack(originX + 220, originY + 90);
 
-            // Glowing Blinking LED Lights
-            const now = Date.now();
-            ctx.fillStyle = (now % 600 > 300) ? '#10b981' : '#3b82f6';
-            ctx.fillRect(-6, -15, 3, 3);
-            ctx.fillStyle = (now % 400 > 200) ? '#ef4444' : '#f59e0b';
-            ctx.fillRect(-1, -15, 3, 3);
-            ctx.fillStyle = '#10b981';
-            ctx.fillRect(4, -15, 3, 3);
+            // 2. CENTER HOLOGRAPHIC MEETING TABLE (Matching the Image)
+            drawHologramTable(originX, originY + 160);
 
-            ctx.restore();
+            // 3. WORKSTATIONS (Left Area)
+            drawWorkstation(originX - 160, originY + 140);
+
+            // 4. COFFEE & LOUNGE CORNER (Bottom Left)
+            drawCoffeeCorner(originX - 180, originY + 230);
         }
 
-        function drawDesk(iso, label) {
-            ctx.save();
-            ctx.translate(iso.x, iso.y);
-
-            // Table top
-            ctx.fillStyle = '#1e293b';
+        // Server Cabinet Renderer
+        function drawServerRack(x, y) {
+            // Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.4)";
             ctx.beginPath();
-            ctx.moveTo(0, -10);
-            ctx.lineTo(TILE_WIDTH / 2, -10 + TILE_HEIGHT / 2);
-            ctx.lineTo(0, TILE_HEIGHT - 10);
-            ctx.lineTo(-TILE_WIDTH / 2, -10 + TILE_HEIGHT / 2);
-            ctx.closePath();
+            ctx.ellipse(x, y + 40, 25, 12, 0, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = '#3b82f6';
+
+            // Main Tower
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(x - 20, y - 40, 40, 70);
+            ctx.strokeStyle = "#3b82f6";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - 20, y - 40, 40, 70);
+
+            // Blinking Status LEDs
+            const time = Date.now() * 0.005;
+            for (let i = 0; i < 5; i++) {
+                ctx.fillStyle = (Math.sin(time + i) > 0) ? "#34d399" : "#3b82f6";
+                ctx.fillRect(x - 14, y - 30 + (i * 12), 6, 4);
+
+                ctx.fillStyle = "#64748b";
+                ctx.fillRect(x - 4, y - 30 + (i * 12), 22, 4);
+            }
+        }
+
+        // Center Hologram Table Renderer (Exact match to User Image)
+        function drawHologramTable(x, y) {
+            // Table Wooden Base Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.beginPath();
+            ctx.ellipse(x, y + 25, 75, 40, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Table Top (Rich Wooden Texture)
+            ctx.beginPath();
+            ctx.ellipse(x, y, 70, 35, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "#331e14";
+            ctx.fill();
+            ctx.strokeStyle = "#543322";
+            ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Monitor
-            ctx.fillStyle = '#0284c7';
-            ctx.fillRect(-6, -24, 12, 10);
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(-5, -23, 10, 8);
-
-            ctx.restore();
-        }
-
-        function drawCoffeeBar(iso) {
+            // Holographic Network Diagram Projection (Glow Effect)
+            const time = Date.now() * 0.003;
             ctx.save();
-            ctx.translate(iso.x, iso.y);
+            ctx.translate(x, y - 10);
 
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(-12, -10, 24, 12);
-            ctx.fillStyle = '#f59e0b'; // Coffee machine glowing icon
-            ctx.fillRect(-4, -16, 8, 6);
-
-            ctx.restore();
-        }
-
-        function drawPlant(iso) {
-            ctx.save();
-            ctx.translate(iso.x, iso.y);
-
-            ctx.fillStyle = '#b45309'; // Pot
-            ctx.fillRect(-5, -6, 10, 8);
-            ctx.fillStyle = '#10b981'; // Leaves
+            // Cyan Hologram Outer Ring
             ctx.beginPath();
-            ctx.arc(0, -12, 8, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, 40, 20, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.7)";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Floating Nodes
+            const nodeOffset = Math.sin(time) * 4;
+            ctx.fillStyle = "#06b6d4";
+            ctx.beginPath();
+            ctx.arc(-15, -5 + nodeOffset, 4, 0, Math.PI * 2);
+            ctx.arc(15, -5 - nodeOffset, 4, 0, Math.PI * 2);
+            ctx.arc(0, 8 + nodeOffset, 5, 0, Math.PI * 2);
             ctx.fill();
 
+            // Connecting Hologram Beam Lines
+            ctx.beginPath();
+            ctx.moveTo(-15, -5 + nodeOffset);
+            ctx.lineTo(0, 8 + nodeOffset);
+            ctx.lineTo(15, -5 - nodeOffset);
+            ctx.strokeStyle = "rgba(56, 189, 248, 0.8)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
             ctx.restore();
+
+            // 4 Office Chairs Around Table (Matching User Picture)
+            drawOfficeChair(x - 65, y - 10); // Left
+            drawOfficeChair(x + 65, y - 10); // Right
+            drawOfficeChair(x - 25, y - 30); // Top
+            drawOfficeChair(x + 25, y + 25); // Bottom
         }
 
-        function resetAgentsPos() {
-            characters.forEach(c => c.setNewTarget());
-            playBeep(900, 'triangle', 0.1);
+        // Office Chair Renderer
+        function drawOfficeChair(x, y) {
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 12, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#334155";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Backrest
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(x - 10, y - 14, 20, 10);
         }
 
-        // Animation Loop
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Workstation Renderer
+        function drawWorkstation(x, y) {
+            // Desk Surface
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(x - 30, y - 15, 60, 30);
+            ctx.strokeStyle = "#475569";
+            ctx.strokeRect(x - 30, y - 15, 60, 30);
 
-            // Render Floor & Static Decor
-            drawIsometricRoom();
+            // Dual Monitors
+            ctx.fillStyle = "#3b82f6";
+            ctx.fillRect(x - 25, y - 28, 22, 12);
+            ctx.fillRect(x + 3, y - 28, 22, 12);
+        }
 
-            // Sort Characters by Y position for proper isometric depth (Z-indexing)
-            characters.sort((a, b) => (a.gridX + a.gridY) - (b.gridX + b.gridY));
+        // Coffee Machine Corner Renderer
+        function drawCoffeeCorner(x, y) {
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(x - 15, y - 15, 30, 20);
+            ctx.fillStyle = "#f97316";
+            ctx.fillRect(x - 10, y - 25, 12, 12);
+        }
 
-            // Update and Draw Characters
-            characters.forEach(char => {
-                char.update();
-                char.draw();
+        // --- HIGH-DETAIL 32-BIT PIXEL ART AGENT CHARACTER DRAWING ---
+        function updateAndDrawCharacters() {
+            const originX = canvas.width / 2;
+            const originY = 80;
+
+            AGENTS_DATA.forEach((agent, index) => {
+                // Character Waypoint Animation Logic
+                if (Math.random() < 0.005) { // Random chance to move to new station
+                    const randomWaypoint = WAYPOINTS[Math.floor(Math.random() * WAYPOINTS.length)];
+                    agent.targetX = randomWaypoint.x;
+                    agent.targetY = randomWaypoint.y;
+                }
+
+                // Smooth position interpolation
+                agent.x += (agent.targetX - agent.x) * 0.03;
+                agent.y += (agent.targetY - agent.y) * 0.03;
+
+                const screenX = originX + (agent.x - agent.y) * 0.8;
+                const screenY = originY + (agent.x + agent.y) * 0.4;
+
+                // Draw Drop Shadow
+                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                ctx.beginPath();
+                ctx.ellipse(screenX, screenY + 16, 10, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Character High-Detail Body Rendering
+                const isSelected = selectedAgentIndex === index;
+
+                // Selection Ring Effect
+                if (isSelected) {
+                    ctx.beginPath();
+                    ctx.ellipse(screenX, screenY + 16, 16, 8, 0, 0, Math.PI * 2);
+                    ctx.strokeStyle = "#3b82f6";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                // 1. Legs & Pants
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(screenX - 4, screenY + 4, 3, 10);
+                ctx.fillRect(screenX + 1, screenY + 4, 3, 10);
+
+                // 2. Torso & Outfit (Matching Specific Agent Clothing Color)
+                ctx.fillStyle = agent.outfit;
+                ctx.fillRect(screenX - 6, screenY - 6, 12, 12);
+
+                // Collar / Shirt Accent
+                ctx.fillStyle = agent.color;
+                ctx.fillRect(screenX - 2, screenY - 6, 4, 6);
+
+                // 3. Head & Face Skin
+                ctx.fillStyle = "#fcd34d"; // Skin tone
+                ctx.fillRect(screenX - 5, screenY - 16, 10, 10);
+
+                // 4. Detailed Hair Style (32-Bit Style)
+                ctx.fillStyle = agent.hair;
+                ctx.fillRect(screenX - 6, screenY - 19, 12, 5); // Hair top
+                ctx.fillRect(screenX - 6, screenY - 16, 3, 6);  // Side hair
+
+                // Glasses (if applicable)
+                if (agent.glasses) {
+                    ctx.fillStyle = "#38bdf8";
+                    ctx.fillRect(screenX - 4, screenY - 13, 3, 2);
+                    ctx.fillRect(screenX + 1, screenY - 13, 3, 2);
+                }
+
+                // 5. Floating Agent Tag & Icon Overhead
+                ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+                ctx.fillRect(screenX - 35, screenY - 36, 70, 15);
+                ctx.strokeStyle = agent.color;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(screenX - 35, screenY - 36, 70, 15);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "10px Kanit";
+                ctx.textAlign = "center";
+                ctx.fillText(`${agent.icon} ${agent.name.split('.')[1] || agent.name}`, screenX, screenY - 25);
             });
-
-            requestAnimationFrame(animate);
         }
 
-        // Canvas Click Detection (Select Agent on Canvas)
-        canvas.addEventListener('click', (e) => {
+        // Handle Clicking on Character in Canvas
+        function handleCanvasClick(e) {
             const rect = canvas.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            // Check distance to each character
-            let clickedChar = null;
-            let minDist = 35; // Click radius
+            const originX = canvas.width / 2;
+            const originY = 80;
 
-            characters.forEach(char => {
-                const dist = Math.hypot(char.x - clickX, char.y - 20 - clickY);
-                if (dist < minDist) {
-                    minDist = dist;
-                    clickedChar = char;
+            AGENTS_DATA.forEach((agent, index) => {
+                const screenX = originX + (agent.x - agent.y) * 0.8;
+                const screenY = originY + (agent.x + agent.y) * 0.4;
+
+                const dist = Math.hypot(clickX - screenX, clickY - screenY);
+                if (dist < 25) {
+                    selectAgent(index);
                 }
             });
-
-            if (clickedChar) {
-                selectAgent(clickedChar.data.id);
-            }
-        });
-
-        // -------------------------------------------------------------
-        // 4. LIVE TERMINAL LOG GENERATOR
-        // -------------------------------------------------------------
-        const LOG_TEMPLATES = [
-            { agentId: 0, text: "[XAUUSD Bot] Executed Grid Order #8421 - Lot: 0.05 @ 2742.50" },
-            { agentId: 0, text: "[XAUUSD Bot] Recalculating Partial Hedging Thresholds..." },
-            { agentId: 1, text: "[Captain Insurance] Polled FairDee API - 3 New Leads captured" },
-            { agentId: 1, text: "[Captain Insurance] Proposal PDF generated for Client #9812" },
-            { agentId: 2, text: "[Logistics Fleet] Driver matched for Express Delivery #L302" },
-            { agentId: 3, text: "[Solar System] Solar generation at 4.2kW - Battery SOC 95%" },
-            { agentId: 4, text: "[Take Profit Fitness] Step Goal 8,500 reached! Reminder: Hydrate" },
-            { agentId: 5, text: "[Tiramisu Baker] Wongnai review rating updated: 4.9 Stars" },
-            { agentId: 6, text: "[Telegram Notifier] Sent daily status summary to @AgentHQ_Channel" },
-            { agentId: 7, text: "[Google Sheets] Apps Script sync completed - 24 rows updated" }
-        ];
-
-        function addTerminalLog(logText, colorClass = "text-gray-300") {
-            const container = document.getElementById('terminal-logs');
-            const timeStr = new Date().toLocaleTimeString();
-
-            const entry = document.createElement('div');
-            entry.className = `flex gap-2 ${colorClass}`;
-            entry.innerHTML = `<span class="text-gray-600">[${timeStr}]</span> <span>${logText}</span>`;
-
-            container.appendChild(entry);
-            container.scrollTop = container.scrollHeight;
-
-            // Keep max 50 log lines
-            if (container.children.length > 50) {
-                container.removeChild(container.firstChild);
-            }
         }
 
-        function clearLogs() {
-            document.getElementById('terminal-logs').innerHTML = '';
-        }
+        // --- INTERACTION & MODAL HANDLERS ---
+        function selectAgent(index) {
+            selectedAgentIndex = index;
+            const agent = AGENTS_DATA[index];
 
-        function startLiveLogStream() {
-            setInterval(() => {
-                const randomLog = LOG_TEMPLATES[Math.floor(Math.random() * LOG_TEMPLATES.length)];
-                addTerminalLog(randomLog.text);
-
-                // Randomly fluctuate agent CPU load
-                const targetAgent = AGENTS[randomLog.agentId];
-                targetAgent.cpu = Math.floor(30 + Math.random() * 55);
-
-                if (targetAgent.id === selectedAgentId) {
-                    document.getElementById('selected-cpu').innerText = `${targetAgent.cpu}%`;
-                    document.getElementById('selected-cpu-bar').style.width = `${targetAgent.cpu}%`;
+            // Highlight Cards UI
+            for (let i = 0; i < 8; i++) {
+                const card = document.getElementById(`card-${i}`);
+                if (i === index) {
+                    card.classList.add('cyber-panel-active');
+                } else {
+                    card.classList.remove('cyber-panel-active');
                 }
-            }, 2500);
-        }
-
-        // -------------------------------------------------------------
-        // 5. INSPECTION MODAL LOGIC
-        // -------------------------------------------------------------
-        function openAgentModal(id) {
-            const agent = AGENTS[id];
-            
-            document.getElementById('modal-avatar').innerText = agent.code;
-            document.getElementById('modal-avatar').style.backgroundColor = agent.color;
-            document.getElementById('modal-title').innerText = `${agent.code}. ${agent.name}`;
-            document.getElementById('modal-desc').innerText = agent.desc;
-            document.getElementById('modal-station-text').innerText = agent.currentStation;
-            document.getElementById('modal-tasks-count').innerText = agent.tasksCompleted.toLocaleString();
-            document.getElementById('modal-specs').innerText = `${agent.cpu}% / 256MB`;
-
-            // Populate specific logs
-            const logsContainer = document.getElementById('modal-agent-logs');
-            logsContainer.innerHTML = '';
-            for (let i = 0; i < 5; i++) {
-                const logDiv = document.createElement('div');
-                logDiv.className = 'text-gray-300';
-                logDiv.innerText = `[${new Date().toLocaleTimeString()}] ${agent.currentTask} (Seq #${Math.floor(Math.random() * 9000)})`;
-                logsContainer.appendChild(logDiv);
             }
 
+            // Populate Modal Info
+            document.getElementById('modal-icon').innerText = agent.icon;
+            document.getElementById('modal-title').innerText = agent.name;
+            document.getElementById('modal-role').innerText = agent.role;
+            document.getElementById('modal-desc').innerText = agent.desc;
+
+            // Show Modal
             document.getElementById('agent-modal').classList.remove('hidden');
-            playBeep(700, 'sine', 0.08);
+
+            // Log selection
+            addTerminalLog(`[COMMAND] ทำการเลือกเอเจนต์: ${agent.name} (${agent.role})`);
         }
 
-        function closeAgentModal() {
+        function closeModal() {
             document.getElementById('agent-modal').classList.add('hidden');
         }
 
         function triggerAgentAction() {
-            const agent = AGENTS[selectedAgentId];
-            addTerminalLog(`[MANUAL OVERRIDE] Triggered immediate sync for ${agent.name}`, 'text-yellow-400');
-            closeAgentModal();
-            playBeep(1200, 'square', 0.1);
+            if (selectedAgentIndex !== null) {
+                const agent = AGENTS_DATA[selectedAgentIndex];
+                addTerminalLog(`[EXECUTE] สั่งการด่วนไปยัง ${agent.name}: ประมวลผลงานปัจจุบันสำเร็จ`);
+                closeModal();
+            }
         }
 
-        // Clock display
-        function updateClock() {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        // Toggle CRT Filter
+        function toggleCRT() {
+            const crt = document.getElementById('crt-layer');
+            crt.classList.toggle('hidden');
         }
-        setInterval(updateClock, 1000);
 
-        // -------------------------------------------------------------
-        // 6. INITIALIZATION ON WINDOW LOAD
-        // -------------------------------------------------------------
-        window.onload = function () {
-            initTopCards();
-            selectAgent(0);
+        // --- REALTIME TERMINAL LOG SIMULATOR ---
+        function startLogStream() {
+            const sampleLogs = [
+                "[MQL5 GRID] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงสำเร็จ",
+                "[CAPTAIN] รับข้อมูลผู้ขอใบเสนอราคาประกันภัยรถยนต์ ปรับสถานะเข้า FairDee",
+                "[LOGISTICS] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab/Bolt สมบูรณ์",
+                "[SOLAR ENERGY] สลับโหมดแบตเตอรี่ LiFePO4 ทำงานร่วมกับ Deye Inverter (แบต 94%)",
+                "[TAKE PROFIT] บันทึกสถิติเดินออกกำลังกายประจำวัน 1 ชั่วโมง สำเร็จเรียบร้อย",
+                "[TIRAMISU BAKER] อัปเดตสต็อกทิรามิสุรสสตรอว์เบอร์รี & บลูเบอร์รี ในระบบ Wongnai",
+                "[TELEGRAM] ส่งรายงานสรุปพอร์ตการเทรดและสถานะเข้ากลุ่ม Telegram OpenChat",
+                "[SHEETS SCRIPT] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets อัตโนมัติ"
+            ];
 
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            setInterval(() => {
+                const randomLog = sampleLogs[Math.floor(Math.random() * sampleLogs.length)];
+                addTerminalLog(randomLog);
+            }, 3500);
+        }
 
-            // Create 8 Character Instances
-            characters = AGENTS.map(agent => new Character(agent));
+        function addTerminalLog(msg) {
+            const box = document.getElementById('terminal-box');
+            const now = new Date().toLocaleTimeString('th-TH');
+            const p = document.createElement('p');
+            p.innerHTML = `<span class="text-blue-400">[${now}]</span> <span class="text-gray-300">${msg}</span>`;
+            box.appendChild(p);
 
-            // Start Canvas Render Loop
-            animate();
+            // Auto scroll to bottom
+            box.scrollTop = box.scrollHeight;
 
-            // Start Terminal Stream
-            addTerminalLog("[SYSTEM INIT] AGENT HQ Command Center loaded successfully.", "text-green-400 font-bold");
-            addTerminalLog("[SYSTEM INIT] 8 AI Agents synchronized with main pipeline.", "text-blue-400");
-            startLiveLogStream();
-        };
+            // Keep max 30 log lines
+            if (box.children.length > 30) {
+                box.removeChild(box.firstChild);
+            }
+        }
     </script>
 </body>
 </html>
