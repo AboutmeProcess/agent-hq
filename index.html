@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGENT HQ - Ultimate Standalone Command Center</title>
+    <title>AGENT HQ - Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -47,64 +47,56 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code">PURE CANVAS 128-BIT EDITION</span>
+                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code">DASHBOARD</span>
                     </h1>
-                    <p class="text-xs text-gray-400">ศูนย์ปฏิบัติการเอเจนต์อัตโนมัติ (ระบบเสถียร 100% เรนเดอร์ตัวละคร Pixel Art ตรงตามเรฟเฟอเรนซ์)</p>
+                    <p class="text-xs text-gray-400">ศูนย์ปฏิบัติการและติดตามสถานะโปรเจกต์อัตโนมัติ</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-4 text-xs font-mono-code">
-                <div class="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-700">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="text-emerald-400 font-bold">สถานะระบบ: ทำงานปกติ (8/8 เอเจนต์)</span>
-                </div>
                 <button onclick="toggleCRT()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 border border-slate-600 transition flex items-center gap-2">
                     📺 <span>สลับโหมดจอ CRT</span>
                 </button>
             </div>
         </header>
 
-        <!-- TOP CARDS (8 AGENTS) -->
+        <!-- PROJECT CARDS -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-            <div onclick="selectAgent(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-blue-400 truncate">01. XAUUSD Grid</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">MT5 MQL5 Grid</div>
-                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">กำไร +14.2%</div>
+            <div onclick="selectProject(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-blue-400 truncate">Driver</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">ระบบขับรถรับจ้าง</div>
+                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">ซิงก์ข้อมูลแล้ว</div>
             </div>
-            <div onclick="selectAgent(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-cyan-400 truncate">02. Captain ประกันภัย</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">FairDee Leads</div>
+            <div onclick="selectProject(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-cyan-400 truncate">Captain ประกันภัย</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">นายหน้าประกันภัย</div>
                 <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18</div>
             </div>
-            <div onclick="selectAgent(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-indigo-400 truncate">03. Fleet Logistics</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">Grab / Bolt / Lala</div>
-                <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">รอบวิ่ง: 12 เที่ยว</div>
+            <div onclick="selectProject(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-indigo-400 truncate">Take Profit</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">ระบบเทรด XAUUSD</div>
+                <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">กำไร +14.2%</div>
             </div>
-            <div onclick="selectAgent(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-amber-400 truncate">04. Solar & Energy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">Deye / LiFePO4</div>
+            <div onclick="selectProject(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-amber-400 truncate">Solar & Energy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">ระบบโซล่าเซลล์</div>
                 <div class="text-[10px] text-amber-300 mt-1 font-mono-code">แบตเตอรี่: 94%</div>
             </div>
-            <div onclick="selectAgent(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-rose-400 truncate">05. Take Profit Fit</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">เดิน 1 ชม. + 10กก.</div>
+            <div onclick="selectProject(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-rose-400 truncate">Healthy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">สุขภาพและการออกกำลังกาย</div>
                 <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จ 3/3 วัน</div>
             </div>
-            <div onclick="selectAgent(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-orange-400 truncate">06. Tiramisu Baker</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">Wongnai Merchant</div>
-                <div class="text-[10px] text-orange-300 mt-1 font-mono-code">ออเดอร์: 15 กล่อง</div>
+            <div class="opacity-50 cursor-not-allowed hidden"></div>
+            <div onclick="selectProject(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-sky-400 truncate">Telegram</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">ระบบแจ้งเตือน</div>
+                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ออนไลน์</div>
             </div>
-            <div onclick="selectAgent(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-sky-400 truncate">07. Telegram Bot</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">Webhook Alert</div>
-                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ซิงก์เรียบร้อย</div>
-            </div>
-            <div onclick="selectAgent(7)" id="card-7" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-emerald-400 truncate">08. Google Sheets</span><span class="text-xs text-emerald-400 font-bold">✓ Sync</span></div>
-                <div class="text-[10px] text-gray-400 truncate">Apps Script Auto</div>
-                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">อัปเดตฐานข้อมูล</div>
+            <div onclick="selectProject(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
+                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-emerald-400 truncate">App Script Auto</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
+                <div class="text-[10px] text-gray-400 truncate">ระบบอัตโนมัติ</div>
+                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">พร้อมใช้งาน</div>
             </div>
         </div>
 
@@ -116,7 +108,7 @@
                 <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
                     <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2.5 shadow-lg pointer-events-auto">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        ผังจำลองศูนย์ปฏิบัติการเอเจนต์ (8 โต๊ะทำงานประจำตำแหน่ง + ตัวละคร 128-Bit)
+                        ผังจำลองสถานะโปรเจกต์อัตโนมัติ
                     </div>
                 </div>
 
@@ -127,7 +119,7 @@
                 <div class="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
                     <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-300 text-xs flex items-center gap-2 pointer-events-auto">
                         <span class="text-blue-400 font-bold">คำแนะนำ:</span>
-                        <span>🖱️ คลิกที่ตัวละครหรือโต๊ะทำงานเพื่อเปิดหน้าต่างตรวจสอบเอเจนต์</span>
+                        <span>🖱️ คลิกที่โมดูลหรือไอคอนเพื่อตรวจสอบรายละเอียด</span>
                     </div>
                 </div>
             </div>
@@ -136,7 +128,7 @@
             <div class="flex flex-col gap-4">
                 <div class="cyber-panel rounded-2xl p-4 flex-1 flex flex-col justify-between border border-slate-700">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
-                        <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>💻</span> บันทึกระบบสำนักงาน (Terminal Log)</h3>
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>💻</span> บันทึกระบบ (System Log)</h3>
                         <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE FEED</span>
                     </div>
                     <div id="terminal-box" class="flex-1 bg-[#020408] p-3.5 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[280px] space-y-2 text-gray-300"></div>
@@ -145,11 +137,11 @@
                 <div class="cyber-panel rounded-2xl p-4 border border-slate-700 space-y-3">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>⚡</span> ประสิทธิภาพการทำงาน</h3>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบเทรด XAUUSD & ป้องกันความเสี่ยง</span><span class="text-blue-400 font-bold font-mono-code">82%</span></div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">สถานะระบบเทรด XAUUSD</span><span class="text-blue-400 font-bold font-mono-code">82%</span></div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบพลังงานโซล่าเซลล์ & แบตเตอรี่</span><span class="text-amber-400 font-bold font-mono-code">94%</span></div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบสำรองพลังงานโซล่าเซลล์</span><span class="text-amber-400 font-bold font-mono-code">94%</span></div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-amber-500 h-1.5 rounded-full" style="width: 94%"></div></div>
                     </div>
                 </div>
@@ -159,18 +151,18 @@
         <!-- FOOTER -->
         <footer class="cyber-panel p-3.5 rounded-2xl flex justify-between items-center text-xs text-gray-500 border-t border-slate-800">
             <div>© 2026 <strong>Agent HQ Command Center</strong>.</div>
-            <div class="font-mono-code text-[11px] text-gray-400">โปรเจกต์ Take Profit | MQL5, Captain ประกันภัย, Fleet & Solar</div>
+            <div class="font-mono-code text-[11px] text-gray-400">Driver, Captain ประกันภัย, Take Profit, Solar, Healthy, Telegram, App Script</div>
         </footer>
     </div>
 
     <!-- INSPECTOR MODAL -->
-    <div id="agent-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div id="project-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="cyber-panel bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
             <div class="flex items-center gap-3.5 mb-4">
                 <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl shadow-lg">🤖</div>
                 <div>
-                    <h2 id="modal-title" class="text-xl font-bold text-white">ชื่อเอเจนต์</h2>
+                    <h2 id="modal-title" class="text-xl font-bold text-white">ชื่อโปรเจกต์</h2>
                     <p id="modal-role" class="text-xs text-blue-400 font-mono-code">บทบาทหน้าที่</p>
                 </div>
             </div>
@@ -182,25 +174,24 @@
             </div>
             <div class="flex justify-end gap-2.5">
                 <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
-                <button onclick="triggerAgentAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วน</button>
+                <button onclick="triggerProjectAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วน</button>
             </div>
         </div>
     </div>
 
     <!-- PURE CANVAS ENGINE -->
     <script>
-        const AGENTS_DATA = [
-            { id: 1, name: "01. XAUUSD Grid Bot", role: "เอเจนต์ MT5 MQL5 Grid Trading", desc: "รัน Grid Trading ทองคำ XAUUSD พร้อม Partially Hedging ปิดความเสี่ยงอัตโนมัติ", color: "#3b82f6", icon: "📈", type: "SUIT_MALE_LAPTOP" },
-            { id: 2, name: "02. Captain ประกันภัย", role: "เอเจนต์บริหารงานประกันภัย FairDee", desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานบริษัทประกันชั้นนำอัตโนมัติ", color: "#06b6d4", icon: "🛡️", type: "SUIT_FEMALE_CLIPBOARD" },
-            { id: 3, name: "03. Fleet Logistics", role: "เอเจนต์ติดตามงานขนส่ง Grab/Bolt/Lala", desc: "ติดตามสถานะงาน รวบรวมรายงานอินเซนทีฟและภาษีประจำเดือน", color: "#6366f1", icon: "🚚", type: "DELIVERY_MALE_BOX" },
-            { id: 4, name: "04. Solar & Energy", role: "เอเจนต์บริหารพลังงานโซล่าเซลล์", desc: "ตรวจเช็กแผง AIKO, อินเวอร์เตอร์ Deye และแบตเตอรี่ LiFePO4", color: "#f59e0b", icon: "⚡", type: "HOODIE_DEV_MONITOR" },
-            { id: 5, name: "05. Take Profit Fit", role: "เอเจนต์ติดตามสุขภาพและการออกกำลังกาย", desc: "บันทึกสถิติการเดินออกกำลังกายประจำวัน 1 ชม. และเวทดัมเบล 10 กก.", color: "#f43f5e", icon: "🏋️", type: "WOMAN_GLASSES_TOOLS" },
-            { id: 6, name: "06. Tiramisu Baker", role: "เอเจนต์จัดการร้านขนม Wongnai Merchant", desc: "จัดการรายการสินค้าขนมทิรามิสุโฮมเมดรสชาติต่างๆ ผ่านแอป", color: "#f97316", icon: "🍰", type: "PRESENTER_CHART" },
-            { id: 7, name: "07. Telegram Notifier", role: "เอเจนต์แจ้งเตือน Telegram Bot", desc: "ยิงการแจ้งเตือนสัญญาณเทรดและยอดขายเข้ากลุ่ม Telegram อัตโนมัติ", color: "#38bdf8", icon: "📲", type: "HEADSET_OPERATOR" },
-            { id: 8, name: "08. Google Sheets Script", role: "เอเจนต์ประมวลผลข้อมูล Apps Script", desc: "ซิงก์ข้อมูลสมาชิกระหว่าง Web Portal กับ Google Sheets อัตโนมัติ", color: "#10b981", icon: "📊", type: "WOMAN_TABLET" }
+        const PROJECTS_DATA = [
+            { id: 1, name: "Driver", role: "ระบบติดตามงานขับรถรับจ้าง", desc: "ติดตามและบันทึกข้อมูลรายได้ ค่าใช้จ่าย และอินเซนทีฟประจำวันจากทุกแพลตฟอร์มการขับขี่ พร้อมคำนวณกำไรสุทธิ", color: "#3b82f6", icon: "🚗", type: "DRIVER_MODULE" },
+            { id: 2, name: "Captain ประกันภัย", role: "ระบบบริหารงานประกันภัย (FairDee)", desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานกับบริษัทประกันภัย และติดตามสถานะเคสประกันภัยแบบอัตโนมัติ", color: "#06b6d4", icon: "🛡️", type: "INSURANCE_MODULE" },
+            { id: 3, name: "Take Profit", role: "ระบบเทรดอัลกอริทึม XAUUSD", desc: "รันกลยุทธ์ Grid Trading สำหรับคู่เงินทองคำ (XAUUSD) พร้อมฟังก์ชัน Partial Hedging ปิดความเสี่ยงอัตโนมัติ", color: "#6366f1", icon: "📈", type: "TRADING_MODULE" },
+            { id: 4, name: "Solar & Energy", role: "ระบบบริหารจัดการพลังงานโซล่าเซลล์", desc: "ตรวจเช็กและบริหารการทำงานของแผงโซล่าเซลล์ อินเวอร์เตอร์ และระบบแบตเตอรี่สำรองภายในบ้าน", color: "#f59e0b", icon: "⚡", type: "ENERGY_MODULE" },
+            { id: 5, name: "Healthy", role: "ระบบติดตามสุขภาพและการออกกำลังกาย", desc: "ลงบันทึกและติดตามสถิติการออกกำลังกายประวัน เช่น การเดิน และการยกเวทเทรนนิ่งเพื่อสุขภาพ", color: "#f43f5e", icon: "🏋️", type: "HEALTH_MODULE" },
+            { id: 6, name: "Telegram", role: "ระบบแจ้งเตือนอัตโนมัติ", desc: "ช่องทางหลักในการรับการแจ้งเตือนแบบเรียลไทม์เกี่ยวกับพอร์ตการเทรด สถานะพลังงาน และอัปเดตต่างๆ", color: "#38bdf8", icon: "📲", type: "NOTIFICATION_MODULE" },
+            { id: 7, name: "App Script Auto", role: "ระบบเขียนโค้ดและ Google App Script", desc: "เครื่องมือในการเขียนและรันสคริปต์อัตโนมัติ เพื่อเชื่อมโยงข้อมูลระหว่างระบบต่างๆ และ Google Sheets", color: "#10b981", icon: "⚙️", type: "AUTOMATION_MODULE" }
         ];
 
-        let selectedAgentIndex = null;
+        let selectedProjectIndex = null;
         let canvas, ctx;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -223,7 +214,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawOfficeBackground();
             drawDecorations();
-            draw8Workstations();
+            drawModules();
             requestAnimationFrame(renderLoop);
         }
 
@@ -244,7 +235,7 @@
             }
         }
 
-        // 2. สิ่งตกแต่งออฟฟิศ (ตู้เซิร์ฟเวอร์, บอร์ดวางแผน, ต้นไม้, ตู้กาแฟ)
+        // 2. สิ่งตกแต่งออฟฟิศ (ตู้เซิร์ฟเวอร์, บอร์ดวางแผน, ต้นไม้)
         function drawDecorations() {
             const cx = canvas.width / 2;
 
@@ -258,7 +249,7 @@
             ctx.fillStyle = "#38bdf8";
             ctx.font = "bold 11px Sukhumvit Set, Prompt";
             ctx.textAlign = "center";
-            ctx.fillText("📋 WORKFLOW & STRATEGY KANBAN BOARD", cx, 32);
+            ctx.fillText("📋 SYSTEM OPERATIONS & KANBAN BOARD", cx, 32);
 
             ctx.fillStyle = "#f59e0b"; ctx.fillRect(cx - 130, 24, 20, 18);
             ctx.fillStyle = "#10b981"; ctx.fillRect(cx - 100, 24, 20, 18);
@@ -274,146 +265,67 @@
             }
         }
 
-        // 3. วาด 8 โต๊ะทำงานและตัวละคร Pixel Art สไตล์ 128-Bit ตรงตามเรฟเฟอเรนซ์
-        function draw8Workstations() {
+        // 3. วาดโมดูลโปรเจกต์
+        function drawModules() {
             const cols = 4;
             const startX = 130;
             const startY = 120;
             const spacingX = (canvas.width - 220) / 3;
             const spacingY = 170;
 
-            AGENTS_DATA.forEach((agent, index) => {
+            PROJECTS_DATA.forEach((project, index) => {
                 const c = index % cols;
                 const r = Math.floor(index / cols);
                 const x = startX + (c * spacingX);
                 const y = startY + (r * spacingY);
 
-                agent.renderX = x;
-                agent.renderY = y;
+                project.renderX = x;
+                project.renderY = y;
 
-                const isSelected = selectedAgentIndex === index;
+                const isSelected = selectedProjectIndex === index;
 
-                // วาดโต๊ะทำงานและจอคอมพิวเตอร์ประจำตำแหน่ง
-                drawDeskAndMonitors(x, y, agent, isSelected);
+                // วาดเงา
+                ctx.fillStyle = "rgba(0,0,0,0.4)";
+                ctx.fillRect(x - 45, y - 5, 90, 40);
 
-                // วาดตัวละคร Pixel Art 128-bit ตรงตามประเภทและบทบาท (อิงตามรูป Reference)
-                drawHighDetailPixelCharacter(x, y + 10, agent.type, agent.color);
+                // ขอบเรืองแสงเมื่อเลือก
+                if (isSelected) {
+                    ctx.strokeStyle = "#3b82f6";
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeRect(x - 48, y - 8, 96, 46);
+                }
 
-                // ป้ายชื่อเอเจนต์ด้านบน
+                // ฐานโมดูล
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(x - 42, y - 8, 84, 38);
+                ctx.strokeStyle = project.color;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(x - 42, y - 8, 84, 38);
+
+                // จอโฮโลแกรม/ดีเทลจำลองในโมดูล
+                ctx.fillStyle = "#0b101d";
+                ctx.fillRect(x - 36, y - 2, 72, 24);
+                ctx.strokeStyle = "#334155";
+                ctx.strokeRect(x - 36, y - 2, 72, 24);
+
+                // ไอคอนประจำโมดูล
+                ctx.fillStyle = project.color;
+                ctx.font = "24px Sukhumvit Set, Prompt";
+                ctx.textAlign = "center";
+                ctx.fillText(project.icon, x, y - 10);
+
+                // ป้ายชื่อด้านบน
                 ctx.fillStyle = "rgba(10, 15, 28, 0.95)";
-                ctx.fillRect(x - 50, y - 48, 100, 18);
-                ctx.strokeStyle = agent.color;
+                ctx.fillRect(x - 55, y - 48, 110, 18);
+                ctx.strokeStyle = project.color;
                 ctx.lineWidth = 1;
-                ctx.strokeRect(x - 50, y - 48, 100, 18);
+                ctx.strokeRect(x - 55, y - 48, 110, 18);
 
                 ctx.fillStyle = "#ffffff";
                 ctx.font = "bold 10px Sukhumvit Set, Prompt";
                 ctx.textAlign = "center";
-                ctx.fillText(`${agent.icon} ${agent.name.split('.')[1]}`, x, y - 35);
+                ctx.fillText(project.name, x, y - 35);
             });
-        }
-
-        // วาดโต๊ะทำงานพร้อมมอนิเตอร์
-        function drawDeskAndMonitors(x, y, agent, isSelected) {
-            // Shadow
-            ctx.fillStyle = "rgba(0,0,0,0.4)";
-            ctx.fillRect(x - 45, y - 5, 90, 40);
-
-            // Highlighting Ring
-            if (isSelected) {
-                ctx.strokeStyle = "#3b82f6";
-                ctx.lineWidth = 2.5;
-                ctx.strokeRect(x - 48, y - 8, 96, 46);
-            }
-
-            // Desk Top
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(x - 42, y - 8, 84, 38);
-            ctx.strokeStyle = agent.color;
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x - 42, y - 8, 84, 38);
-
-            // Dual Monitors
-            ctx.fillStyle = "#0b101d";
-            ctx.fillRect(x - 36, y - 28, 32, 18);
-            ctx.fillRect(x + 4, y - 28, 32, 18);
-            ctx.strokeStyle = "#334155";
-            ctx.strokeRect(x - 36, y - 28, 32, 18);
-            ctx.strokeRect(x + 4, y - 28, 32, 18);
-
-            // Screen Glow
-            ctx.fillStyle = agent.color;
-            ctx.fillRect(x - 32, y - 24, 20, 2);
-            ctx.fillRect(x - 32, y - 20, 24, 2);
-            ctx.fillRect(x + 8, y - 24, 22, 2);
-        }
-
-        // เรนเดอร์ตัวละคร Pixel Art สไตล์ 128-Bit ถอดแบบละเอียดตามรูป Reference[cite: 2]
-        function drawHighDetailPixelCharacter(x, y, type, accentColor) {
-            ctx.save();
-
-            // เก้าอี้ทำงาน
-            ctx.fillStyle = "#0f172a";
-            ctx.fillRect(x - 12, y - 6, 24, 16);
-
-            // ลายเส้นตัวละครหลัก
-            if (type === "SUIT_MALE_LAPTOP") {
-                // หนุ่มใส่สูทสีกรมถือแล็ปท็อป[cite: 2]
-                ctx.fillStyle = "#1e293b"; ctx.fillRect(x - 8, y - 8, 16, 16); // Suit jacket
-                ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 3, y - 8, 6, 8);  // White shirt
-                ctx.fillStyle = "#ef4444"; ctx.fillRect(x - 1, y - 6, 2, 6);  // Red tie
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11); // Skin
-                ctx.fillStyle = "#475569"; ctx.fillRect(x - 7, y - 23, 14, 5); // Hair
-                ctx.fillStyle = "#cbd5e1"; ctx.fillRect(x + 2, y - 2, 8, 6);  // Laptop[cite: 2]
-            } 
-            else if (type === "SUIT_FEMALE_CLIPBOARD") {
-                // สาวใส่สูทน้ำเงินถือแฟ้มเอกสาร[cite: 2]
-                ctx.fillStyle = "#0284c7"; ctx.fillRect(x - 8, y - 8, 16, 16); // Blazer
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11); // Skin
-                ctx.fillStyle = "#78350f"; ctx.fillRect(x - 8, y - 23, 16, 8); // Long Hair[cite: 2]
-                ctx.fillStyle = "#92400e"; ctx.fillRect(x + 2, y - 4, 6, 9);  // Clipboard[cite: 2]
-            }
-            else if (type === "DELIVERY_MALE_BOX") {
-                // พนักงานส่งพัสดุใส่หมวกถือกล่อง[cite: 2]
-                ctx.fillStyle = "#2563eb"; ctx.fillRect(x - 8, y - 8, 16, 16); // Blue Shirt
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11); // Skin
-                ctx.fillStyle = "#1d4ed8"; ctx.fillRect(x - 8, y - 23, 16, 5); // Cap[cite: 2]
-                ctx.fillStyle = "#d97706"; ctx.fillRect(x + 2, y - 4, 8, 8);  // Parcel Box[cite: 2]
-            }
-            else if (type === "HOODIE_DEV_MONITOR") {
-                // หนุ่มเทรดเดอร์/นักพัฒนาใส่เสื้อฮู้ดสีฟ้า[cite: 2]
-                ctx.fillStyle = "#0284c7"; ctx.fillRect(x - 9, y - 8, 18, 16); // Hoodie[cite: 2]
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11); // Skin
-                ctx.fillStyle = "#1e293b"; ctx.fillRect(x - 7, y - 23, 14, 6); // Dark Hair
-            }
-            else if (type === "WOMAN_GLASSES_TOOLS") {
-                // หญิงสาวใส่แว่นตา เสื้อเขียว[cite: 2]
-                ctx.fillStyle = "#16a34a"; ctx.fillRect(x - 8, y - 8, 16, 16); // Green Shirt[cite: 2]
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11); // Skin
-                ctx.fillStyle = "#78350f"; ctx.fillRect(x - 7, y - 23, 14, 6); // Hair
-                ctx.fillStyle = "#38bdf8"; ctx.fillRect(x - 5, y - 16, 10, 3); // Glasses[cite: 2]
-            }
-            else if (type === "PRESENTER_CHART") {
-                // นักบริหาร/ผู้นำเสนอใส่สูททักทาย[cite: 2]
-                ctx.fillStyle = "#334155"; ctx.fillRect(x - 8, y - 8, 16, 16);
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11);
-                ctx.fillStyle = "#0f172a"; ctx.fillRect(x - 7, y - 23, 14, 5);
-            }
-            else if (type === "HEADSET_OPERATOR") {
-                // เจ้าหน้าที่คอลเซ็นเตอร์สวมหูฟัง Headset[cite: 2]
-                ctx.fillStyle = "#ea580c"; ctx.fillRect(x - 8, y - 8, 16, 16); // Orange Shirt[cite: 2]
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11);
-                ctx.fillStyle = "#475569"; ctx.fillRect(x - 8, y - 22, 16, 4); // Headset Band[cite: 2]
-                ctx.fillStyle = "#38bdf8"; ctx.fillRect(x + 4, y - 16, 3, 3);  // Mic
-            }
-            else {
-                // หญิงสาวถือแท็บเล็ต/กล้อง[cite: 2]
-                ctx.fillStyle = "#d97706"; ctx.fillRect(x - 8, y - 8, 16, 16);
-                ctx.fillStyle = "#fcd34d"; ctx.fillRect(x - 6, y - 20, 12, 11);
-                ctx.fillStyle = "#1e293b"; ctx.fillRect(x - 7, y - 23, 14, 6);
-            }
-
-            ctx.restore();
         }
 
         function handleCanvasClick(e) {
@@ -421,38 +333,40 @@
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            AGENTS_DATA.forEach((agent, index) => {
-                const dist = Math.hypot(clickX - agent.renderX, clickY - agent.renderY);
+            PROJECTS_DATA.forEach((project, index) => {
+                const dist = Math.hypot(clickX - project.renderX, clickY - project.renderY);
                 if (dist < 40) {
-                    selectAgent(index);
+                    selectProject(index);
                 }
             });
         }
 
-        function selectAgent(index) {
-            selectedAgentIndex = index;
-            const agent = AGENTS_DATA[index];
+        function selectProject(index) {
+            selectedProjectIndex = index;
+            const project = PROJECTS_DATA[index];
 
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < PROJECTS_DATA.length; i++) {
                 const card = document.getElementById(`card-${i}`);
-                if (i === index) card.classList.add('cyber-panel-active');
-                else card.classList.remove('cyber-panel-active');
+                if (card) {
+                    if (i === index) card.classList.add('cyber-panel-active');
+                    else card.classList.remove('cyber-panel-active');
+                }
             }
 
-            document.getElementById('modal-icon').innerText = agent.icon;
-            document.getElementById('modal-title').innerText = agent.name;
-            document.getElementById('modal-role').innerText = agent.role;
-            document.getElementById('modal-desc').innerText = agent.desc;
-            document.getElementById('agent-modal').classList.remove('hidden');
+            document.getElementById('modal-icon').innerText = project.icon;
+            document.getElementById('modal-title').innerText = project.name;
+            document.getElementById('modal-role').innerText = project.role;
+            document.getElementById('modal-desc').innerText = project.desc;
+            document.getElementById('project-modal').classList.remove('hidden');
 
-            addTerminalLog(`[COMMAND] ตรวจสอบเอเจนต์ 128-Bit: ${agent.name} (${agent.role})`);
+            addTerminalLog(`[COMMAND] ตรวจสอบโมดูลระบบ: ${project.name}`);
         }
 
-        function closeModal() { document.getElementById('agent-modal').classList.add('hidden'); }
-        function triggerAgentAction() {
-            if (selectedAgentIndex !== null) {
-                const agent = AGENTS_DATA[selectedAgentIndex];
-                addTerminalLog(`[EXECUTE] สั่งการด่วนไปยัง ${agent.name}: สำเร็จ`);
+        function closeModal() { document.getElementById('project-modal').classList.add('hidden'); }
+        function triggerProjectAction() {
+            if (selectedProjectIndex !== null) {
+                const project = PROJECTS_DATA[selectedProjectIndex];
+                addTerminalLog(`[EXECUTE] สั่งการด่วนไปยัง ${project.name}: สำเร็จ`);
                 closeModal();
             }
         }
@@ -460,14 +374,13 @@
 
         function startLogStream() {
             const logs = [
-                "[MQL5 GRID] XAUUSD Partial Hedging จับคู่ออเดอร์ Buy/Sell ปิดความเสี่ยงรอบล่าสุดสำเร็จ",
-                "[CAPTAIN] รับข้อมูลลูกค้าและใบเสนอราคาประกันภัยรถยนต์ อัปเดตเข้าระบบ FairDee เรียบร้อย",
-                "[LOGISTICS] ดึงรายงานอินเซนทีฟประจำสัปดาห์ Grab / Bolt / Lalamove สมบูรณ์",
-                "[SOLAR] ตรวจสอบสถานะแบตเตอรี่ LiFePO4 และอินเวอร์เตอร์ Deye (แบตเตอรี่ 94%)",
-                "[TAKE PROFIT] บันทึกสถิติเดินออกกำลังกายประจำวัน 1 ชั่วโมง และเวทดัมเบล 10 กก. สำเร็จ",
-                "[TIRAMISU] อัปเดตสต็อกขนมทิรามิสุโฮมเมดรสชาติต่างๆ บนแอป Wongnai Merchant",
-                "[TELEGRAM] ส่งรายงานสรุปพอร์ตการเทรดและสถานะพลังงานเข้ากลุ่ม Telegram",
-                "[SHEETS] Apps Script บันทึก WebRequest Log เข้าระบบ Google Sheets อัตโนมัติ"
+                "[DRIVER] ซิงก์ข้อมูลรายได้และค่าใช้จ่ายประจำวันเข้า Google Sheets สำเร็จ",
+                "[CAPTAIN] รับข้อมูลลูกค้าและออกใบเสนอราคาประกันภัยเคสใหม่เรียบร้อย",
+                "[TAKE PROFIT] XAUUSD Partial Hedging ทำงานตามกลยุทธ์ ปิดความเสี่ยงรอบล่าสุดสำเร็จ",
+                "[ENERGY] สถานะแบตเตอรี่สำรอง LiFePO4 ทำงานปกติ (ความจุ 94%)",
+                "[HEALTH] บันทึกสถิติการเดินออกกำลังกายประจำวัน 1 ชั่วโมง สำเร็จ",
+                "[NOTIFICATION] ยิงสรุปประจำวันเข้ากลุ่ม Telegram เรียบร้อย",
+                "[AUTOMATION] Google Apps Script ทำการสำรองข้อมูลฐานข้อมูลสมบูรณ์"
             ];
             setInterval(() => {
                 const l = logs[Math.floor(Math.random() * logs.length)];
