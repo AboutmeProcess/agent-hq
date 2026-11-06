@@ -3,92 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AGENT HQ - Adaptive Layout</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+Thai:wght@400;600&display=swap">
+<title>AGENT HQ - Executive Command Center</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Noto+Sans+Thai:wght@300;400;600&display=swap">
 <style>
 :root {
   color-scheme: dark;
   box-sizing: border-box;
-  --bg: #0a0f1f;
-  --ink: #e8eefc;
-  --mut: #8b97b8;
-  --panel: #121a33;
-  --line: #2a3560;
+  --bg: #060913;
+  --panel-bg: rgba(15, 23, 42, 0.75);
+  --panel-border: rgba(56, 189, 248, 0.2);
+  --ink: #f1f5f9;
+  --mut: #94a3b8;
+  --accent: #38bdf8;
 }
 *, *::before, *::after { box-sizing: inherit; }
 
 html, body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden; /* ป้องกันการสกอร์ลหลักหากพื้นที่พอ */
-  background: radial-gradient(ellipse at 50% 0, #16224a, var(--bg) 70%);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 0%, #0f172a 0%, var(--bg) 80%);
   color: var(--ink);
   font-family: "Noto Sans Thai", system-ui, sans-serif;
 }
 
-/* APP SHELL: ล็อกความสูงเต็มหน้าจอ */
-.app-container {
+/* APP CONTAINER */
+.app-shell {
   display: flex;
   flex-direction: column;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
-  padding: 12px 16px;
-  gap: 10px;
-  max-width: 1280px;
+  padding: 12px 20px;
+  gap: 12px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
+/* HEADER */
 header {
   flex: 0 0 auto;
-  text-align: center;
-}
-h1 {
-  font-family: "Press Start 2P", monospace;
-  font-size: clamp(16px, 3vw, 28px);
-  margin: 0;
-  color: #cfeaff;
-  text-shadow: 2px 2px 0 #1f4fa8;
-}
-header p {
-  color: var(--mut);
-  margin: 4px 0 0;
-  font-size: 12px;
-}
-
-/* MAIN CONTENT AREA */
-main {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 0; /* สำคัญ: เพื่อให้ Flex child หดตัวตามขนาดหน้าจอได้ */
-}
-
-/* STAGE: ส่วนแสดงผลรูปห้องสี่เหลี่ยมผืนผ้า (อัตราส่วน 16:9) */
-.stage-wrapper {
-  flex: 1 1 auto;
-  position: relative;
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+  margin: 0;
+}
+.sys-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+.sys-status-dot {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #4ade80;
+}
+
+/* MAIN DASHBOARD (SPLIT LAYOUT) */
+main {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px; /* แยกฝั่งฉากควบคุมกับแผงสถานะ */
+  gap: 16px;
   min-height: 0;
 }
 
-.room-container {
+/* LEFT COLUMN: CONTROL ROOM STAGE */
+.stage-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  min-height: 0;
+}
+
+.room-aspect-box {
   position: relative;
   width: 100%;
   height: 100%;
   max-width: 100%;
   max-height: 100%;
   aspect-ratio: 16 / 9; /* ล็อกสัดส่วนสี่เหลี่ยมผืนผ้า */
-  border: 2px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
-  background: #131b2e;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
 }
 
 .room-bg {
@@ -97,72 +127,6 @@ main {
   object-fit: cover;
   display: block;
 }
-
-/* DASHBOARD PANELS (ส่วนล่าง) */
-.dashboard-panels {
-  flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 10px;
-}
-
-.pn {
-  background: #0c1329;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 10px 12px;
-  font-size: 12px;
-}
-.pn > b {
-  font: 400 9px "Press Start 2P", monospace;
-  color: #7fd4ff;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.mrow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-.mrow button {
-  all: unset;
-  cursor: pointer;
-  background: #111a36;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--k);
-  border-radius: 4px;
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 11px;
-  color: var(--mut);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mrow button:hover { background: #18244a; }
-.mrow strong { color: var(--ink); font-size: 12px; }
-
-/* LOGS */
-.log-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-height: 64px;
-  overflow-y: auto;
-}
-.log-list li {
-  display: flex;
-  gap: 8px;
-  color: #c5cfe8;
-  font-size: 11px;
-}
-.log-list time { color: var(--mut); }
 
 /* HOTSPOTS */
 .hotspot {
@@ -175,19 +139,24 @@ main {
   z-index: 3;
 }
 .hotspot-ring {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--c, #4fd1ff);
-  background: rgba(10, 15, 31, 0.7);
-  box-shadow: 0 0 10px var(--c, #4fd1ff);
+  border: 2px solid var(--c, var(--accent));
+  background: rgba(6, 9, 19, 0.7);
+  box-shadow: 0 0 12px var(--c, var(--accent));
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.25s ease;
+}
+.hotspot:hover .hotspot-ring {
+  transform: scale(1.25);
+  background: var(--c, var(--accent));
 }
 .hotspot-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #fff;
 }
@@ -196,98 +165,211 @@ main {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 2px;
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
+  margin-top: 4px;
+  font-family: 'Orbitron', "Noto Sans Thai", sans-serif;
+  font-size: 9px;
+  font-weight: 600;
   color: #fff;
-  background: rgba(10, 15, 31, 0.85);
-  padding: 2px 5px;
-  border-radius: 3px;
-  border: 1px solid var(--c, #4fd1ff);
+  background: rgba(6, 9, 19, 0.85);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--c, var(--accent));
   white-space: nowrap;
   pointer-events: none;
 }
 
-/* RESPONSIVE FOR SMALL SCREENS */
-@media (max-width: 768px) {
-  html, body { overflow: auto; } /* ยอมให้สกอร์ลได้กรณีหน้าจอเล็กมากจริงๆ */
-  .app-container { height: auto; min-height: 100vh; }
-  .dashboard-panels { grid-template-columns: 1fr; }
-  .mrow { grid-template-columns: repeat(2, 1fr); }
+/* RIGHT COLUMN: SIDEBAR PANELS */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
 }
 
-/* MODAL */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.panel-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* AGENT LIST GRID */
+.agents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.agent-card-btn {
+  all: unset;
+  cursor: pointer;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 3px solid var(--k, var(--accent));
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.2s ease;
+}
+.agent-card-btn:hover {
+  background: rgba(51, 65, 85, 0.6);
+  border-color: var(--k, var(--accent));
+  transform: translateY(-1px);
+}
+.agent-name {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink);
+}
+.agent-status {
+  font-size: 10px;
+  color: var(--mut);
+}
+
+/* LOG PANEL */
+.log-panel {
+  flex: 0 0 160px;
+  display: flex;
+  flex-direction: column;
+}
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+.log-item {
+  font-size: 11px;
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.05);
+}
+.log-time { color: var(--mut); font-family: monospace; }
+
+/* MODAL DIALOG */
 #m {
   position: fixed;
   inset: 0;
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(3,6,16,.75);
-  backdrop-filter: blur(4px);
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 100;
   padding: 16px;
-  z-index: 10;
 }
 #m.on { display: flex; }
-.card {
-  background: var(--panel);
-  border: 2px solid var(--c,#4fd1ff);
-  border-radius: 6px;
-  max-width: 400px;
+.modal-card {
+  background: #0f172a;
+  border: 1px solid var(--c, var(--accent));
+  box-shadow: 0 0 24px rgba(0,0,0,0.8), 0 0 12px var(--c, var(--accent));
+  border-radius: 12px;
+  max-width: 420px;
   width: 100%;
-  padding: 18px;
+  padding: 20px;
 }
-.card h2 { font-family: "Press Start 2P", monospace; font-size: 13px; color: var(--c); margin: 0 0 6px; }
-.card p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; }
-button.close-btn {
-  background: var(--c, #4fd1ff);
-  color: #06101f;
-  border: 0;
-  border-radius: 3px;
-  padding: 8px 16px;
+.modal-card h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  color: var(--c, var(--accent));
+  margin: 0 0 4px;
+}
+.modal-role {
+  color: var(--mut);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.modal-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+.close-btn {
+  background: var(--c, var(--accent));
+  color: #020617;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
   font-weight: 600;
+  font-size: 12px;
   cursor: pointer;
+  float: right;
+}
+
+/* RESPONSIVE LAYOUT (MOBILE) */
+@media (max-width: 1024px) {
+  html, body { overflow: auto; }
+  .app-shell { height: auto; min-height: 100vh; }
+  main { grid-template-columns: 1fr; }
+  .stage-container { height: 60vh; }
 }
 </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="app-shell">
   <header>
-    <h1>AGENT HQ</h1>
-    <p>ศูนย์ปฏิบัติการเอเจนต์อัจฉริยะ</p>
+    <div class="brand">
+      <h1 class="brand-title">AGENT HQ</h1>
+    </div>
+    <div class="sys-status">
+      <div class="sys-status-dot"></div>
+      SYSTEM ONLINE
+    </div>
   </header>
 
   <main>
-    <!-- ส่วนรูปภาพสี่เหลี่ยมผืนผ้า Fit หน้าจอพอดี -->
-    <div class="stage-wrapper">
-      <div class="room-container">
+    <!-- LEFT: 16:9 CONTROL ROOM STAGE -->
+    <div class="stage-container">
+      <div class="room-aspect-box">
         <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
         <div id="hotspots-layer"></div>
       </div>
     </div>
 
-    <!-- แผงข้อมูลส่วนล่าง -->
-    <div class="dashboard-panels">
-      <div class="pn">
-        <b>ACTIVE AGENTS</b>
-        <div class="mrow" id="modules-list"></div>
+    <!-- RIGHT: AGENT MODULES & LOGS -->
+    <div class="sidebar">
+      <div class="panel" style="flex: 1 1 auto; display: flex; flex-direction: column;">
+        <div class="panel-title">ACTIVE MODULES (8)</div>
+        <div class="agents-grid" id="modules-list"></div>
       </div>
-      <div class="pn">
-        <b>SYSTEM LOG</b>
+
+      <div class="panel log-panel">
+        <div class="panel-title">LIVE LOGS</div>
         <ul class="log-list" id="log"></ul>
       </div>
     </div>
   </main>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL CARD -->
 <div id="m" onclick="if(event.target.id==='m') closeCard()">
-  <div class="card" id="card">
+  <div class="modal-card" id="card">
     <h2 id="mt"></h2>
-    <p id="mr" style="color:var(--mut); font-size:12px;"></p>
-    <p id="md"></p>
-    <button class="close-btn" onclick="closeCard()">ปิดหน้าต่าง</button>
+    <div class="modal-role" id="mr"></div>
+    <div class="modal-desc" id="md"></div>
+    <button class="close-btn" onclick="closeCard()">CLOSE</button>
   </div>
 </div>
 
@@ -305,8 +387,8 @@ const AGENTS = [
 
 const LOGS = [
   ['10:24', '#5ee08a', 'Driver ซิงก์ข้อมูลเส้นทางสำเร็จ'],
-  ['10:21', '#4fd1ff', 'Telegram ส่งการแจ้งเตือนจาก EA แล้ว'],
-  ['10:15', '#ffb347', 'Take Profit ตรวจสถานะ Grid XAUUSD'],
+  ['10:21', '#4fd1ff', 'Telegram ส่งการแจ้งเตือนจาก EA'],
+  ['10:15', '#ffb347', 'Take Profit ตรวจ Grid XAUUSD'],
   ['10:02', '#6ea8ff', 'Captain อัปเดตเคสวันนี้']
 ];
 
@@ -316,7 +398,7 @@ function initUI() {
   const logList = document.getElementById('log');
 
   AGENTS.forEach(agent => {
-    // Hotspot ปุ่มกดบนรูปภาพ
+    // Hotspot บนรูปภาพ
     const btn = document.createElement('button');
     btn.className = 'hotspot';
     btn.style.left = agent.x + '%';
@@ -329,16 +411,24 @@ function initUI() {
     `;
     layer.appendChild(btn);
 
-    // ปุ่ม Module ในแผงล่าง
+    // การ์ดใน Sidebar
     const modBtn = document.createElement('button');
+    modBtn.className = 'agent-card-btn';
     modBtn.style.setProperty('--k', agent.c);
     modBtn.onclick = () => openCard(agent.id);
-    modBtn.innerHTML = `<strong>${agent.n}</strong><span>${agent.st}</span>`;
+    modBtn.innerHTML = `
+      <div class="agent-name">${agent.n}</div>
+      <div class="agent-status">${agent.st}</div>
+    `;
     modulesList.appendChild(modBtn);
   });
 
+  // Logs
   logList.innerHTML = LOGS.map(([time, color, msg]) => `
-    <li><time>${time}</time><span style="color:${color}">${msg}</span></li>
+    <li class="log-item">
+      <span class="log-time">${time}</span>
+      <span style="color:${color}">${msg}</span>
+    </li>
   `).join('');
 }
 
