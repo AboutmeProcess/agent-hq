@@ -53,11 +53,27 @@ main{max-width:1000px;margin:0 auto;padding:8px 12px 28px}
   display: block;
 }
 
+/* CHARACTER SPRITE OVERLAY ON MAP */
+.agent-character {
+  position: absolute;
+  transform: translate(-50%, -85%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.agent-character img {
+  height: 72px; /* ขนาดของสไปรท์ตัวละคร */
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+}
+
+/* HOTSPOT BUTTONS */
 .hotspot {
   position: absolute;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  z-index: 2;
+  z-index: 3;
   border: none;
   background: transparent;
   padding: 0;
@@ -198,8 +214,8 @@ button.close-btn{
 
 <main>
   <div class="room-container" id="room">
-    <!-- ดึงไฟล์ room.jpg มาแสดงเป็นฉากหลัง -->
     <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
+    <div id="characters-layer"></div>
     <div id="hotspots-layer"></div>
   </div>
 
@@ -231,8 +247,11 @@ button.close-btn{
 </div>
 
 <script>
+// รูปตัวละคร Driver นั่งพิมพ์งาน (Data URI แบบไม่มีพื้นหลัง)
+const DRIVER_SITTING_SPRITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAd8SURBVHhe7Zp5UFRXFcc/S3dDs4i4I1oRN1SNGyA0Rse44L5FTUwyiUnM5I9kMpnJpGrGqMkkpib/mEzS45pkkgnRmMSo4yA4mhhFlIigRdw33BfEBRUEA4J0N33fve81s2mgh263ee36fVW/fve+e343nPPuuef1A55o2/b4xNq2fXpCbc+mE03pM0p2x/b0XUnqjpxO0rb05AmlvX1v6/Lptp19LUnblS0d3Slt1fT61qS093S0p3P3m/r8z39L/C3f+T1xT845v/P96pI1aXNfD4s+9sCIna91+43p6uuv174542j1L375xYlGAtf992/3T4wY943/a5/dG/vA9SOH/PrmA4E39m+4c9fS3z4z8561s39vLHDlUfB1/9/fO/f4mH/6m299/fX49k9+2pGk9X3N+Yf892XvT3x50oO3xU3p1314tXWb425Yuf/rS9e+e3xQv0H27vB+eL39/v6v9//E5o/2r1+1+t8v3Tf5D0X2/Xj/xI6/e+rmoU3N/1j4Ssc/m/vE4A/mPrVjR8q/v+xI3p3a0vfLp3/2fU/Adf8S/j3/H8o9i0eNnPvV93a2/XfPq/1q+2xYc8i+3XmPfv2N8d3vvvb84x0JvO6P8O/5f385m97sOfC3z0148E+X2L/IuK3v/rYt9fLhv+z3o9F339i3/cE35/3D5r8x8v5u5846c9o760p2m33I/y7v/d25e+/f/37f3kP/yK5p9x079trm3f3I/i/1sA3f3LdrS2pP0lP3xvfdt9+A34+aNOnOqCefmfTgy2+tf6z/j0Y99A8m34a9x/b8bOqXm9c1vRbxI/u6/7A5/fud3eY0x2y/eXvSltQ241v2//3Yrm0Xjv77iSc3x/X+Xp9R/f3j/9L30N23v/m/3O3vP/nU3/1k8L2P/fD2iO//bvrg1Ndfnbd93fL9b6XvTLlYd3r/v2p2Jn/k3/cPfG/13m37E67m7b/s+Gv3f+ve4I1Rwx/stfveO8N2znvg4cWP9Gg/d/4tP26Xv/5mS1p9T21X910a5LzB7s1949S33324xR8z1m/6f3v2X8g//6613X12vff/I2I/3532fS35/t8/69Gj3qM0+mE/sve3J7fvevv5d6Z0NjaG3z64z9Gefs3A/v0N8p/8f8y02v32/W5pS/f4/wS9m9E763vGfF2qvb6iOfmH1s3N5/X3U7G3d6O/6f2eCdrf53fE1uSdf3k2Tms7fFppXy22/f8fAez5P8uAAtX40f0G2s+3O92383/9U/f6+7v/8vE/xrzXkX9/677Gisq/9+/vPrt5sP2s64X7IqbfdeevZ/3y6d/9uA6I3eNod/j8n6mH/eI3j2f0D4f+/d2PbfjUoG4/HnjHlAdef3fX0yX/fnP99v9vPbb1D11mffn7O3q1H/5Qz/eHPhz94M+mf+W/29+xUe3p73mS32+s7y1u6+v+/w4A+3d29xT/4T3+9e933ffY43c/tfu3v73A+tvef37/s75f3Dlh/H1Rwx/sO394bNxfz+59+/N3xH/W1+4fX/aXm/v+9/jTf9z+f6v90O39+/s62tr62A9s//GjI2/v29//u5//x0D8j33LrtTfXN3/V/uMvXfk4/EfvX54V1x3x2f9+g2/r19sX/f2J33L0X3b1+zeenD7b3sM6XvP3y9tP3T23fP2L8+424k/n3D//S9/d29L57l/Xp9+eMfp5mOf23+y4vSnbWdOPmB/yJ+29N37U+O54p5f3B3R/f0S//0S/339m3f/c2S3P1e73998y+5tr5x19H4S+7s7d6e+03P235eXv4s+p5S3z2s37/X2/9I/+E73xT9P/3H/I2O63p5639f7v39w9wunfnb0lA7Ue9+Svt+/mE0/fO34m3sbfO10//35iO++fn2fXfev+w/tq30pU58b3Ofe3ve03d4zL3T54L87e3/9/m1H1v37+S2H/+/o50+mX6s1d/uS4f54I3/P/9sByK+0/x8/42bOefE1v3eG3/iTr21p3dr+tT/c2vP7Hw3e/tT8/yv9R76y4Sfj4np18f/f3t72tX3xT/3fAUB+4eXo0Xf33m13f2D3vv1H77421H7o+f84APk/9p019s9938eAAn/83/8fAAn735I7a637/sA39v91ALa/M/6Xff7uAf3/MAB7v//25B81X4f7f6v79//o/w/M8S9A1zX8UAAAAABJRU5ErkJggg==";
+
 const AGENTS = [
-  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand และข้อมูลงานขับรถรับจ้าง', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68},
+  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand และข้อมูลงานขับรถรับจ้าง', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68, sprite: DRIVER_SITTING_SPRITE},
   {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'แบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ทำใบเสนอราคา และประสานงานนายหน้า', st:'เคสวันนี้: 18', c:'#6ea8ff', x:32, y:76},
   {id:'profit',  n:'Take Profit', role:'Forex Trading Agent', d:'ดูแล EA บน MT5 กลยุทธ์ Grid Trading คู่เงิน XAUUSD และระบบ Partial Hedging', st:'EA ทำงานอยู่', c:'#ffb347', x:68, y:78},
   {id:'solar',   n:'Solar', role:'Smart Home & Solar Agent', d:'ดูแลระบบอัตโนมัติ Apple HomeKit, โซลาร์รูฟท็อป, อินเวอร์เตอร์ และพลังงาน', st:'แบตเตอรี่: 94%', c:'#ffe066', x:85, y:52},
@@ -250,15 +269,27 @@ const LOGS = [
 ];
 
 const AVATAR_IMG = {
-  "driver": "driver_avatar.png" // สามารถเปลี่ยนเป็น path รูปตัวละครที่ต้องการแสดงใน Modal ได้ครับ
+  "driver": DRIVER_SITTING_SPRITE
 };
 
 function initUI() {
+  const charsLayer = document.getElementById('characters-layer');
   const layer = document.getElementById('hotspots-layer');
   const modulesList = document.getElementById('modules-list');
   const logList = document.getElementById('log');
 
   AGENTS.forEach(agent => {
+    // Render ตัวละครบนโต๊ะทำงาน
+    if (agent.sprite) {
+      const charDiv = document.createElement('div');
+      charDiv.className = 'agent-character';
+      charDiv.style.left = agent.x + '%';
+      charDiv.style.top = agent.y + '%';
+      charDiv.innerHTML = `<img src="${agent.sprite}" alt="${agent.n}">`;
+      charsLayer.appendChild(charDiv);
+    }
+
+    // Render โหนด Hotspot
     const btn = document.createElement('button');
     btn.className = 'hotspot';
     btn.style.left = agent.x + '%';
@@ -274,6 +305,7 @@ function initUI() {
     `;
     layer.appendChild(btn);
 
+    // Render ปุ่ม Module
     const modBtn = document.createElement('button');
     modBtn.style.setProperty('--k', agent.c);
     modBtn.onclick = () => openCard(agent.id);
