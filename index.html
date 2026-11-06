@@ -198,7 +198,7 @@ button.close-btn{
 
 <main>
   <div class="room-container" id="room">
-    <!-- ดึงรูปภาพ room.jpg มาใช้เป็นฉากหลัง -->
+    <!-- ดึงไฟล์ room.jpg มาแสดงเป็นฉากหลัง -->
     <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
     <div id="hotspots-layer"></div>
   </div>
@@ -231,7 +231,6 @@ button.close-btn{
 </div>
 
 <script>
-// ข้อมูลเอเจนต์ 8 ระบบ พร้อมพิกัดตำแหน่งโต๊ะบนภาพ room.jpg (%)
 const AGENTS = [
   {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand และข้อมูลงานขับรถรับจ้าง', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68},
   {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'แบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ทำใบเสนอราคา และประสานงานนายหน้า', st:'เคสวันนี้: 18', c:'#6ea8ff', x:32, y:76},
@@ -251,7 +250,7 @@ const LOGS = [
 ];
 
 const AVATAR_IMG = {
-  "driver": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGsAAACUCAYAAACUe9fAAABaW0lEQVR42u39ebhm113fiX7WWnt65/c986k6NQ9SlaaSLMuSJVslyxiBASGg5BBfCDwkT9/gcAm+T980/XQH+94mSacT+ZKOuQ0hF9IOBKsA2wweAFuDZUuWLLmEVFWSah7PfM47v3tYw/1j73Mkx0M7xk5fW9rPY2uqOqfO+9tr/abvIPg/+XnHffcdef7Clz+sUzeJFQBYY0AIkAKBwAH5/1nAsW3Hdq5cuoqzLv/XUjMzM3P01BdfenDvrfseXmqvHlHCx5oMGTjKpfIHr3zlygf4Hn/Ef+1vuOemPYdtQ/ya50U0GvUpVZIHX37iBF7q4QwYo3HOgRRIpZAIhAMlJQKHkLBlboalhRWMccSJJvMMW2/Yzrbdu04sLs4ffOnzL7J7Zo6Z6TFeOHuSxq6x82/a9bbbjv7u7y6/Eaxv4bn77rvnxm6cfej5F48dufTyZQICjEnxNeya2s7u2a2MBgOyLEVIj8xqtDYEvkelFFEKfJQQGKNBSZT0cBYuX7nKwBgWh326NsYnxB9kHNq/i727t/PZp58infJpTjUuP//nX9n2vRws9d3+BjfccMPcje980z9/afnUfzrxlZPXDa/ETKkJtjenqIuQXVOzTNYqhNISSEetHFIKFOXAw2YxwiRMjVUJhMaXFiUcgeczGgwoKUc99NizYxtJLyFpZ9RkyNaxJtfs2EIkHb4XcfnyAp10WN9z7f4TSxfmT7wRrK/z3HfffXOn0zNP9uLhvcOFhHAQ0JBVWmGJyXqZrZNjVEKPRrWEwiIAgUMpD99T+EpQKflEvoenJEpKjLWsd4dcvnyFibEGjWoIzjCKE0IvoFWrEHmOmfEGylnS1GCsx8LKOrbFkTvvPnzi9N+8dOKNYL165TVLByqfUpOlf7NwaqWuFzQ1XWLH+AzbpiaphoJ6JKlXQgQZ1hZ5Cok2jjhOyZKEZr1MFHhICVJIholmeb3HKHUMhyMmmnV8adHWgJBUK1UCT1KOJNVSAAiWVtqkGaSJZRRr1szakUar/Hx3sfvS91qwvO/GF822yY+devzS4fOjRaq2zFipSi3wKUuLjdcZb9UIQx8lQaLIjEZ5PnGqaXf6DAcDWo0yaRoQRQGptgyHI7ywwjCxdLs9JsfHqFbKaJ2QGcdaZ8BgmBLHQ/bv2orDYREM44QsMVSEQo8sq2fXKJU5BHz8dR+swz/7rofPXb54uDQqU3IRNb9EIyrjuZSJVhVrYpzTJLGh2+8hhKRaqyGlYjjsMxwOmZocY7JVxeiMNDMYJ+n0U1avrJOkGaXQJ/AlmdH0e0NiIxmMNMYphJAEvo9zAm0sSWYIfMW1cztYTxOOXXoFa833ZM76jgbr3p9/98PPvfTckeRMRtVUiFSItI5AwXi9RimSKFnG4ej3RwRRiSRJMRbSUYw1mnLgUS8HOJ0hEFydX8GKEI3HertP6HvMbd9CvepjraMfG1a7A1bXemyZnWJudpwwCEgSTXuQYBwEOCqhxHgBCkum7fdksOR34ovcf//9zf3vOvDI6Qunn7gFQdmUqAZlAunhSUkY+tRqZXSWECcxmTYMRjFZZvH8iCwzJHFG5PtMjjcpRyHOCTItKJVb9IaahcUVyqUSU+NNFIY00XR7Ce1eyii2hEEAJsXDYayjN0xZbfdJUoMqipPRaIg1lh3X7fjl122w7G7/Y3GqD88fW0SsOULng7UoWbRxzqKUhxMKbQSd/ggnPBwSbSzDYcxg0KdaLdFs1rHW0emPWFrrkWrJYJiSxjGTrTq7t8/heT6dfsIggd5QkyQZW2anmWjViUKfXn/EKLWMEo2UkjAIcNZhLTgHwhPN1+U1ePO7b3v4c5/87OGgHzHptSiFIdI5sA6TJVhrGKUlFlbaBJ4EIegPE6IwAidwWueNb7mGFI4s0/QGCVF1jH424MrCGsYYifHKYU+K2ur9AYxK50+g2GGMY5y6IFOKEd1tLEsrnZZaQ8AwdR4g1q1Sqc3YH5hiUxvVJ6vs2A98N73zi3Lp31023X34m9eLhx3X3Ld5u0e2f59u7eub2361/2/f3n6d2v//3a2+u3m/2L/+x89Pj4f3h++L91+9a613d5/e5f3z/839/e0ZGR4bGRsZGx0dH3/f7m8/3s/vT//f0t/X3x4f/x/f32/vL9/f33+///1b"
+  "driver": "driver_avatar.png" // สามารถเปลี่ยนเป็น path รูปตัวละครที่ต้องการแสดงใน Modal ได้ครับ
 };
 
 function initUI() {
@@ -260,7 +259,6 @@ function initUI() {
   const logList = document.getElementById('log');
 
   AGENTS.forEach(agent => {
-    // โหนด Hotspot บนภาพ
     const btn = document.createElement('button');
     btn.className = 'hotspot';
     btn.style.left = agent.x + '%';
@@ -276,7 +274,6 @@ function initUI() {
     `;
     layer.appendChild(btn);
 
-    // ปุ่มเลือกในแผง Module ด้านล่าง
     const modBtn = document.createElement('button');
     modBtn.style.setProperty('--k', agent.c);
     modBtn.onclick = () => openCard(agent.id);
@@ -284,7 +281,6 @@ function initUI() {
     modulesList.appendChild(modBtn);
   });
 
-  // แสดงบันทึกระบบ
   logList.innerHTML = LOGS.map(([time, color, msg]) => `
     <li>
       <time>${time}</time>
