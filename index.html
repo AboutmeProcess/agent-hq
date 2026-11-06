@@ -4,8 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AGENT HQ - Executive Command Center</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Noto+Sans+Thai:wght@300;400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap">
 <style>
+/* นำเข้าฟอนต์ Sukumvit / Sukumvit Tadmai และกำหนดเป็นหลัก */
+@font-face {
+  font-family: 'Sukumvit Tadmai';
+  src: local('Sukumvit Tadmai'), local('SukumvitSet-Medium'), local('SukumvitSet-Text');
+}
+
 :root {
   color-scheme: dark;
   box-sizing: border-box;
@@ -15,6 +21,7 @@
   --ink: #f1f5f9;
   --mut: #94a3b8;
   --accent: #38bdf8;
+  --font-main: 'Sukumvit Tadmai', 'Sukumvit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 *, *::before, *::after { box-sizing: inherit; }
 
@@ -26,28 +33,29 @@ html, body {
   overflow: hidden;
   background: radial-gradient(circle at 50% 0%, #0f172a 0%, var(--bg) 80%);
   color: var(--ink);
-  font-family: "Noto Sans Thai", system-ui, sans-serif;
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* APP CONTAINER */
+/* APP SHELL CONTAINER */
 .app-shell {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100vh;
-  padding: 12px 20px;
+  padding: 14px 20px;
   gap: 12px;
   max-width: 1600px;
   margin: 0 auto;
 }
 
-/* HEADER */
+/* HEADER BAR */
 header {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--panel-border);
 }
 .brand {
@@ -56,38 +64,44 @@ header {
   gap: 12px;
 }
 .brand-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 20px;
+  font-family: 'Orbitron', var(--font-main);
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: 2px;
   color: #fff;
-  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
   margin: 0;
+}
+.brand-sub {
+  font-size: 13px;
+  color: var(--mut);
+  font-weight: 400;
 }
 .sys-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
   color: #4ade80;
   background: rgba(74, 222, 128, 0.1);
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 20px;
   border: 1px solid rgba(74, 222, 128, 0.3);
 }
 .sys-status-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   background: #4ade80;
   border-radius: 50%;
   box-shadow: 0 0 8px #4ade80;
 }
 
-/* MAIN DASHBOARD (SPLIT LAYOUT) */
+/* MAIN CONTENT SPLIT GRID */
 main {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: 1fr 380px; /* แยกฝั่งฉากควบคุมกับแผงสถานะ */
+  grid-template-columns: 1fr 380px;
   gap: 16px;
   min-height: 0;
 }
@@ -102,10 +116,10 @@ main {
   justify-content: center;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 12px;
   box-shadow: 0 16px 32px rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   min-height: 0;
 }
 
@@ -115,10 +129,10 @@ main {
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  aspect-ratio: 16 / 9; /* ล็อกสัดส่วนสี่เหลี่ยมผืนผ้า */
-  border-radius: 8px;
+  aspect-ratio: 16 / 9; /* สัดส่วนสี่เหลี่ยมผืนผ้า 16:9 */
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+  box-shadow: 0 0 24px rgba(0,0,0,0.8);
 }
 
 .room-bg {
@@ -143,7 +157,7 @@ main {
   height: 32px;
   border-radius: 50%;
   border: 2px solid var(--c, var(--accent));
-  background: rgba(6, 9, 19, 0.7);
+  background: rgba(6, 9, 19, 0.75);
   box-shadow: 0 0 12px var(--c, var(--accent));
   display: flex;
   align-items: center;
@@ -165,20 +179,21 @@ main {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 4px;
-  font-family: 'Orbitron', "Noto Sans Thai", sans-serif;
-  font-size: 9px;
+  margin-top: 5px;
+  font-family: var(--font-main);
+  font-size: 11px;
   font-weight: 600;
   color: #fff;
-  background: rgba(6, 9, 19, 0.85);
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: rgba(6, 9, 19, 0.88);
+  padding: 2px 9px;
+  border-radius: 5px;
   border: 1px solid var(--c, var(--accent));
   white-space: nowrap;
   pointer-events: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-/* RIGHT COLUMN: SIDEBAR PANELS */
+/* RIGHT COLUMN: SIDEBAR */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -189,23 +204,24 @@ main {
 .panel {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  padding: 14px;
-  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 16px;
+  backdrop-filter: blur(12px);
 }
 
 .panel-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 11px;
+  font-family: 'Orbitron', var(--font-main);
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 1px;
   color: var(--accent);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
 }
 
-/* AGENT LIST GRID */
+/* AGENTS GRID */
 .agents-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -217,34 +233,34 @@ main {
 .agent-card-btn {
   all: unset;
   cursor: pointer;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 3px solid var(--k, var(--accent));
-  border-radius: 6px;
-  padding: 8px 10px;
+  border-radius: 8px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   transition: all 0.2s ease;
 }
 .agent-card-btn:hover {
   background: rgba(51, 65, 85, 0.6);
   border-color: var(--k, var(--accent));
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 .agent-name {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink);
 }
 .agent-status {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--mut);
 }
 
-/* LOG PANEL */
+/* LIVE LOG PANEL */
 .log-panel {
-  flex: 0 0 160px;
+  flex: 0 0 170px;
   display: flex;
   flex-direction: column;
 }
@@ -258,23 +274,27 @@ main {
   overflow-y: auto;
 }
 .log-item {
-  font-size: 11px;
+  font-size: 12px;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   padding: 4px 0;
-  border-bottom: 1px dashed rgba(255,255,255,0.05);
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
 }
-.log-time { color: var(--mut); font-family: monospace; }
+.log-time {
+  color: var(--mut);
+  font-family: monospace;
+  font-size: 11px;
+}
 
-/* MODAL DIALOG */
+/* MODAL CARD */
 #m {
   position: fixed;
   inset: 0;
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(2, 6, 23, 0.8);
-  backdrop-filter: blur(8px);
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(10px);
   z-index: 100;
   padding: 16px;
 }
@@ -282,27 +302,29 @@ main {
 .modal-card {
   background: #0f172a;
   border: 1px solid var(--c, var(--accent));
-  box-shadow: 0 0 24px rgba(0,0,0,0.8), 0 0 12px var(--c, var(--accent));
-  border-radius: 12px;
+  box-shadow: 0 0 32px rgba(0,0,0,0.8), 0 0 16px var(--c, var(--accent));
+  border-radius: 14px;
   max-width: 420px;
   width: 100%;
-  padding: 20px;
+  padding: 22px;
 }
 .modal-card h2 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 16px;
+  font-family: 'Orbitron', var(--font-main);
+  font-size: 18px;
+  font-weight: 800;
   color: var(--c, var(--accent));
-  margin: 0 0 4px;
+  margin: 0 0 6px;
 }
 .modal-role {
   color: var(--mut);
-  font-size: 12px;
-  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 14px;
 }
 .modal-desc {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   color: var(--ink);
 }
 .close-btn {
@@ -310,14 +332,15 @@ main {
   color: #020617;
   border: none;
   border-radius: 6px;
-  padding: 8px 18px;
+  padding: 9px 20px;
+  font-family: var(--font-main);
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   float: right;
 }
 
-/* RESPONSIVE LAYOUT (MOBILE) */
+/* RESPONSIVE LAYOUT */
 @media (max-width: 1024px) {
   html, body { overflow: auto; }
   .app-shell { height: auto; min-height: 100vh; }
@@ -332,6 +355,7 @@ main {
   <header>
     <div class="brand">
       <h1 class="brand-title">AGENT HQ</h1>
+      <span class="brand-sub">ศูนย์ปฏิบัติการเอเจนต์อัจฉริยะ</span>
     </div>
     <div class="sys-status">
       <div class="sys-status-dot"></div>
@@ -351,12 +375,15 @@ main {
     <!-- RIGHT: AGENT MODULES & LOGS -->
     <div class="sidebar">
       <div class="panel" style="flex: 1 1 auto; display: flex; flex-direction: column;">
-        <div class="panel-title">ACTIVE MODULES (8)</div>
+        <div class="panel-title">
+          <span>ACTIVE MODULES</span>
+          <span style="color: var(--mut); font-weight: 400;">(8 Agents)</span>
+        </div>
         <div class="agents-grid" id="modules-list"></div>
       </div>
 
       <div class="panel log-panel">
-        <div class="panel-title">LIVE LOGS</div>
+        <div class="panel-title">SYSTEM LOGS</div>
         <ul class="log-list" id="log"></ul>
       </div>
     </div>
@@ -369,7 +396,7 @@ main {
     <h2 id="mt"></h2>
     <div class="modal-role" id="mr"></div>
     <div class="modal-desc" id="md"></div>
-    <button class="close-btn" onclick="closeCard()">CLOSE</button>
+    <button class="close-btn" onclick="closeCard()">ปิดหน้าต่าง</button>
   </div>
 </div>
 
