@@ -6,7 +6,6 @@
 <title>AGENT HQ - Executive Command Center</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap">
 <style>
-/* นำเข้าฟอนต์ Sukumvit / Sukumvit Tadmai และกำหนดเป็นหลัก */
 @font-face {
   font-family: 'Sukumvit Tadmai';
   src: local('Sukumvit Tadmai'), local('SukumvitSet-Medium'), local('SukumvitSet-Text');
@@ -37,7 +36,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* APP SHELL CONTAINER */
 .app-shell {
   display: flex;
   flex-direction: column;
@@ -49,7 +47,6 @@ html, body {
   margin: 0 auto;
 }
 
-/* HEADER BAR */
 header {
   flex: 0 0 auto;
   display: flex;
@@ -58,46 +55,20 @@ header {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--panel-border);
 }
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.brand { display: flex; align-items: center; gap: 12px; }
 .brand-title {
   font-family: 'Orbitron', var(--font-main);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: #fff;
-  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-  margin: 0;
+  font-size: 22px; font-weight: 800; letter-spacing: 2px;
+  color: #fff; text-shadow: 0 0 12px rgba(56, 189, 248, 0.5); margin: 0;
 }
-.brand-sub {
-  font-size: 13px;
-  color: var(--mut);
-  font-weight: 400;
-}
+.brand-sub { font-size: 13px; color: var(--mut); font-weight: 400; }
 .sys-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4ade80;
-  background: rgba(74, 222, 128, 0.1);
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1px solid rgba(74, 222, 128, 0.3);
+  display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+  color: #4ade80; background: rgba(74, 222, 128, 0.1); padding: 5px 12px;
+  border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.3);
 }
-.sys-status-dot {
-  width: 7px;
-  height: 7px;
-  background: #4ade80;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #4ade80;
-}
+.sys-status-dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 8px #4ade80; }
 
-/* MAIN CONTENT SPLIT GRID */
 main {
   flex: 1 1 auto;
   display: grid;
@@ -106,241 +77,115 @@ main {
   min-height: 0;
 }
 
-/* LEFT COLUMN: CONTROL ROOM STAGE */
 .stage-container {
   position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  padding: 12px;
+  border-radius: 14px; padding: 12px;
   box-shadow: 0 16px 32px rgba(0,0,0,0.4);
-  backdrop-filter: blur(12px);
-  min-height: 0;
+  backdrop-filter: blur(12px); min-height: 0;
 }
 
 .room-aspect-box {
   position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 16 / 9; /* สัดส่วนสี่เหลี่ยมผืนผ้า 16:9 */
-  border-radius: 10px;
-  overflow: hidden;
+  width: 100%; height: 100%;
+  max-width: 100%; max-height: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px; overflow: hidden;
   box-shadow: 0 0 24px rgba(0,0,0,0.8);
 }
 
-.room-bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.room-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* AGENT SPRITE OVERLAY */
+.agent-sprite {
+  position: absolute;
+  transform: translate(-50%, -82%);
+  pointer-events: none;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+.agent-sprite img {
+  height: 64px;
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.7));
 }
 
 /* HOTSPOTS */
 .hotspot {
   position: absolute;
   transform: translate(-50%, -50%);
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  padding: 0;
-  z-index: 3;
+  cursor: pointer; border: none; background: transparent; padding: 0; z-index: 3;
 }
 .hotspot-ring {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   border: 2px solid var(--c, var(--accent));
   background: rgba(6, 9, 19, 0.75);
   box-shadow: 0 0 12px var(--c, var(--accent));
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: all 0.25s ease;
 }
-.hotspot:hover .hotspot-ring {
-  transform: scale(1.25);
-  background: var(--c, var(--accent));
-}
-.hotspot-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #fff;
-}
+.hotspot:hover .hotspot-ring { transform: scale(1.25); background: var(--c, var(--accent)); }
+.hotspot-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
 .hotspot-label {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 5px;
-  font-family: var(--font-main);
-  font-size: 11px;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(6, 9, 19, 0.88);
-  padding: 2px 9px;
-  border-radius: 5px;
-  border: 1px solid var(--c, var(--accent));
-  white-space: nowrap;
-  pointer-events: none;
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  margin-top: 5px; font-family: var(--font-main); font-size: 11px; font-weight: 600;
+  color: #fff; background: rgba(6, 9, 19, 0.88); padding: 2px 9px; border-radius: 5px;
+  border: 1px solid var(--c, var(--accent)); white-space: nowrap; pointer-events: none;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-/* RIGHT COLUMN: SIDEBAR */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-}
-
+.sidebar { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .panel {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  padding: 16px;
-  backdrop-filter: blur(12px);
+  background: var(--panel-bg); border: 1px solid var(--panel-border);
+  border-radius: 14px; padding: 16px; backdrop-filter: blur(12px);
 }
-
 .panel-title {
-  font-family: 'Orbitron', var(--font-main);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--accent);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  font-family: 'Orbitron', var(--font-main); font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; color: var(--accent); margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
 }
 
-/* AGENTS GRID */
-.agents-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  flex: 1 1 auto;
-  overflow-y: auto;
-}
-
+.agents-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1 1 auto; overflow-y: auto; }
 .agent-card-btn {
-  all: unset;
-  cursor: pointer;
-  background: rgba(30, 41, 59, 0.4);
+  all: unset; cursor: pointer; background: rgba(30, 41, 59, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 3px solid var(--k, var(--accent));
-  border-radius: 8px;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: all 0.2s ease;
+  border-radius: 8px; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 4px; transition: all 0.2s ease;
 }
-.agent-card-btn:hover {
-  background: rgba(51, 65, 85, 0.6);
-  border-color: var(--k, var(--accent));
-  transform: translateY(-2px);
-}
-.agent-name {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink);
-}
-.agent-status {
-  font-size: 11px;
-  color: var(--mut);
-}
+.agent-card-btn:hover { background: rgba(51, 65, 85, 0.6); border-color: var(--k, var(--accent)); transform: translateY(-2px); }
+.agent-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+.agent-status { font-size: 11px; color: var(--mut); }
 
-/* LIVE LOG PANEL */
-.log-panel {
-  flex: 0 0 170px;
-  display: flex;
-  flex-direction: column;
-}
-.log-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-}
-.log-item {
-  font-size: 12px;
-  display: flex;
-  gap: 10px;
-  padding: 4px 0;
-  border-bottom: 1px dashed rgba(255,255,255,0.06);
-}
-.log-time {
-  color: var(--mut);
-  font-family: monospace;
-  font-size: 11px;
-}
+.log-panel { flex: 0 0 170px; display: flex; flex-direction: column; }
+.log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+.log-item { font-size: 12px; display: flex; gap: 10px; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); }
+.log-time { color: var(--mut); font-family: monospace; font-size: 11px; }
 
-/* MODAL CARD */
 #m {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2, 6, 23, 0.85);
-  backdrop-filter: blur(10px);
-  z-index: 100;
-  padding: 16px;
+  position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+  background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(10px); z-index: 100; padding: 16px;
 }
 #m.on { display: flex; }
 .modal-card {
-  background: #0f172a;
-  border: 1px solid var(--c, var(--accent));
+  background: #0f172a; border: 1px solid var(--c, var(--accent));
   box-shadow: 0 0 32px rgba(0,0,0,0.8), 0 0 16px var(--c, var(--accent));
-  border-radius: 14px;
-  max-width: 420px;
-  width: 100%;
-  padding: 22px;
+  border-radius: 14px; max-width: 440px; width: 100%; padding: 22px;
 }
-.modal-card h2 {
-  font-family: 'Orbitron', var(--font-main);
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--c, var(--accent));
-  margin: 0 0 6px;
+.modal-card h2 { font-family: 'Orbitron', var(--font-main); font-size: 18px; font-weight: 800; color: var(--c, var(--accent)); margin: 0 0 6px; }
+.modal-role { color: var(--mut); font-size: 13px; margin-bottom: 14px; }
+.modal-desc { font-size: 14px; line-height: 1.6; margin-bottom: 18px; color: var(--ink); }
+.btn-group { display: flex; gap: 10px; justify-content: flex-end; }
+.btn {
+  background: var(--c, var(--accent)); color: #020617; border: none; border-radius: 6px;
+  padding: 8px 16px; font-family: var(--font-main); font-weight: 600; font-size: 12px; cursor: pointer;
 }
-.modal-role {
-  color: var(--mut);
-  font-size: 13px;
-  font-weight: 400;
-  margin-bottom: 14px;
-}
-.modal-desc {
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 18px;
-  color: var(--ink);
-}
-.close-btn {
-  background: var(--c, var(--accent));
-  color: #020617;
-  border: none;
-  border-radius: 6px;
-  padding: 9px 20px;
-  font-family: var(--font-main);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  float: right;
-}
+.btn-sec { background: rgba(255,255,255,0.1); color: #fff; }
 
-/* RESPONSIVE LAYOUT */
 @media (max-width: 1024px) {
   html, body { overflow: auto; }
   .app-shell { height: auto; min-height: 100vh; }
@@ -364,15 +209,14 @@ main {
   </header>
 
   <main>
-    <!-- LEFT: 16:9 CONTROL ROOM STAGE -->
     <div class="stage-container">
       <div class="room-aspect-box">
         <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
+        <div id="sprites-layer"></div>
         <div id="hotspots-layer"></div>
       </div>
     </div>
 
-    <!-- RIGHT: AGENT MODULES & LOGS -->
     <div class="sidebar">
       <div class="panel" style="flex: 1 1 auto; display: flex; flex-direction: column;">
         <div class="panel-title">
@@ -390,19 +234,27 @@ main {
   </main>
 </div>
 
-<!-- MODAL CARD -->
+<!-- MODAL CARD WITH TOGGLE STATE -->
 <div id="m" onclick="if(event.target.id==='m') closeCard()">
   <div class="modal-card" id="card">
     <h2 id="mt"></h2>
     <div class="modal-role" id="mr"></div>
     <div class="modal-desc" id="md"></div>
-    <button class="close-btn" onclick="closeCard()">ปิดหน้าต่าง</button>
+    <div class="btn-group">
+      <button class="btn btn-sec" id="btn-toggle" onclick="toggleDriverState()">สลับสถานะ (นั่ง/ยืน)</button>
+      <button class="btn" onclick="closeCard()">ปิดหน้าต่าง</button>
+    </div>
   </div>
 </div>
 
 <script>
+// Sprite Data URIs ของ Driver Agent
+const DRIVER_WORK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqxunAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAd8SURBVHhe7Zp5UFRXFcc/S3dDs4i4I1oRN1SNGyA0Rse44L5FTUwyiUnM5I9kMpnJpGrGqMkkpib/mEzS45pkkgnRmMSo4yA4mhhFlIigRdw33BfEBRUEA4J0N33fve81s2mgh263ee36fVW/fve+e343nPPuuef1A55o2/b4xNq2fXpCbc+mE03pM0p2x/b0XUnqjpxO0rb05AmlvX1v6/Lptp19LUnblS0d3Slt1fT61qS093S0p3P3m/r8z39L/C3f+T1xT845v/P96pI1aXNfD4s+9sCIna91+43p6uuv174542j1L375xYlGAtf992/3T4wY943/a5/dG/vA9SOH/PrmA4E39m+4c9fS3z4z8561s39vLHDlUfB1/9/fO/f4mH/6m299/fX49k9+2pGk9X3N+Yf892XvT3x50oO3xU3p1314tXWb425Yuf/rS9e+e3xQv0H27vB+eL39/v6v9//E5o/2r1+1+t8v3Tf5D0X2/Xj/xI6/e+rmoU3N/1j4Ssc/m/vE4A/mPrVjR8q/v+xI3p3a0vfLp3/2fU/Adf8S/j3/H8o9i0eNnPvV93a2/XfPq/1q+2xYc8i+3XmPfv2N8d3vvvb84x0JvO6P8O/5f385m97sOfC3z0148E+X2L/IuK3v/rYt9fLhv+z3o9F339i3/cE35/3D5r8x8v5u5846c9o760p2m33I/y7v/d25e+/f/37f3kP/yK5p9x079trm3f3I/i/1sA3f3LdrS2pP0lP3xvfdt9+A34+aNOnOqCefmfTgy2+tf6z/j0Y99A8m34a9x/b8bOqXm9c1vRbxI/u6/7A5/fud3eY0x2y/eXvSltQ241v2//3Yrm0Xjv77iSc3x/X+Xp9R/f3j/9L30N23v/m/3O3vP/nU3/1k8L2P/fD2iO//bvrg1Ndfnbd93fL9b6XvTLlYd3r/v2p2Jn/k3/cPfG/13m37E67m7b/s+Gv3f+ve4I1Rwx/stfveO8N2znvg4cWP9Gg/d/4tP26Xv/5mS1p9T21X910a5LzB7s1949S33324xR8z1m/6f3v2X8g//6613X12vff/I2I/3532fS35/t8/69Gj3qM0+mE/sve3J7fvevv5d6Z0NjaG3z64z9Gefs3A/v0N8p/8f8y02v32/W5pS/f4/wS9m9E763vGfF2qvb6iOfmH1s3N5/X3U7G3d6O/6f2eCdrf53fE1uSdf3k2Tms7fFppXy22/f8fAez5P8uAAtX40f0G2s+3O92383/9U/f6+7v/8vE/xrzXkX9/677Gisq/9+/vPrt5sP2s64X7IqbfdeevZ/3y6d/9uA6I3eNod/j8n6mH/eI3j2f0D4f+/d2PbfjUoG4/HnjHlAdef3fX0yX/fnP99v9vPbb1D11mffn7O3q1H/5Qz/eHPhz94M+mf+W/29+xUe3p73mS32+s7y1u6+v+/w4A+3d29xT/4T3+9e933ffY43c/tfu3v73A+tvef37/s75f3Dlh/H1Rwx/sO394bNxfz+59+/N3xH/W1+4fX/aXm/v+9/jTf9z+f6v90O39+/s62tr62A9s//GjI2/v29//u5//x0D8j33LrtTfXN3/V/uMvXfk4/EfvX54V1x3x2f9+g2/r19sX/f2J33L0X3b1+zeenD7b3sM6XvP3y9tP3T23fP2L8+424k/n3D//S9/d29L57l/Xp9+eMfp5mOf23+y4vSnbWdOPmB/yJ+29N37U+O54p5f3B3R/f0S//0S/339m3f/c2S3P1e73998y+5tr5x19H4S+7s7d6e+03P235eXv4s+p5S3z2s37/X2/9I/+E73xT9P/3H/I2O63p5639f7v39w9wunfnb0lA7Ue9+Svt+/mE0/fO34m3sbfO10//35iO++fn2fXfev+w/tq30pU58b3Ofe3ve03d4zL3T54L87e3/9/m1H1v37+S2H/+/o50+mX6s1d/uS4f54I3/P/9sByK+0/x8/42bOefE1v3eG3/iTr21p3dr+tT/c2vP7Hw3e/tT8/yv9R76y4Sfj4np18f/f3t72tX3xT/3fAUB+4eXo0Xf33m13f2D3vv1H77421H7o+f84APk/9p019s9938eAAn/83/8fAAn735I7a637/sA39v91ALa/M/6Xff7uAf3/MAB7v//25B81X4f7f6v79//o/w/M8S9A1zX8UAAAAABJRU5ErkJggg==";
+
+const DRIVER_STAND = "data:image/png;base64,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";
+
 const AGENTS = [
-  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68},
+  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68, state:'working', workSprite: DRIVER_WORK, standSprite: DRIVER_STAND},
   {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'แบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ใบเสนอราคา', st:'เคสวันนี้: 18', c:'#6ea8ff', x:32, y:76},
   {id:'profit',  n:'Take Profit', role:'Forex Trading Agent', d:'ดูแล EA บน MT5 กลยุทธ์ Grid Trading คู่เงิน XAUUSD', st:'EA ทำงานอยู่', c:'#ffb347', x:68, y:78},
   {id:'solar',   n:'Solar', role:'Smart Home & Solar Agent', d:'ดูแลระบบอัตโนมัติ Apple HomeKit, โซลาร์รูฟท็อป', st:'แบตเตอรี่: 94%', c:'#ffe066', x:85, y:52},
@@ -419,13 +271,27 @@ const LOGS = [
   ['10:02', '#6ea8ff', 'Captain อัปเดตเคสวันนี้']
 ];
 
+let activeAgentId = null;
+
 function initUI() {
-  const layer = document.getElementById('hotspots-layer');
+  const spritesLayer = document.getElementById('sprites-layer');
+  const hotspotsLayer = document.getElementById('hotspots-layer');
   const modulesList = document.getElementById('modules-list');
   const logList = document.getElementById('log');
 
   AGENTS.forEach(agent => {
-    // Hotspot บนรูปภาพ
+    // Render Sprite
+    if (agent.workSprite) {
+      const charDiv = document.createElement('div');
+      charDiv.className = 'agent-sprite';
+      charDiv.id = `sprite-${agent.id}`;
+      charDiv.style.left = agent.x + '%';
+      charDiv.style.top = agent.y + '%';
+      charDiv.innerHTML = `<img src="${agent.state === 'working' ? agent.workSprite : agent.standSprite}" id="img-sprite-${agent.id}">`;
+      spritesLayer.appendChild(charDiv);
+    }
+
+    // Render Hotspot
     const btn = document.createElement('button');
     btn.className = 'hotspot';
     btn.style.left = agent.x + '%';
@@ -436,38 +302,67 @@ function initUI() {
       <div class="hotspot-ring"><div class="hotspot-dot"></div></div>
       <div class="hotspot-label">${agent.n}</div>
     `;
-    layer.appendChild(btn);
+    hotspotsLayer.appendChild(btn);
 
-    // การ์ดใน Sidebar
+    // Render Sidebar Card
     const modBtn = document.createElement('button');
     modBtn.className = 'agent-card-btn';
     modBtn.style.setProperty('--k', agent.c);
     modBtn.onclick = () => openCard(agent.id);
     modBtn.innerHTML = `
       <div class="agent-name">${agent.n}</div>
-      <div class="agent-status">${agent.st}</div>
+      <div class="agent-status" id="status-card-${agent.id}">${agent.st}</div>
     `;
     modulesList.appendChild(modBtn);
   });
 
-  // Logs
   logList.innerHTML = LOGS.map(([time, color, msg]) => `
-    <li class="log-item">
-      <span class="log-time">${time}</span>
-      <span style="color:${color}">${msg}</span>
-    </li>
+    <li class="log-item"><span class="log-time">${time}</span><span style="color:${color}">${msg}</span></li>
   `).join('');
 }
 
 function openCard(id) {
+  activeAgentId = id;
   const agent = AGENTS.find(a => a.id === id);
   if(!agent) return;
+
   const m = document.getElementById('m');
+  const btnToggle = document.getElementById('btn-toggle');
   document.getElementById('card').style.setProperty('--c', agent.c);
   document.getElementById('mt').innerText = agent.n;
   document.getElementById('mr').innerText = agent.role;
   document.getElementById('md').innerText = agent.d;
+
+  if (agent.workSprite && agent.standSprite) {
+    btnToggle.style.display = 'inline-block';
+    btnToggle.innerText = agent.state === 'working' ? 'สลับเป็นท่าทาง: ยืน' : 'สลับเป็นท่าทาง: นั่งทำงาน';
+  } else {
+    btnToggle.style.display = 'none';
+  }
+
   m.classList.add('on');
+}
+
+function toggleDriverState() {
+  const agent = AGENTS.find(a => a.id === activeAgentId);
+  if (!agent || !agent.workSprite) return;
+
+  agent.state = agent.state === 'working' ? 'standing' : 'working';
+  agent.st = agent.state === 'working' ? 'กำลังทำงาน (นั่งที่โต๊ะ)' : 'กำลังยืน / พักผ่อน';
+
+  // อัปเดตรูป Sprite บนแผนที่
+  const imgEl = document.getElementById(`img-sprite-${agent.id}`);
+  if (imgEl) {
+    imgEl.src = agent.state === 'working' ? agent.workSprite : agent.standSprite;
+  }
+
+  // อัปเดตข้อความใน Sidebar
+  const statusEl = document.getElementById(`status-card-${agent.id}`);
+  if (statusEl) {
+    statusEl.innerText = agent.st;
+  }
+
+  openCard(activeAgentId); // รีเฟรช Modal
 }
 
 function closeCard() {
