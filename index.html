@@ -69,7 +69,7 @@ main{max-width:1000px;margin:0 auto;padding:8px 12px 28px}
   height: 32px;
   border-radius: 50%;
   border: 2px solid var(--c, #4fd1ff);
-  background: rgba(10, 15, 31, 0.6);
+  background: rgba(10, 15, 31, 0.65);
   box-shadow: 0 0 12px var(--c, #4fd1ff);
   display: flex;
   align-items: center;
@@ -198,8 +198,8 @@ button.close-btn{
 
 <main>
   <div class="room-container" id="room">
-    <!-- ภาพพื้นหลังห้องควบคุม (ใช้ Data URI ป้องกันจอดำ) -->
-    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Control Room Isometric" class="room-bg" id="bg-img">
+    <!-- ดึงรูปภาพ room.jpg มาใช้เป็นฉากหลัง -->
+    <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
     <div id="hotspots-layer"></div>
   </div>
 
@@ -231,6 +231,7 @@ button.close-btn{
 </div>
 
 <script>
+// ข้อมูลเอเจนต์ 8 ระบบ พร้อมพิกัดตำแหน่งโต๊ะบนภาพ room.jpg (%)
 const AGENTS = [
   {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand และข้อมูลงานขับรถรับจ้าง', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68},
   {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'แบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ทำใบเสนอราคา และประสานงานนายหน้า', st:'เคสวันนี้: 18', c:'#6ea8ff', x:32, y:76},
@@ -259,6 +260,7 @@ function initUI() {
   const logList = document.getElementById('log');
 
   AGENTS.forEach(agent => {
+    // โหนด Hotspot บนภาพ
     const btn = document.createElement('button');
     btn.className = 'hotspot';
     btn.style.left = agent.x + '%';
@@ -274,6 +276,7 @@ function initUI() {
     `;
     layer.appendChild(btn);
 
+    // ปุ่มเลือกในแผง Module ด้านล่าง
     const modBtn = document.createElement('button');
     modBtn.style.setProperty('--k', agent.c);
     modBtn.onclick = () => openCard(agent.id);
@@ -281,6 +284,7 @@ function initUI() {
     modulesList.appendChild(modBtn);
   });
 
+  // แสดงบันทึกระบบ
   logList.innerHTML = LOGS.map(([time, color, msg]) => `
     <li>
       <time>${time}</time>
