@@ -3,47 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AGENT HQ - Control Room UI</title>
+<title>AGENT HQ - Adaptive Layout</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+Thai:wght@400;600&display=swap">
 <style>
-:root{
-  color-scheme:dark;
-  box-sizing:border-box;
-  --bg:#0a0f1f;
-  --ink:#e8eefc;
-  --mut:#8b97b8;
-  --panel:#121a33;
-  --line:#2a3560;
+:root {
+  color-scheme: dark;
+  box-sizing: border-box;
+  --bg: #0a0f1f;
+  --ink: #e8eefc;
+  --mut: #8b97b8;
+  --panel: #121a33;
+  --line: #2a3560;
 }
-*,*::before,*::after{box-sizing:inherit}
-body{
-  margin:0;
-  min-height:100vh;
-  background:radial-gradient(ellipse at 50% 0,#16224a,var(--bg) 60%);
-  color:var(--ink);
-  font-family:"Noto Sans Thai",system-ui,sans-serif;
+*, *::before, *::after { box-sizing: inherit; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* ป้องกันการสกอร์ลหลักหากพื้นที่พอ */
+  background: radial-gradient(ellipse at 50% 0, #16224a, var(--bg) 70%);
+  color: var(--ink);
+  font-family: "Noto Sans Thai", system-ui, sans-serif;
 }
-header{padding:20px 16px 8px;text-align:center}
-h1{
-  font-family:"Press Start 2P",monospace;
-  font-size:clamp(20px,5vw,36px);
-  margin:0;
-  letter-spacing:2px;
-  color:#cfeaff;
-  text-shadow:3px 3px 0 #1f4fa8,6px 6px 0 #0a1a40;
+
+/* APP SHELL: ล็อกความสูงเต็มหน้าจอ */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  padding: 12px 16px;
+  gap: 10px;
+  max-width: 1280px;
+  margin: 0 auto;
 }
-header p{color:var(--mut);margin:10px 0 0;font-size:14px}
-main{max-width:1000px;margin:0 auto;padding:8px 12px 28px}
+
+header {
+  flex: 0 0 auto;
+  text-align: center;
+}
+h1 {
+  font-family: "Press Start 2P", monospace;
+  font-size: clamp(16px, 3vw, 28px);
+  margin: 0;
+  color: #cfeaff;
+  text-shadow: 2px 2px 0 #1f4fa8;
+}
+header p {
+  color: var(--mut);
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+/* MAIN CONTENT AREA */
+main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0; /* สำคัญ: เพื่อให้ Flex child หดตัวตามขนาดหน้าจอได้ */
+}
+
+/* STAGE: ส่วนแสดงผลรูปห้องสี่เหลี่ยมผืนผ้า (อัตราส่วน 16:9) */
+.stage-wrapper {
+  flex: 1 1 auto;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
 
 .room-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 16 / 9; /* ล็อกสัดส่วนสี่เหลี่ยมผืนผ้า */
   border: 2px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
   background: #131b2e;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .room-bg {
@@ -53,212 +98,209 @@ main{max-width:1000px;margin:0 auto;padding:8px 12px 28px}
   display: block;
 }
 
-/* CHARACTER SPRITE OVERLAY ON MAP */
-.agent-character {
-  position: absolute;
-  transform: translate(-50%, -85%);
-  pointer-events: none;
-  z-index: 2;
+/* DASHBOARD PANELS (ส่วนล่าง) */
+.dashboard-panels {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
 }
 
-.agent-character img {
-  height: 72px; /* ขนาดของสไปรท์ตัวละคร */
-  width: auto;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+.pn {
+  background: #0c1329;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.pn > b {
+  font: 400 9px "Press Start 2P", monospace;
+  color: #7fd4ff;
+  display: block;
+  margin-bottom: 8px;
 }
 
-/* HOTSPOT BUTTONS */
+.mrow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.mrow button {
+  all: unset;
+  cursor: pointer;
+  background: #111a36;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--k);
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--mut);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mrow button:hover { background: #18244a; }
+.mrow strong { color: var(--ink); font-size: 12px; }
+
+/* LOGS */
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 64px;
+  overflow-y: auto;
+}
+.log-list li {
+  display: flex;
+  gap: 8px;
+  color: #c5cfe8;
+  font-size: 11px;
+}
+.log-list time { color: var(--mut); }
+
+/* HOTSPOTS */
 .hotspot {
   position: absolute;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  z-index: 3;
   border: none;
   background: transparent;
   padding: 0;
-  outline: none;
+  z-index: 3;
 }
-
 .hotspot-ring {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid var(--c, #4fd1ff);
-  background: rgba(10, 15, 31, 0.65);
-  box-shadow: 0 0 12px var(--c, #4fd1ff);
+  background: rgba(10, 15, 31, 0.7);
+  box-shadow: 0 0 10px var(--c, #4fd1ff);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s, background 0.2s;
 }
-
-.hotspot:hover .hotspot-ring,
-.hotspot:focus-visible .hotspot-ring {
-  transform: scale(1.25);
-  background: var(--c, #4fd1ff);
-}
-
 .hotspot-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #fff;
-  animation: pulse 1.5s infinite;
 }
-
 .hotspot-label {
   position: absolute;
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 4px;
+  margin-top: 2px;
   font-family: "Press Start 2P", monospace;
-  font-size: 9px;
+  font-size: 8px;
   color: #fff;
   background: rgba(10, 15, 31, 0.85);
-  padding: 3px 6px;
+  padding: 2px 5px;
   border-radius: 3px;
   border: 1px solid var(--c, #4fd1ff);
   white-space: nowrap;
   pointer-events: none;
-  text-shadow: 1px 1px 0 #000;
 }
 
-@keyframes pulse {
-  50% { opacity: 0.3; }
+/* RESPONSIVE FOR SMALL SCREENS */
+@media (max-width: 768px) {
+  html, body { overflow: auto; } /* ยอมให้สกอร์ลได้กรณีหน้าจอเล็กมากจริงๆ */
+  .app-container { height: auto; min-height: 100vh; }
+  .dashboard-panels { grid-template-columns: 1fr; }
+  .mrow { grid-template-columns: repeat(2, 1fr); }
 }
 
-.hint{text-align:center;color:var(--mut);font-size:13px;margin:12px 0 16px}
-
-.hq{display:grid;gap:12px;margin:0 0 14px}
-.pn{background:#0c1329;border:1px solid var(--line);border-radius:6px;padding:12px 14px}
-.pn>b{font:400 9px "Press Start 2P",monospace;color:#7fd4ff;display:block;margin-bottom:10px}
-.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
-.mrow button{
-  all:unset;
-  cursor:pointer;
-  background:#111a36;
-  border:1px solid var(--line);
-  border-left:3px solid var(--k);
-  border-radius:4px;
-  padding:8px 10px;
-  display:grid;
-  gap:2px;
-  font-size:12px;
-  color:var(--mut);
+/* MODAL */
+#m {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3,6,16,.75);
+  backdrop-filter: blur(4px);
+  padding: 16px;
+  z-index: 10;
 }
-.mrow button:hover,.mrow button:focus-visible{background:#18244a;outline:2px solid var(--k)}
-.mrow strong{color:var(--ink);font-size:13px}
-.mrow i{display:inline-block;width:7px;height:7px;background:var(--k);margin-right:6px;border-radius:50%}
-
-.log{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:13px}
-.log b{font-family:"Press Start 2P",monospace;font-size:10px;font-weight:400;color:#7fd4ff}
-.log ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
-.log li{display:flex;gap:10px;color:#c5cfe8}
-.log time{color:var(--mut);min-width:52px}
-.log i{width:8px;height:8px;margin-top:6px;flex:none;border-radius:50%}
-
-#m{
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(3,6,16,.75);
-  backdrop-filter:blur(4px);
-  padding:16px;
-  z-index:10;
+#m.on { display: flex; }
+.card {
+  background: var(--panel);
+  border: 2px solid var(--c,#4fd1ff);
+  border-radius: 6px;
+  max-width: 400px;
+  width: 100%;
+  padding: 18px;
 }
-#m.on{display:flex}
-.card{
-  background:var(--panel);
-  border:2px solid var(--c,#4fd1ff);
-  box-shadow:6px 6px 0 rgba(0,0,0,.5);
-  border-radius:6px;
-  max-width:440px;
-  width:100%;
-  padding:20px;
-  display:flow-root;
-}
-#mi{
-  height:110px;
-  width:auto;
-  float:right;
-  margin:0 0 8px 12px;
-  image-rendering:pixelated;
-  border-radius:4px;
-}
-.card h2{font-family:"Press Start 2P",monospace;font-size:14px;line-height:1.5;margin:0 0 6px;color:var(--c)}
-.card .r{color:var(--mut);font-size:13px;margin:0 0 12px}
-.card p{margin:0 0 14px;line-height:1.7;font-size:14px}
-.card .s{display:inline-block;background:#0a0f1f;border:1px solid var(--c);padding:4px 10px;font-size:13px;margin-bottom:16px;border-radius:3px}
-button.close-btn{
-  font:inherit;
-  background:var(--c,#4fd1ff);
-  color:#06101f;
-  border:0;
-  border-radius:3px;
-  padding:9px 18px;
-  font-weight:600;
-  cursor:pointer;
+.card h2 { font-family: "Press Start 2P", monospace; font-size: 13px; color: var(--c); margin: 0 0 6px; }
+.card p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; }
+button.close-btn {
+  background: var(--c, #4fd1ff);
+  color: #06101f;
+  border: 0;
+  border-radius: 3px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>AGENT HQ</h1>
-  <p>ศูนย์ปฏิบัติการเอเจนต์อัจฉริยะ (Isometric Control Room)</p>
-</header>
+<div class="app-container">
+  <header>
+    <h1>AGENT HQ</h1>
+    <p>ศูนย์ปฏิบัติการเอเจนต์อัจฉริยะ</p>
+  </header>
 
-<main>
-  <div class="room-container" id="room">
-    <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
-    <div id="characters-layer"></div>
-    <div id="hotspots-layer"></div>
-  </div>
-
-  <p class="hint">แตะที่โหนดบนโต๊ะทำงานในห้อง หรือเลือกแถบระบบเพื่อตรวจสอบสถานะ</p>
-
-  <section class="hq" aria-label="แผงสถานะ">
-    <div class="pn">
-      <b>ACTIVE AGENTS</b>
-      <div class="mrow" id="modules-list"></div>
+  <main>
+    <!-- ส่วนรูปภาพสี่เหลี่ยมผืนผ้า Fit หน้าจอพอดี -->
+    <div class="stage-wrapper">
+      <div class="room-container">
+        <img src="room.jpg" alt="Control Room Isometric" class="room-bg">
+        <div id="hotspots-layer"></div>
+      </div>
     </div>
-  </section>
 
-  <section class="log" aria-label="บันทึกระบบ">
-    <b>SYSTEM LOG</b>
-    <ul id="log"></ul>
-  </section>
-</main>
+    <!-- แผงข้อมูลส่วนล่าง -->
+    <div class="dashboard-panels">
+      <div class="pn">
+        <b>ACTIVE AGENTS</b>
+        <div class="mrow" id="modules-list"></div>
+      </div>
+      <div class="pn">
+        <b>SYSTEM LOG</b>
+        <ul class="log-list" id="log"></ul>
+      </div>
+    </div>
+  </main>
+</div>
 
-<div id="m" role="dialog" aria-modal="true" aria-labelledby="mt">
+<!-- MODAL -->
+<div id="m" onclick="if(event.target.id==='m') closeCard()">
   <div class="card" id="card">
-    <img id="mi" alt="" hidden>
     <h2 id="mt"></h2>
-    <p class="r" id="mr"></p>
+    <p id="mr" style="color:var(--mut); font-size:12px;"></p>
     <p id="md"></p>
-    <span class="s" id="ms"></span>
-    <br>
     <button class="close-btn" onclick="closeCard()">ปิดหน้าต่าง</button>
   </div>
 </div>
 
 <script>
-// รูปตัวละคร Driver นั่งพิมพ์งาน (Data URI แบบไม่มีพื้นหลัง)
-const DRIVER_SITTING_SPRITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAd8SURBVHhe7Zp5UFRXFcc/S3dDs4i4I1oRN1SNGyA0Rse44L5FTUwyiUnM5I9kMpnJpGrGqMkkpib/mEzS45pkkgnRmMSo4yA4mhhFlIigRdw33BfEBRUEA4J0N33fve81s2mgh263ee36fVW/fve+e343nPPuuef1A55o2/b4xNq2fXpCbc+mE03pM0p2x/b0XUnqjpxO0rb05AmlvX1v6/Lptp19LUnblS0d3Slt1fT61qS093S0p3P3m/r8z39L/C3f+T1xT845v/P96pI1aXNfD4s+9sCIna91+43p6uuv174542j1L375xYlGAtf992/3T4wY943/a5/dG/vA9SOH/PrmA4E39m+4c9fS3z4z8561s39vLHDlUfB1/9/fO/f4mH/6m299/fX49k9+2pGk9X3N+Yf892XvT3x50oO3xU3p1314tXWb425Yuf/rS9e+e3xQv0H27vB+eL39/v6v9//E5o/2r1+1+t8v3Tf5D0X2/Xj/xI6/e+rmoU3N/1j4Ssc/m/vE4A/mPrVjR8q/v+xI3p3a0vfLp3/2fU/Adf8S/j3/H8o9i0eNnPvV93a2/XfPq/1q+2xYc8i+3XmPfv2N8d3vvvb84x0JvO6P8O/5f385m97sOfC3z0148E+X2L/IuK3v/rYt9fLhv+z3o9F339i3/cE35/3D5r8x8v5u5846c9o760p2m33I/y7v/d25e+/f/37f3kP/yK5p9x079trm3f3I/i/1sA3f3LdrS2pP0lP3xvfdt9+A34+aNOnOqCefmfTgy2+tf6z/j0Y99A8m34a9x/b8bOqXm9c1vRbxI/u6/7A5/fud3eY0x2y/eXvSltQ241v2//3Yrm0Xjv77iSc3x/X+Xp9R/f3j/9L30N23v/m/3O3vP/nU3/1k8L2P/fD2iO//bvrg1Ndfnbd93fL9b6XvTLlYd3r/v2p2Jn/k3/cPfG/13m37E67m7b/s+Gv3f+ve4I1Rwx/stfveO8N2znvg4cWP9Gg/d/4tP26Xv/5mS1p9T21X910a5LzB7s1949S33324xR8z1m/6f3v2X8g//6613X12vff/I2I/3532fS35/t8/69Gj3qM0+mE/sve3J7fvevv5d6Z0NjaG3z64z9Gefs3A/v0N8p/8f8y02v32/W5pS/f4/wS9m9E763vGfF2qvb6iOfmH1s3N5/X3U7G3d6O/6f2eCdrf53fE1uSdf3k2Tms7fFppXy22/f8fAez5P8uAAtX40f0G2s+3O92383/9U/f6+7v/8vE/xrzXkX9/677Gisq/9+/vPrt5sP2s64X7IqbfdeevZ/3y6d/9uA6I3eNod/j8n6mH/eI3j2f0D4f+/d2PbfjUoG4/HnjHlAdef3fX0yX/fnP99v9vPbb1D11mffn7O3q1H/5Qz/eHPhz94M+mf+W/29+xUe3p73mS32+s7y1u6+v+/w4A+3d29xT/4T3+9e933ffY43c/tfu3v73A+tvef37/s75f3Dlh/H1Rwx/sO394bNxfz+59+/N3xH/W1+4fX/aXm/v+9/jTf9z+f6v90O39+/s62tr62A9s//GjI2/v29//u5//x0D8j33LrtTfXN3/V/uMvXfk4/EfvX54V1x3x2f9+g2/r19sX/f2J33L0X3b1+zeenD7b3sM6XvP3y9tP3T23fP2L8+424k/n3D//S9/d29L57l/Xp9+eMfp5mOf23+y4vSnbWdOPmB/yJ+29N37U+O54p5f3B3R/f0S//0S/339m3f/c2S3P1e73998y+5tr5x19H4S+7s7d6e+03P235eXv4s+p5S3z2s37/X2/9I/+E73xT9P/3H/I2O63p5639f7v39w9wunfnb0lA7Ue9+Svt+/mE0/fO34m3sbfO10//35iO++fn2fXfev+w/tq30pU58b3Ofe3ve03d4zL3T54L87e3/9/m1H1v37+S2H/+/o50+mX6s1d/uS4f54I3/P/9sByK+0/x8/42bOefE1v3eG3/iTr21p3dr+tT/c2vP7Hw3e/tT8/yv9R76y4Sfj4np18f/f3t72tX3xT/3fAUB+4eXo0Xf33m13f2D3vv1H77421H7o+f84APk/9p019s9938eAAn/83/8fAAn735I7a637/sA39v91ALa/M/6Xff7uAf3/MAB7v//25B81X4f7f6v79//o/w/M8S9A1zX8UAAAAABJRU5ErkJggg==";
-
 const AGENTS = [
-  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand และข้อมูลงานขับรถรับจ้าง', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68, sprite: DRIVER_SITTING_SPRITE},
-  {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'แบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ทำใบเสนอราคา และประสานงานนายหน้า', st:'เคสวันนี้: 18', c:'#6ea8ff', x:32, y:76},
-  {id:'profit',  n:'Take Profit', role:'Forex Trading Agent', d:'ดูแล EA บน MT5 กลยุทธ์ Grid Trading คู่เงิน XAUUSD และระบบ Partial Hedging', st:'EA ทำงานอยู่', c:'#ffb347', x:68, y:78},
-  {id:'solar',   n:'Solar', role:'Smart Home & Solar Agent', d:'ดูแลระบบอัตโนมัติ Apple HomeKit, โซลาร์รูฟท็อป, อินเวอร์เตอร์ และพลังงาน', st:'แบตเตอรี่: 94%', c:'#ffe066', x:85, y:52},
-  {id:'tg',      n:'Telegram', role:'ศูนย์แจ้งเตือนกลาง', d:'รับการแจ้งเตือนจากทุกระบบ รวมถึงสัญญาณจาก EA ผ่าน Webhook', st:'ออนไลน์', c:'#4fd1ff', x:50, y:52},
-  {id:'health',  n:'Healthy', role:'Health Analytics Agent', d:'บันทึกและติดตามผลออกกำลังกาย เช่น เดินลู่วิ่งและเล่นดัมเบลล์ ในโปรเจกต์ take profit', st:'สำเร็จ 3/3 วัน', c:'#ff8ad8', x:85, y:30},
-  {id:'script',  n:'App Script', role:'ระบบอัตโนมัติ', d:'สคริปต์อัตโนมัติที่เชื่อมงานและการประมวลผลต่างๆ เข้าด้วยกัน', st:'พร้อมใช้งาน', c:'#9b7bff', x:68, y:28},
-  {id:'finance', n:'Finance', role:'Personal Finance Agent', d:'ติดตามธุรกรรม การโอนเงิน บิลชำระเงิน และความเคลื่อนไหวผ่านแอปธนาคาร', st:'ตรวจสอบแล้ว', c:'#f2c94c', x:32, y:28}
+  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:18, y:68},
+  {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'แบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ใบเสนอราคา', st:'เคสวันนี้: 18', c:'#6ea8ff', x:32, y:76},
+  {id:'profit',  n:'Take Profit', role:'Forex Trading Agent', d:'ดูแล EA บน MT5 กลยุทธ์ Grid Trading คู่เงิน XAUUSD', st:'EA ทำงานอยู่', c:'#ffb347', x:68, y:78},
+  {id:'solar',   n:'Solar', role:'Smart Home & Solar Agent', d:'ดูแลระบบอัตโนมัติ Apple HomeKit, โซลาร์รูฟท็อป', st:'แบตเตอรี่: 94%', c:'#ffe066', x:85, y:52},
+  {id:'tg',      n:'Telegram', role:'ศูนย์แจ้งเตือนกลาง', d:'รับการแจ้งเตือนจากทุกระบบ ผ่าน Webhook', st:'ออนไลน์', c:'#4fd1ff', x:50, y:52},
+  {id:'health',  n:'Healthy', role:'Health Analytics Agent', d:'ติดตามผลออกกำลังกาย ลู่วิ่ง/ดัมเบลล์ โปรเจกต์ take profit', st:'สำเร็จ 3/3 วัน', c:'#ff8ad8', x:85, y:30},
+  {id:'script',  n:'App Script', role:'ระบบอัตโนมัติ', d:'สคริปต์อัตโนมัติเชื่อมระบบ', st:'พร้อมใช้งาน', c:'#9b7bff', x:68, y:28},
+  {id:'finance', n:'Finance', role:'Personal Finance Agent', d:'ติดตามธุรกรรม บิลชำระเงิน ธนาคาร', st:'ตรวจสอบแล้ว', c:'#f2c94c', x:32, y:28}
 ];
 
 const LOGS = [
@@ -268,91 +310,52 @@ const LOGS = [
   ['10:02', '#6ea8ff', 'Captain อัปเดตเคสวันนี้']
 ];
 
-const AVATAR_IMG = {
-  "driver": DRIVER_SITTING_SPRITE
-};
-
 function initUI() {
-  const charsLayer = document.getElementById('characters-layer');
   const layer = document.getElementById('hotspots-layer');
   const modulesList = document.getElementById('modules-list');
   const logList = document.getElementById('log');
 
   AGENTS.forEach(agent => {
-    // Render ตัวละครบนโต๊ะทำงาน
-    if (agent.sprite) {
-      const charDiv = document.createElement('div');
-      charDiv.className = 'agent-character';
-      charDiv.style.left = agent.x + '%';
-      charDiv.style.top = agent.y + '%';
-      charDiv.innerHTML = `<img src="${agent.sprite}" alt="${agent.n}">`;
-      charsLayer.appendChild(charDiv);
-    }
-
-    // Render โหนด Hotspot
+    // Hotspot ปุ่มกดบนรูปภาพ
     const btn = document.createElement('button');
     btn.className = 'hotspot';
     btn.style.left = agent.x + '%';
     btn.style.top = agent.y + '%';
     btn.style.setProperty('--c', agent.c);
     btn.onclick = () => openCard(agent.id);
-
     btn.innerHTML = `
-      <div class="hotspot-ring">
-        <div class="hotspot-dot"></div>
-      </div>
+      <div class="hotspot-ring"><div class="hotspot-dot"></div></div>
       <div class="hotspot-label">${agent.n}</div>
     `;
     layer.appendChild(btn);
 
-    // Render ปุ่ม Module
+    // ปุ่ม Module ในแผงล่าง
     const modBtn = document.createElement('button');
     modBtn.style.setProperty('--k', agent.c);
     modBtn.onclick = () => openCard(agent.id);
-    modBtn.innerHTML = `<strong><i></i>${agent.n}</strong>${agent.st}`;
+    modBtn.innerHTML = `<strong>${agent.n}</strong><span>${agent.st}</span>`;
     modulesList.appendChild(modBtn);
   });
 
   logList.innerHTML = LOGS.map(([time, color, msg]) => `
-    <li>
-      <time>${time}</time>
-      <i style="background:${color}"></i>
-      <span>${msg}</span>
-    </li>
+    <li><time>${time}</time><span style="color:${color}">${msg}</span></li>
   `).join('');
 }
 
 function openCard(id) {
   const agent = AGENTS.find(a => a.id === id);
   if(!agent) return;
-  
   const m = document.getElementById('m');
-  const card = document.getElementById('card');
-  const mi = document.getElementById('mi');
-  
-  card.style.setProperty('--c', agent.c);
+  document.getElementById('card').style.setProperty('--c', agent.c);
   document.getElementById('mt').innerText = agent.n;
   document.getElementById('mr').innerText = agent.role;
   document.getElementById('md').innerText = agent.d;
-  document.getElementById('ms').innerText = `สถานะ: ${agent.st}`;
-  
-  if (AVATAR_IMG[id]) {
-    mi.src = AVATAR_IMG[id];
-    mi.hidden = false;
-  } else {
-    mi.hidden = true;
-  }
-  
   m.classList.add('on');
 }
 
 function closeCard() {
   document.getElementById('m').classList.remove('on');
 }
-
-document.getElementById('m').addEventListener('click', (e) => {
-  if (e.target.id === 'm') closeCard();
-});
 
 window.onload = initUI;
 </script>
