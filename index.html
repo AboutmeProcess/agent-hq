@@ -1,381 +1,348 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGENT HQ - Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #04060b;
-            color: #d1d5db;
-            font-family: "Sukhumvit Set", "Prompt", -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        .font-mono-code {
-            font-family: 'Share Tech Mono', monospace;
-        }
-        .cyber-panel {
-            background: rgba(10, 15, 28, 0.94);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(59, 130, 246, 0.35);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-        }
-        .cyber-panel-active {
-            border-color: rgba(59, 130, 246, 0.9);
-            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AGENT HQ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+Thai:wght@400;600&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#0a0f1f;
+  --ink:#e8eefc;
+  --mut:#8b97b8;
+  --panel:#121a33;
+  --line:#2a3560;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(ellipse at 50% 0,#16224a,var(--bg) 60%);
+  color:var(--ink);
+  font-family:"Noto Sans Thai",system-ui,sans-serif;
+}
+header{padding:20px 16px 4px;text-align:center}
+h1{
+  font-family:"Press Start 2P",monospace;
+  font-size:clamp(22px,6vw,44px);
+  margin:0;
+  letter-spacing:2px;
+  color:#cfeaff;
+  text-shadow:3px 3px 0 #1f4fa8,6px 6px 0 #0a1a40;
+}
+header p{color:var(--mut);margin:14px 0 0;font-size:14px}
+main{max-width:980px;margin:0 auto;padding:8px 12px 28px}
+
+#scene{
+  width:100%;
+  height:auto;
+  display:block;
+  shape-rendering:crispEdges;
+  background:#0d1527;
+  border:2px solid var(--line);
+  border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+.st{cursor:pointer;outline:none}
+.st:hover .glow,.st:focus-visible .glow{opacity:1}
+.st:hover .desk,.st:focus-visible .desk{filter:brightness(1.25)}
+.glow{opacity:0;transition:opacity .15s}
+.lab{
+  font:12px "Press Start 2P",monospace;
+  fill:#fff;
+  stroke:#0a0f1f;
+  stroke-width:4px;
+  paint-order:stroke;
+  text-anchor:middle;pointer-events:none;
+}
+.dot{animation:p 1.6s infinite}
+.bd{
+  transform-box:fill-box;
+  transform-origin:50% 100%;
+  animation:br 2.6s ease-in-out infinite;
+  animation-delay:var(--d,0s);
+}
+@keyframes br{50%{transform:scaleY(1.025)}}
+.bb{opacity:0;transition:opacity .25s;pointer-events:none}
+.bb.on{opacity:1}
+.bb text{font:600 13px "Noto Sans Thai",sans-serif;fill:#0a0f1f;text-anchor:middle}
+.holo{animation:b 2.4s ease-in-out infinite}
+@keyframes p{50%{opacity:.25}}
+@keyframes b{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.dot,.holo,.bd{animation:none}}
+
+.hint{text-align:center;color:var(--mut);font-size:13px;margin:12px 0 16px}
+.log{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:13px}
+.log b{font-family:"Press Start 2P",monospace;font-size:10px;font-weight:400;color:#7fd4ff}
+.log ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.log li{display:flex;gap:10px;color:#c5cfe8}
+.log time{color:var(--mut);min-width:52px}
+.log i{width:8px;height:8px;margin-top:6px;flex:none;border-radius:50%}
+
+#m{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(3,6,16,.75);
+  backdrop-filter:blur(4px);
+  padding:16px;
+  z-index:10;
+}
+#m.on{display:flex}
+.card{
+  background:var(--panel);
+  border:2px solid var(--c,#4fd1ff);
+  box-shadow:6px 6px 0 rgba(0,0,0,.5);
+  border-radius:6px;
+  max-width:440px;
+  width:100%;
+  padding:20px;
+  display:flow-root;
+}
+#mi{
+  height:120px;
+  width:auto;
+  float:right;
+  margin:0 0 8px 12px;
+  image-rendering:pixelated;
+  border-radius:4px;
+}
+.card h2{font-family:"Press Start 2P",monospace;font-size:14px;line-height:1.5;margin:0 0 6px;color:var(--c)}
+.card .r{color:var(--mut);font-size:13px;margin:0 0 12px}
+.card p{margin:0 0 14px;line-height:1.7;font-size:14px}
+.card .s{display:inline-block;background:#0a0f1f;border:1px solid var(--c);padding:4px 10px;font-size:13px;margin-bottom:16px;border-radius:3px}
+button{
+  font:inherit;
+  background:var(--c,#4fd1ff);
+  color:#06101f;
+  border:0;
+  border-radius:3px;
+  padding:9px 18px;
+  font-weight:600;
+  cursor:pointer;
+}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+.hq{display:grid;gap:12px;margin:0 0 14px}
+.pn{background:#0c1329;border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.pn>b{font:400 9px "Press Start 2P",monospace;color:#7fd4ff;display:block;margin-bottom:10px}
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.mrow button{
+  all:unset;
+  cursor:pointer;
+  background:#111a36;
+  border:1px solid var(--line);
+  border-left:3px solid var(--k);
+  border-radius:4px;
+  padding:8px 10px;
+  display:grid;
+  gap:2px;
+  font-size:12px;
+  color:var(--mut);
+}
+.mrow button:hover,.mrow button:focus-visible{background:#18244a;outline:2px solid var(--k)}
+.mrow strong{color:var(--ink);font-size:13px}
+.mrow i{display:inline-block;width:7px;height:7px;background:var(--k);margin-right:6px;border-radius:50%}
+.wf{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;font-size:12px}
+.nd{border:1px solid var(--c);color:var(--ink);padding:5px 10px;border-radius:4px;background:#111a36}
+.ln{width:22px;height:2px;background:#3a4d94}
+.sub{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ev{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#c5cfe8;margin-top:2px}
+.ev i{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%}
+.note{color:var(--mut);font-size:11px;margin:0;text-align:right}
+</style>
 </head>
-<body class="min-h-screen p-3 md:p-5 flex flex-col justify-between relative overflow-x-hidden">
+<body>
 
-    <div class="max-w-[1700px] mx-auto w-full flex-1 flex flex-col gap-4">
+<header>
+  <h1>AGENT HQ</h1>
+  <p>ออฟฟิศจำลองของเอเจนต์ทั้ง 8 ระบบ</p>
+</header>
 
-        <!-- HEADER -->
-        <header class="cyber-panel p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4 border-l-4 border-l-blue-500">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-blue-600/25 border border-blue-400 flex items-center justify-center text-blue-400 font-bold text-2xl shadow-[0_0_15px_rgba(59,130,246,0.6)]">
-                    HQ
-                </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                        AGENT HQ <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-900/70 text-blue-300 border border-blue-500/50 font-mono-code">DASHBOARD</span>
-                    </h1>
-                    <p class="text-xs text-gray-400">ศูนย์ปฏิบัติการและติดตามสถานะโปรเจกต์อัตโนมัติ</p>
-                </div>
-            </div>
+<main>
+  <svg id="scene" viewBox="0 0 800 550" role="img" aria-label="ออฟฟิศพิกเซลของ Agent HQ"></svg>
+  
+  <p class="hint">แตะที่โต๊ะหรือสถานะเพื่อดูรายละเอียดเอเจนต์</p>
 
-            <div class="flex items-center gap-4 text-xs font-mono-code">
-                <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-700">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="text-emerald-400 font-bold">สถานะระบบ: ออนไลน์</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- PROJECT CARDS -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-            <div onclick="selectProject(0)" id="card-0" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-blue-400 truncate">Driver</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">ระบบขับรถรับจ้าง</div>
-                <div class="text-[10px] text-emerald-400 mt-1 font-mono-code">ซิงก์ข้อมูลแล้ว</div>
-            </div>
-            <div onclick="selectProject(1)" id="card-1" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-cyan-400 truncate">Captain ประกันภัย</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">นายหน้าประกันภัย</div>
-                <div class="text-[10px] text-cyan-400 mt-1 font-mono-code">เคสวันนี้: 18</div>
-            </div>
-            <div onclick="selectProject(2)" id="card-2" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-indigo-400 truncate">Take Profit</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">ระบบเทรด XAUUSD</div>
-                <div class="text-[10px] text-indigo-300 mt-1 font-mono-code">กำไร +14.2%</div>
-            </div>
-            <div onclick="selectProject(3)" id="card-3" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-amber-400 truncate">Solar & Energy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">ระบบโซล่าเซลล์</div>
-                <div class="text-[10px] text-amber-300 mt-1 font-mono-code">แบตเตอรี่: 94%</div>
-            </div>
-            <div onclick="selectProject(4)" id="card-4" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-rose-400 truncate">Healthy</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">สุขภาพและการออกกำลังกาย</div>
-                <div class="text-[10px] text-rose-300 mt-1 font-mono-code">สำเร็จ 3/3 วัน</div>
-            </div>
-            <div onclick="selectProject(5)" id="card-5" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-sky-400 truncate">Telegram</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">ระบบแจ้งเตือน</div>
-                <div class="text-[10px] text-sky-300 mt-1 font-mono-code">ออนไลน์</div>
-            </div>
-            <div onclick="selectProject(6)" id="card-6" class="cyber-panel p-3 rounded-xl cursor-pointer hover:border-blue-500 transition duration-200">
-                <div class="flex justify-between items-start mb-1"><span class="text-[11px] font-bold text-emerald-400 truncate">App Script Auto</span><span class="w-2 h-2 rounded-full bg-emerald-400"></span></div>
-                <div class="text-[10px] text-gray-400 truncate">ระบบอัตโนมัติ</div>
-                <div class="text-[10px] text-emerald-300 mt-1 font-mono-code">พร้อมใช้งาน</div>
-            </div>
-        </div>
-
-        <!-- MAIN DISPLAY AREA -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[520px]">
-            
-            <!-- CANVAS OFFICE SIMULATOR -->
-            <div class="lg:col-span-2 cyber-panel rounded-2xl p-2.5 relative flex flex-col justify-between overflow-hidden border border-slate-700">
-                <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
-                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-blue-500/40 text-blue-300 font-bold text-xs flex items-center gap-2.5 shadow-lg pointer-events-auto">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        ผังจำลองสถานะโปรเจกต์อัตโนมัติ
-                    </div>
-                </div>
-
-                <div class="w-full h-full min-h-[480px] rounded-xl overflow-hidden relative bg-[#090d18]">
-                    <canvas id="mainCanvas" class="w-full h-full block cursor-pointer"></canvas>
-                </div>
-
-                <div class="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
-                    <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-gray-300 text-xs flex items-center gap-2 pointer-events-auto">
-                        <span class="text-blue-400 font-bold">คำแนะนำ:</span>
-                        <span>🖱️ คลิกที่โมดูลหรือไอคอนเพื่อตรวจสอบรายละเอียด</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TERMINAL LOG & PERFORMANCE -->
-            <div class="flex flex-col gap-4">
-                <div class="cyber-panel rounded-2xl p-4 flex-1 flex flex-col justify-between border border-slate-700">
-                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
-                        <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>💻</span> บันทึกระบบ (System Log)</h3>
-                        <span class="text-[10px] text-emerald-400 font-mono-code px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">LIVE FEED</span>
-                    </div>
-                    <div id="terminal-box" class="flex-1 bg-[#020408] p-3.5 rounded-xl border border-slate-800 font-mono-code text-[11px] overflow-y-auto max-h-[280px] space-y-2 text-gray-300"></div>
-                </div>
-
-                <div class="cyber-panel rounded-2xl p-4 border border-slate-700 space-y-3">
-                    <h3 class="font-bold text-white text-sm flex items-center gap-2"><span>⚡</span> ประสิทธิภาพการทำงาน</h3>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">สถานะระบบเทรด XAUUSD</span><span class="text-blue-400 font-bold font-mono-code">82%</span></div>
-                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 82%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">ระบบสำรองพลังงานโซล่าเซลล์</span><span class="text-amber-400 font-bold font-mono-code">94%</span></div>
-                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-amber-500 h-1.5 rounded-full" style="width: 94%"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- FOOTER -->
-        <footer class="cyber-panel p-3.5 rounded-2xl flex justify-between items-center text-xs text-gray-500 border-t border-slate-800">
-            <div>© 2026 <strong>Agent HQ Command Center</strong>.</div>
-            <div class="font-mono-code text-[11px] text-gray-400">Driver, Captain ประกันภัย, Take Profit, Solar, Healthy, Telegram, App Script</div>
-        </footer>
+  <section class="hq" aria-label="แผงสถานะ">
+    <div class="pn">
+      <b>MODULES</b>
+      <div class="mrow">
+        <button style="--k:#5ee08a" onclick="openCard('driver')"><strong><i></i>Driver</strong>ซิงก์ข้อมูลแล้ว</button>
+        <button style="--k:#6ea8ff" onclick="openCard('captain')"><strong><i></i>Captain</strong>เคสวันนี้ 18</button>
+        <button style="--k:#ffb347" onclick="openCard('profit')"><strong><i></i>Take Profit</strong>EA ทำงานอยู่</button>
+        <button style="--k:#ffe066" onclick="openCard('solar')"><strong><i></i>Solar</strong>แบตเตอรี่ 94%</button>
+        <button style="--k:#ff8ad8" onclick="openCard('health')"><strong><i></i>Healthy</strong>สำเร็จ 3/3 วัน</button>
+        <button style="--k:#f2c94c" onclick="openCard('finance')"><strong><i></i>Finance</strong>ตรวจสอบแล้ว</button>
+        <button style="--k:#9b7bff" onclick="openCard('script')"><strong><i></i>App Script</strong>พร้อมใช้งาน</button>
+        <button style="--k:#4fd1ff" onclick="openCard('tg')"><strong><i></i>Telegram</strong>ออนไลน์</button>
+      </div>
     </div>
-
-    <!-- INSPECTOR MODAL -->
-    <div id="project-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="cyber-panel bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg font-bold">✕</button>
-            <div class="flex items-center gap-3.5 mb-4">
-                <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-blue-600/30 border border-blue-400 flex items-center justify-center text-3xl shadow-lg">🤖</div>
-                <div>
-                    <h2 id="modal-title" class="text-xl font-bold text-white">ชื่อโปรเจกต์</h2>
-                    <p id="modal-role" class="text-xs text-blue-400 font-mono-code">บทบาทหน้าที่</p>
-                </div>
-            </div>
-            <div class="space-y-3 text-xs text-gray-300 mb-6">
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-                    <span class="text-gray-500 block text-[10px]">รายละเอียดการทำงาน:</span>
-                    <p id="modal-desc" class="text-gray-200 leading-relaxed">รายละเอียด...</p>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2.5">
-                <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs transition">ปิดหน้าต่าง</button>
-                <button onclick="triggerProjectAction()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg">สั่งการด่วน</button>
-            </div>
-        </div>
+    
+    <div class="pn">
+      <b>WORKFLOW</b>
+      <div class="wf">
+        <span class="nd" style="--c:#e8eefc">คุณ</span>
+        <span class="ln"></span>
+        <span class="nd" style="--c:#4fd1ff">Telegram</span>
+        <span class="ln"></span>
+        <span class="nd" style="--c:#9b7bff">App Script</span>
+        <span class="ln"></span>
+        <span class="nd" style="--c:#5ee08a">เอเจนต์ 6 ระบบ</span>
+      </div>
+      <div class="sub">
+        <span class="nd" style="--c:#5ee08a">Driver</span>
+        <span class="nd" style="--c:#6ea8ff">Captain</span>
+        <span class="nd" style="--c:#ffb347">Take Profit</span>
+        <span class="nd" style="--c:#ffe066">Solar</span>
+        <span class="nd" style="--c:#ff8ad8">Healthy</span>
+        <span class="nd" style="--c:#f2c94c">Finance</span>
+      </div>
     </div>
+    
+    <div class="pn">
+      <b>EVENTS</b>
+      <div class="ev">
+        <span><i style="background:#6ea8ff"></i>Info 128</span>
+        <span><i style="background:#5ee08a"></i>Success 342</span>
+        <span><i style="background:#ffb347"></i>Warning 7</span>
+        <span><i style="background:#ff6b6b"></i>Error 3</span>
+      </div>
+    </div>
+    
+    <p class="note">ตัวเลขทั้งหมดเป็นข้อมูลตัวอย่าง ยังไม่เชื่อมระบบจริง</p>
+  </section>
 
-    <!-- PURE CANVAS ENGINE -->
-    <script>
-        const PROJECTS_DATA = [
-            { id: 1, name: "Driver", role: "ระบบติดตามงานขับรถรับจ้าง", desc: "ติดตามและบันทึกข้อมูลรายได้ ค่าใช้จ่าย และอินเซนทีฟประจำวันจากทุกแพลตฟอร์มการขับขี่ พร้อมคำนวณกำไรสุทธิ", color: "#3b82f6", icon: "🚗" },
-            { id: 2, name: "Captain ประกันภัย", role: "ระบบบริหารงานประกันภัย (FairDee)", desc: "จัดการรับข้อมูลลูกค้า ทำใบเสนอราคา ประสานงานกับบริษัทประกันภัย และติดตามสถานะเคสประกันภัยแบบอัตโนมัติ", color: "#06b6d4", icon: "🛡️" },
-            { id: 3, name: "Take Profit", role: "ระบบเทรดอัลกอริทึม XAUUSD", desc: "รันกลยุทธ์ Grid Trading สำหรับคู่เงินทองคำ (XAUUSD) พร้อมฟังก์ชัน Partial Hedging ปิดความเสี่ยงอัตโนมัติ", color: "#6366f1", icon: "📈" },
-            { id: 4, name: "Solar & Energy", role: "ระบบบริหารจัดการพลังงานโซล่าเซลล์", desc: "ตรวจเช็กและบริหารการทำงานของแผงโซล่าเซลล์ อินเวอร์เตอร์ และระบบแบตเตอรี่สำรองภายในบ้าน", color: "#f59e0b", icon: "⚡" },
-            { id: 5, name: "Healthy", role: "ระบบติดตามสุขภาพและการออกกำลังกาย", desc: "ลงบันทึกและติดตามสถิติการออกกำลังกายประวัน เช่น การเดิน และการยกเวทเทรนนิ่งเพื่อสุขภาพ", color: "#f43f5e", icon: "🏋️" },
-            { id: 6, name: "Telegram", role: "ระบบแจ้งเตือนอัตโนมัติ", desc: "ช่องทางหลักในการรับการแจ้งเตือนแบบเรียลไทม์เกี่ยวกับพอร์ตการเทรด สถานะพลังงาน และอัปเดตต่างๆ", color: "#38bdf8", icon: "📲" },
-            { id: 7, name: "App Script Auto", role: "ระบบเขียนโค้ดและ Google App Script", desc: "เครื่องมือในการเขียนและรันสคริปต์อัตโนมัติ เพื่อเชื่อมโยงข้อมูลระหว่างระบบต่างๆ และ Google Sheets", color: "#10b981", icon: "⚙️" }
-        ];
+  <section class="log" aria-label="บันทึกระบบ">
+    <b>SYSTEM LOG</b>
+    <ul id="log"></ul>
+  </section>
+</main>
 
-        let selectedProjectIndex = null;
-        let canvas, ctx;
+<div id="m" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="card" id="card">
+    <img id="mi" alt="" hidden>
+    <h2 id="mt"></h2>
+    <p class="r" id="mr"></p>
+    <p id="md"></p>
+    <span class="s" id="ms"></span>
+    <br>
+    <button id="x" onclick="closeCard()">ปิดหน้าต่าง</button>
+  </div>
+</div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            canvas = document.getElementById('mainCanvas');
-            ctx = canvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            canvas.addEventListener('click', handleCanvasClick);
-            requestAnimationFrame(renderLoop);
-            startLogStream();
-        });
+<script>
+const S = [
+  {id:'driver',  n:'Driver', role:'Driver Intelligence Agent', d:'ช่วยวางแผนเส้นทาง ดูแลคอมมูนิตี้ The Driver Thailand และข้อมูลที่เกี่ยวกับงานขับรถรับจ้าง', st:'ซิงก์ข้อมูลแล้ว', c:'#5ee08a', x:150, y:140},
+  {id:'captain', n:'Captain', role:'Insurance CRM Agent', d:'งานแบรนด์ Captain ประกันภัย ดูแลพอร์ตกรมธรรม์ ทำใบเสนอราคา และประสานงานกับแพลตฟอร์มนายหน้า', st:'เคสวันนี้: 18', c:'#6ea8ff', x:370, y:140},
+  {id:'profit',  n:'Take Profit', role:'Forex Trading Agent', d:'ดูแล EA บน MT5 กลยุทธ์ Grid Trading คู่เงิน XAUUSD ระบบ Partial Hedging และแจ้งเตือนผ่าน Telegram', st:'EA ทำงานอยู่', c:'#ffb347', x:590, y:140},
+  {id:'solar',   n:'Solar', role:'Smart Home & Solar Agent', d:'ดูแลระบบอัตโนมัติในบ้าน Apple HomeKit โซลาร์รูฟท็อป อินเวอร์เตอร์ และการประหยัดพลังงาน', st:'แบตเตอรี่: 94%', c:'#ffe066', x:150, y:280},
+  {id:'tg',      n:'Telegram', role:'ศูนย์แจ้งเตือนกลาง', d:'รับการแจ้งเตือนจากทุกระบบ รวมถึงสัญญาณจาก EA ผ่าน Webhook แล้วส่งถึงคุณ', st:'ออนไลน์', c:'#4fd1ff', x:370, y:280},
+  {id:'health',  n:'Healthy', role:'Health Analytics Agent', d:'บันทึกและติดตามผลออกกำลังกายประจำวัน เช่น เดินลู่วิ่งและเล่นดัมเบลล์ ภายใต้โปรเจกต์ take profit', st:'สำเร็จ 3/3 วัน', c:'#ff8ad8', x:590, y:280},
+  {id:'script',  n:'App Script', role:'ระบบอัตโนมัติ', d:'สคริปต์อัตโนมัติที่เชื่อมงานต่างๆ เข้าด้วยกัน', st:'พร้อมใช้งาน', c:'#9b7bff', x:260, y:420},
+  {id:'finance', n:'Finance', role:'Personal Finance Agent', d:'ติดตามธุรกรรม การโอนเงิน บิลชำระเงิน และความเคลื่อนไหวผ่านแอปธนาคารต่างๆ', st:'ตรวจสอบแล้ว', c:'#f2c94c', x:480, y:420}
+];
 
-        function resizeCanvas() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        }
+const L = [
+  ['10:24', '#5ee08a', 'Driver ซิงก์ข้อมูลเส้นทางสำเร็จ'],
+  ['10:21', '#4fd1ff', 'Telegram ส่งการแจ้งเตือนจาก EA แล้ว'],
+  ['10:15', '#ffb347', 'Take Profit ตรวจสถานะ Grid XAUUSD'],
+  ['10:02', '#6ea8ff', 'Captain อัปเดตเคสวันนี้']
+];
 
-        function renderLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawOfficeBackground();
-            drawDecorations();
-            drawModules();
-            requestAnimationFrame(renderLoop);
-        }
+// กำหนดรูปภาพของ Driver Intelligence Agent ใหม่
+const IMG = {
+  "driver": {"u": "data:image/png;base64,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"}
+};
 
-        function drawOfficeBackground() {
-            ctx.fillStyle = "#090d18";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+function renderScene() {
+  const svg = document.getElementById('scene');
+  let html = `
+    <defs>
+      <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+      </filter>
+    </defs>
+    <rect x="10" y="10" width="780" height="530" rx="8" fill="#131b2e" stroke="#1f2c4a" stroke-width="2"/>
+    <g>
+      <path d="M 10 100 L 790 100 M 10 200 L 790 200 M 10 300 L 790 300 M 10 400 L 790 400" stroke="#1a253d" stroke-width="1"/>
+      <path d="M 270 10 L 270 540 M 530 10 L 530 540" stroke="#1a253d" stroke-width="1"/>
+    </g>
+  `;
 
-            ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
-            ctx.lineWidth = 1;
-            const size = 45;
-            for (let x = 0; x < canvas.width; x += size) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-            }
-            for (let y = 0; y < canvas.height; y += size) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-            }
-        }
+  S.forEach((agent, i) => {
+    html += `
+      <g class="st" onclick="openCard('${agent.id}')" transform="translate(${agent.x}, ${agent.y})">
+        <circle cx="0" cy="0" r="45" fill="${agent.c}" class="glow" filter="blur(10px)" opacity="0.15"/>
+        <rect class="desk" x="-40" y="-25" width="80" height="50" rx="6" fill="#1a2642" stroke="${agent.c}" stroke-width="1.5" filter="url(#shadow)"/>
+        
+        <g class="bd" style="--d: ${i * 0.2}s">
+          <circle cx="0" cy="-5" r="14" fill="${agent.c}" opacity="0.8"/>
+          <rect x="-10" y="9" width="20" height="8" rx="2" fill="#e8eefc" opacity="0.9"/>
+        </g>
 
-        function drawDecorations() {
-            const cx = canvas.width / 2;
+        <circle cx="28" cy="-16" r="4" fill="${agent.c}" class="dot"/>
+        <text y="42" class="lab">${agent.n}</text>
+      </g>
+    `;
+  });
 
-            ctx.fillStyle = "#1e293b";
-            ctx.fillRect(cx - 150, 15, 300, 40);
-            ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(cx - 150, 15, 300, 40);
+  svg.innerHTML = html;
+}
 
-            ctx.fillStyle = "#38bdf8";
-            ctx.font = "bold 11px Sukhumvit Set, Prompt";
-            ctx.textAlign = "center";
-            ctx.fillText("📋 SYSTEM OPERATIONS & KANBAN BOARD", cx, 32);
+function renderLogs() {
+  const ul = document.getElementById('log');
+  ul.innerHTML = L.map(([time, color, msg]) => `
+    <li>
+      <time>${time}</time>
+      <i style="background:${color}"></i>
+      <span>${msg}</span>
+    </li>
+  `).join('');
+}
 
-            ctx.fillStyle = "#f59e0b"; ctx.fillRect(cx - 130, 24, 20, 18);
-            ctx.fillStyle = "#10b981"; ctx.fillRect(cx - 100, 24, 20, 18);
-            ctx.fillStyle = "#3b82f6"; ctx.fillRect(cx - 70, 24, 20, 18);
+function openCard(id) {
+  const agent = S.find(a => a.id === id);
+  if(!agent) return;
+  
+  const m = document.getElementById('m');
+  const card = document.getElementById('card');
+  const mi = document.getElementById('mi');
+  
+  card.style.setProperty('--c', agent.c);
+  document.getElementById('mt').innerText = agent.n;
+  document.getElementById('mr').innerText = agent.role;
+  document.getElementById('md').innerText = agent.d;
+  document.getElementById('ms').innerText = `สถานะ: ${agent.st}`;
+  
+  if (IMG[id] && IMG[id].u) {
+    mi.src = IMG[id].u;
+    mi.hidden = false;
+  } else {
+    mi.hidden = true;
+  }
+  
+  m.classList.add('on');
+}
 
-            ctx.fillStyle = "#111827"; ctx.fillRect(canvas.width - 60, 60, 40, 60);
-            ctx.strokeStyle = "#3b82f6"; ctx.strokeRect(canvas.width - 60, 60, 40, 60);
-            const t = Date.now() * 0.005;
-            for(let i=0; i<3; i++){
-                ctx.fillStyle = (Math.sin(t + i) > 0) ? "#34d399" : "#3b82f6";
-                ctx.fillRect(canvas.width - 52, 70 + (i*14), 6, 5);
-            }
-        }
+function closeCard() {
+  document.getElementById('m').classList.remove('on');
+}
 
-        function drawModules() {
-            const cols = 4;
-            const startX = 130;
-            const startY = 120;
-            const spacingX = (canvas.width - 220) / 3;
-            const spacingY = 170;
+document.getElementById('m').addEventListener('click', (e) => {
+  if (e.target.id === 'm') closeCard();
+});
 
-            PROJECTS_DATA.forEach((project, index) => {
-                const c = index % cols;
-                const r = Math.floor(index / cols);
-                const x = startX + (c * spacingX);
-                const y = startY + (r * spacingY);
+renderScene();
+renderLogs();
+</script>
 
-                project.renderX = x;
-                project.renderY = y;
-
-                const isSelected = selectedProjectIndex === index;
-
-                ctx.fillStyle = "rgba(0,0,0,0.4)";
-                ctx.fillRect(x - 45, y - 5, 90, 40);
-
-                if (isSelected) {
-                    ctx.strokeStyle = "#3b82f6";
-                    ctx.lineWidth = 2.5;
-                    ctx.strokeRect(x - 48, y - 8, 96, 46);
-                }
-
-                ctx.fillStyle = "#1e293b";
-                ctx.fillRect(x - 42, y - 8, 84, 38);
-                ctx.strokeStyle = project.color;
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(x - 42, y - 8, 84, 38);
-
-                ctx.fillStyle = "#0b101d";
-                ctx.fillRect(x - 36, y - 2, 72, 24);
-                ctx.strokeStyle = "#334155";
-                ctx.strokeRect(x - 36, y - 2, 72, 24);
-
-                ctx.fillStyle = project.color;
-                ctx.font = "24px Sukhumvit Set, Prompt";
-                ctx.textAlign = "center";
-                ctx.fillText(project.icon, x, y - 10);
-
-                ctx.fillStyle = "rgba(10, 15, 28, 0.95)";
-                ctx.fillRect(x - 55, y - 48, 110, 18);
-                ctx.strokeStyle = project.color;
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x - 55, y - 48, 110, 18);
-
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 10px Sukhumvit Set, Prompt";
-                ctx.textAlign = "center";
-                ctx.fillText(project.name, x, y - 35);
-            });
-        }
-
-        function handleCanvasClick(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            PROJECTS_DATA.forEach((project, index) => {
-                const dist = Math.hypot(clickX - project.renderX, clickY - project.renderY);
-                if (dist < 40) {
-                    selectProject(index);
-                }
-            });
-        }
-
-        function selectProject(index) {
-            selectedProjectIndex = index;
-            const project = PROJECTS_DATA[index];
-
-            for (let i = 0; i < PROJECTS_DATA.length; i++) {
-                const card = document.getElementById(`card-${i}`);
-                if (card) {
-                    if (i === index) card.classList.add('cyber-panel-active');
-                    else card.classList.remove('cyber-panel-active');
-                }
-            }
-
-            document.getElementById('modal-icon').innerText = project.icon;
-            document.getElementById('modal-title').innerText = project.name;
-            document.getElementById('modal-role').innerText = project.role;
-            document.getElementById('modal-desc').innerText = project.desc;
-            document.getElementById('project-modal').classList.remove('hidden');
-
-            addTerminalLog(`[COMMAND] ตรวจสอบโมดูลระบบ: ${project.name}`);
-        }
-
-        function closeModal() { document.getElementById('project-modal').classList.add('hidden'); }
-        function triggerProjectAction() {
-            if (selectedProjectIndex !== null) {
-                const project = PROJECTS_DATA[selectedProjectIndex];
-                addTerminalLog(`[EXECUTE] สั่งการด่วนไปยัง ${project.name}: สำเร็จ`);
-                closeModal();
-            }
-        }
-
-        function startLogStream() {
-            const logs = [
-                "[DRIVER] ซิงก์ข้อมูลรายได้และค่าใช้จ่ายประจำวันเข้า Google Sheets สำเร็จ",
-                "[CAPTAIN] รับข้อมูลลูกค้าและออกใบเสนอราคาประกันภัยเคสใหม่เรียบร้อย",
-                "[TAKE PROFIT] XAUUSD Partial Hedging ทำงานตามกลยุทธ์ ปิดความเสี่ยงรอบล่าสุดสำเร็จ",
-                "[ENERGY] สถานะแบตเตอรี่สำรอง LiFePO4 ทำงานปกติ (ความจุ 94%)",
-                "[HEALTH] บันทึกสถิติการเดินออกกำลังกายประจำวัน 1 ชั่วโมง สำเร็จ",
-                "[NOTIFICATION] ยิงสรุปประจำวันเข้ากลุ่ม Telegram เรียบร้อย",
-                "[AUTOMATION] Google Apps Script ทำการสำรองข้อมูลฐานข้อมูลสมบูรณ์"
-            ];
-            setInterval(() => {
-                const l = logs[Math.floor(Math.random() * logs.length)];
-                addTerminalLog(l);
-            }, 3500);
-        }
-
-        function addTerminalLog(msg) {
-            const box = document.getElementById('terminal-box');
-            const now = new Date().toLocaleTimeString('th-TH');
-            const p = document.createElement('p');
-            p.innerHTML = `<span class="text-blue-400">[${now}]</span> <span class="text-gray-300">${msg}</span>`;
-            box.appendChild(p);
-            box.scrollTop = box.scrollHeight;
-            if (box.children.length > 30) box.removeChild(box.firstChild);
-        }
-    </script>
 </body>
 </html>
