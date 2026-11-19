@@ -11,10 +11,10 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0,#16224a,var(--bg) 60%);color:var(--ink);font-family:"Noto Sans Thai",system-ui,sans-serif}
-header{padding:20px 16px 4px;text-align:center}
-h1{font-family:"Press Start 2P",monospace;font-size:clamp(22px,6vw,44px);margin:0;letter-spacing:2px;color:#cfeaff;text-shadow:3px 3px 0 #1f4fa8,6px 6px 0 #0a1a40}
+header{padding:12px 16px 2px;text-align:center}
+h1{font-family:"Press Start 2P",monospace;font-size:clamp(18px,5vw,28px);margin:0;letter-spacing:2px;color:#cfeaff;text-shadow:3px 3px 0 #1f4fa8,6px 6px 0 #0a1a40}
 header p{color:var(--mut);margin:14px 0 0;font-size:14px}
-main{max-width:980px;margin:0 auto;padding:8px 12px 28px}
+main{max-width:980px;margin:0 auto;padding:8px 12px 88px}
 #scene{width:100%;height:auto;display:block;shape-rendering:crispEdges}
 .st{cursor:pointer;outline:none}
 .st:hover .glow,.st:focus-visible .glow{opacity:1}
@@ -51,15 +51,39 @@ button.alt{background:#2a3560;color:var(--ink)}.ev span{display:inline-flex;alig
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.chips button{all:unset;cursor:pointer;background:#111a36;border:1px solid var(--line);border-radius:14px;padding:5px 11px;font-size:13px;color:var(--ink)}.chips button:hover,.chips button:focus-visible{background:#18244a;outline:2px solid #4fd1ff}
 .cmdrow{display:flex;gap:8px}.cmdrow input{flex:1;min-width:0;background:#0a0f1f;border:1px solid var(--line);border-radius:4px;padding:10px;color:var(--ink);font:inherit}.cmdrow button{background:#4fd1ff}
 .cmdout{white-space:pre-wrap;margin-top:10px;font-size:13px;line-height:1.7;color:#d6def5}.cmdout:empty{display:none}
+.banner{max-width:956px;margin:8px auto 0;padding:8px 12px;border-radius:6px;font-size:13px;background:#3a2a10;border:1px solid #ffb347;color:#ffe2b0}.banner.err{background:#3a1414;border-color:#ff6b6b;color:#ffd0d0}.banner[hidden]{display:none}
+.pane{display:none}.pane.on{display:block}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0c1329;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:4}
+.tabs button{all:unset;flex:1;text-align:center;padding:9px 0 8px;font-size:20px;cursor:pointer;color:var(--mut)}.tabs button span{display:block;font-size:12px;margin-top:2px}
+.tabs button[aria-selected=true]{color:#4fd1ff;box-shadow:inset 0 2px 0 #4fd1ff}.tabs button:focus-visible{outline:2px solid #4fd1ff;outline-offset:-2px}
+.hero{background:linear-gradient(160deg,#16224a,#0c1329);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 12px;text-align:center}.hero small{color:var(--mut);font-size:13px}
+.hero .big{font:400 clamp(30px,9vw,52px)/1.15 "Press Start 2P",monospace;color:#ffd166;margin:10px 0 2px}
+.bar{height:14px;background:#0a0f1f;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:12px auto 6px;max-width:520px}.bar i{display:block;height:100%;background:#5ee08a}
+.hchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}.hchips span{background:#0a0f1f;border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:13px}.hchips .w{border-color:#ffb347;color:#ffe2b0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:12px}.pn{margin-bottom:12px}.grid2 .pn{margin-bottom:0}
+.row{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #1d2850;font-size:13px}.row:first-child{border-top:0}.row .t{font:400 12px "Press Start 2P",monospace;color:#cfeaff}.row .s{font-size:12px;color:var(--mut)}
+.tl{display:grid;grid-template-columns:92px 1fr;gap:8px;align-items:center;font-size:12px;margin:6px 0}.tlb{height:22px;border-radius:3px;background:#3a4d94;color:#fff;padding:2px 6px;white-space:nowrap;overflow:hidden;min-width:70px;box-sizing:border-box}.tlb.hot{background:#c98a1f}.tlb.bad{background:#b33a3a}
+.ln2{margin:5px 0;font-size:14px;line-height:1.6}.muted{color:var(--mut);font-size:12px}.tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 8px;margin-left:6px;color:var(--mut)}
 </style>
 </head>
 <body>
 <header>
 <h1>AGENT HQ</h1>
-<p>ออฟฟิศจำลองของเอเจนต์ทั้ง 8 ระบบ</p>
 <p class="connl"><button id="cfgBtn" class="cfg">⚙️ เชื่อมข้อมูลจริง</button> <span id="conn">ยังไม่ได้เชื่อมข้อมูลจริง</span></p>
 </header>
+<div id="banner" class="banner" hidden></div>
 <main>
+<section class="pane on" id="p-today">
+<div class="hero" id="hero"></div>
+<div class="grid2"><div class="pn"><b>เที่ยวบินถัดไป</b><div id="nextFl"></div></div><div class="pn"><b>รายได้วันนี้</b><div id="todayJ"></div></div></div>
+<div class="pn"><b>สั่งการ</b>
+<div class="chips" id="qc"><button data-send="วันนี้ต้องหาเท่าไร">🎯 วันนี้ต้องหาเท่าไร</button><button data-send="/bills">🧾 รายการจ่าย</button><button data-send="/summary">📊 สรุปรายได้</button><button data-send="/bkk">✈️ BKK</button><button data-send="/dmk">✈️ DMK</button>
+<button data-fill="บันทึก Grab ">➕ บันทึกงาน</button><button data-fill="เงินสด ">💵 เงินสด</button><button data-fill="จ่ายแล้ว ">✅ จ่ายแล้ว</button><button data-fill="ค้างจ่าย ">📌 ค้างจ่าย</button></div>
+<div class="cmdrow"><input id="cmdIn" placeholder="พิมพ์เหมือนในบอท เช่น บันทึก Grab 250 ทิป 20 สยาม ไป สาทร" autocomplete="off" enterkeyhint="send"><button id="cmdGo">ส่ง</button></div>
+<div id="cmdOut" class="cmdout" aria-live="polite"></div>
+<p class="note" id="cmdNote" style="text-align:left"></p></div>
+</section>
+<section class="pane" id="p-office">
 <svg id="scene" viewBox="0 0 1312 816" role="img" aria-label="ออฟฟิศพิกเซลของ Agent HQ"></svg>
 <p class="hint">แตะที่โต๊ะของเอเจนต์เพื่อดูรายละเอียด</p>
 <section class="hq" aria-label="แผงสถานะ">
@@ -76,18 +100,27 @@ button.alt{background:#2a3560;color:var(--ink)}.ev span{display:inline-flex;alig
 <div class="pn"><b>WORKFLOW</b><div class="wf"><span class="nd" style="--c:#e8eefc">คุณ</span><span class="ln"></span><span class="nd" style="--c:#4fd1ff">Telegram</span><span class="ln"></span><span class="nd" style="--c:#9b7bff">App Script</span><span class="ln"></span><span class="nd" style="--c:#5ee08a">เอเจนต์ 6 ระบบ</span></div>
 <div class="sub"><span class="nd" style="--c:#5ee08a">Driver</span><span class="nd" style="--c:#6ea8ff">Captain</span><span class="nd" style="--c:#ffb347">Take Profit</span><span class="nd" style="--c:#ffe066">Solar</span><span class="nd" style="--c:#ff8ad8">Healthy</span><span class="nd" style="--c:#f2c94c">Finance</span></div></div>
 <div class="pn"><b>STATUS</b><div class="ev" id="evp"></div></div>
-<div class="pn"><b>สั่งการ</b>
-<div class="chips" id="qc"><button data-send="วันนี้ต้องหาเท่าไร">🎯 วันนี้ต้องหาเท่าไร</button><button data-send="/bills">🧾 รายการจ่าย</button><button data-send="/summary">📊 สรุปรายได้</button><button data-send="/bkk">✈️ BKK</button><button data-send="/dmk">✈️ DMK</button>
-<button data-fill="บันทึก Grab ">➕ บันทึกงาน</button><button data-fill="เงินสด ">💵 เงินสด</button><button data-fill="จ่ายแล้ว ">✅ จ่ายแล้ว</button><button data-fill="ค้างจ่าย ">📌 ค้างจ่าย</button></div>
-<div class="cmdrow"><input id="cmdIn" placeholder="พิมพ์เหมือนในบอท เช่น บันทึก Grab 250 ทิป 20 สยาม ไป สาทร" autocomplete="off" enterkeyhint="send"><button id="cmdGo">ส่ง</button></div>
-<div id="cmdOut" class="cmdout" aria-live="polite"></div>
-<p class="note" id="cmdNote" style="text-align:left"></p></div>
+
 </section>
 <section class="log" aria-label="บันทึกระบบ">
 <b>SYSTEM LOG</b>
 <ul id="log"></ul>
 </section>
+</section>
+<section class="pane" id="p-flights"><div id="flBoards"></div></section>
+<section class="pane" id="p-money">
+<div class="pn"><b>แผนเงิน</b><div id="planBox"></div></div>
+<div class="pn"><b>ภาระ 30 วันข้างหน้า</b><div id="tl"></div></div>
+<div class="pn"><b>รายได้ 7 วันล่าสุด</b><div id="inc"></div></div>
+<div class="pn"><b>รายการจ่ายเดือนนี้</b><div id="bills"></div></div>
+</section>
 </main>
+<nav class="tabs" role="tablist" aria-label="เมนูหลัก">
+<button data-t="today" role="tab" aria-selected="true">🎯<span>วันนี้</span></button>
+<button data-t="office" role="tab" aria-selected="false">🏢<span>ออฟฟิศ</span></button>
+<button data-t="flights" role="tab" aria-selected="false">✈️<span>เที่ยวบิน</span></button>
+<button data-t="money" role="tab" aria-selected="false">💰<span>การเงิน</span></button>
+</nav>
 <div id="cfgd" role="dialog" aria-modal="true" aria-labelledby="cfgt"><div class="card" style="--c:#4fd1ff">
 <h2 id="cfgt">เชื่อมข้อมูลจริง</h2>
 <p class="r">ใส่ลิงก์ Web app ของ Apps Script (ลงท้าย /exec) และรหัส DASH_KEY ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งไปที่อื่นนอกจากลิงก์ที่คุณใส่ · ไม่อยากกรอกเอง: พิมพ์ /dash ในบอทแล้วกดปุ่มที่ส่งให้ หน้านี้จะเชื่อมเอง</p>
@@ -137,7 +170,7 @@ mv:document.getElementById('mv-'+s.id),bb:document.getElementById('bb-'+s.id),fl
 const say=(c,sec,now)=>{c.bb.classList.add('on');c.bo=now+sec};
 const turn=(c,f)=>{if(c.face!==f){c.face=f;c.fl.setAttribute('transform',f<0?`translate(${2*c.hx} 0) scale(-1 1)`:'')}};
 let lt=0,order='';
-function tick(ms){const now=ms/1000,dt=Math.min(.1,now-lt);lt=now;
+function tick(ms){if(!OFFICE_ON){lt=ms/1000;requestAnimationFrame(tick);return}const now=ms/1000,dt=Math.min(.1,now-lt);lt=now;
 const walking=()=>C.filter(c=>c.st==='go'||c.st==='back').length;
 C.forEach(c=>{
 if(c.bo&&now>c.bo){c.bb.classList.remove('on');c.bo=0}
@@ -185,7 +218,7 @@ function setEv(list){const e=$('evp');e.textContent='';list.forEach(c=>e.appendC
 function setLog(list,msg){lg.textContent='';if(!list||!list.length){const li=document.createElement('li');li.textContent=msg||'ยังไม่มีเหตุการณ์';lg.appendChild(li);return}
 list.slice().reverse().forEach(r=>{const li=document.createElement('li'),t=document.createElement('time'),i=document.createElement('i'),sp=document.createElement('span');t.textContent=r.t;i.style.background='#4fd1ff';sp.textContent=r.m;li.append(t,i,sp);lg.appendChild(li)})}
 function setConn(kind,t){$('conn').textContent=kind==='on'?'เชื่อมแล้ว · อัปเดตล่าสุด '+t+' น.':kind==='err'?'เชื่อมไม่สำเร็จ: '+t:'ยังไม่ได้เชื่อมข้อมูลจริง'}
-function showOff(){setSt({});setEv([['#8b97b8','ยังไม่เชื่อมข้อมูล (กด ⚙️ เพื่อเชื่อม)']]);setLog(null,'ยังไม่เชื่อมข้อมูล');setConn('off')}
+function showOff(){setSt({});setEv([['#8b97b8','ยังไม่เชื่อมข้อมูล (กด ⚙️ เพื่อเชื่อม)']]);setLog(null,'ยังไม่เชื่อมข้อมูล');setConn('off');renderTabs(SAMPLE,true)}
 function fl(k,f){if(!f||f.live===null)return [ '#8b97b8',k+': ยังไม่มีข้อมูลล่าสุด (พิมพ์ /'+k.toLowerCase()+' ในบอทเพื่ออัปเดต)'];return [f.live?'#5ee08a':'#ffb347',k+': ลงแล้ว '+f.landed+' · กำลังจะลง '+f.upcoming+(f.next?' (ถัดไป '+f.next+')':'')+(f.live?' · ข้อมูลสด':' · ข้อมูลสำรองจากชีต')]}
 function applyData(d){
  const j=d.jobs,b=d.bot,e=d.errors,n=v=>Number(v).toLocaleString('en-US'),st={};
@@ -196,7 +229,7 @@ function applyData(d){
  setSt(st);
  const ev=[fl('BKK',d.flights&&d.flights.BKK),fl('DMK',d.flights&&d.flights.DMK)];
  ev.push(e?['#ff6b6b','ข้อผิดพลาดล่าสุด '+e.t+' น.: '+e.m]:['#5ee08a','ไม่มีข้อผิดพลาดที่บันทึกไว้']);
- setEv(ev);setLog(d.log,'ยังไม่มีเหตุการณ์ (ลองสั่งงานในบอท)');
+ setEv(ev);setLog(d.log,'ยังไม่มีเหตุการณ์ (ลองสั่งงานในบอท)');renderTabs(d,false);
 }
 function jsonp(u){return new Promise((res,rej)=>{const cb='hq_cb_'+Date.now(),sc=document.createElement('script');const t=setTimeout(()=>{cleanup();rej(new Error('หมดเวลา'))},12000);
  function cleanup(){clearTimeout(t);delete window[cb];sc.remove()}
@@ -210,7 +243,7 @@ async function pull(force){
  try{const r=await fetch(u,{redirect:'follow'});d=await r.json()}catch(e1){try{d=await jsonp(u)}catch(e2){err=e2.message||'เชื่อมต่อไม่ได้'}}
  if(d&&d.ok){applyData(d);setConn('on',d.now);return}
  const msg=d?(d.error==='unauthorized'?'รหัส DASH_KEY ไม่ถูกต้อง หรือยังไม่ได้ตั้งใน Script properties':d.error||'ตอบกลับไม่ถูกต้อง'):err;
- setSt({});setEv([['#ff6b6b',msg]]);setLog(null,msg);setConn('err',msg);
+ setSt({});setEv([['#ff6b6b',msg]]);setLog(null,msg);setConn('err',msg);renderTabs(null,msg);
 }
 let timer=null;
 function startPoll(){clearInterval(timer);pull(true);timer=setInterval(()=>{if(document.visibilityState==='visible')pull()},120000)}
@@ -250,6 +283,70 @@ $('cmdGo').onclick=()=>sendCmd($('cmdIn').value,false);
 $('cmdIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendCmd($('cmdIn').value,false)}});
 $('qc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.send)sendCmd(b.dataset.send,true);else if(b.dataset.fill){$('cmdIn').value=b.dataset.fill;$('cmdIn').focus()}});
 $('cmdNote').textContent='คำสั่งใช้ชุดเดียวกับในบอท ส่งเฉพาะเมื่อเชื่อมข้อมูลแล้ว และต้องเปิดสิทธิ์สั่งการในฝั่ง Apps Script ก่อน';
+
+// ================== แท็บและหน้าใหม่ ==================
+let OFFICE_ON=false;
+const $$=s=>document.querySelectorAll(s);
+function E(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+const fmt=n=>Math.round(Number(n)||0).toLocaleString('en-US');
+function setTab(n){$$('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+n));$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===n?'true':'false'));OFFICE_ON=n==='office';try{localStorage.setItem('hq_tab',n)}catch(e){}window.scrollTo(0,0)}
+$$('.tabs button').forEach(b=>{b.onclick=()=>setTab(b.dataset.t)});
+let tab0='today';try{tab0=localStorage.getItem('hq_tab')||'today'}catch(e){}
+setTab(['today','office','flights','money'].indexOf(tab0)>=0?tab0:'today');
+const SAMPLE={jobs:{count:7,grab:4,bolt:3,gross:1250},
+ budget:{cash:6472,nowSum:16088,shortNow:9616,target:4760,best:{label:'อ. 1 ธ.ค.',cum:77788,days:15},earned:1250,overdue:[{name:'ค่าผ่อนรถ (ตัวอย่าง)',amt:12088,late:true},{name:'หนี้ค้าง (ตัวอย่าง)',amt:4000,late:true}],
+  up:[{dn:9,label:'พ. 25 พ.ย.',sum:9700,items:['ค่าคอนโด (ตัวอย่าง)'],more:0},{dn:15,label:'อ. 1 ธ.ค.',sum:52000,items:['รายการ A','รายการ B','รายการ C'],more:1},{dn:17,label:'พฤ. 3 ธ.ค.',sum:4556,items:['รายการ D','รายการ E'],more:0}],avg:1500,fc:{label:'จ. 23 พ.ย.',short:3200}},
+ daily:[{d:'10/11',v:900},{d:'11/11',v:1400},{d:'12/11',v:0},{d:'13/11',v:1800},{d:'14/11',v:2100},{d:'15/11',v:1500},{d:'16/11',v:1250}],
+ bills:[{day:1,name:'รายการ A (ตัวอย่าง)',amt:23000,paid:true},{day:15,name:'ค่าผ่อนรถ (ตัวอย่าง)',amt:12088,paid:false,late:true},{day:25,name:'ค่าคอนโด (ตัวอย่าง)',amt:9700,paid:false}],
+ flights:{BKK:{live:false,list:{landed:[{code:'XX101',route:'Singapore',est:'19:05',d:-40,st:'🧳 รอรับกระเป๋า',dl:'🟡 ช้า 5 น.'}],up:[{code:'XX204',route:'Tokyo',est:'20:38',d:17,st:'🛬 กำลังลงจอด',dl:'🟡 ช้า 8 น.'},{code:'XX310',route:'Dubai',est:'21:30',d:70,st:'✈️ กำลังบินมา',dl:'🟢 ตรงเวลา'}]}},DMK:{live:false,list:{landed:[],up:[{code:'XX512',route:'Phuket',est:'20:55',d:34,st:'✈️ กำลังบินมา',dl:'🟢 ตรงเวลา'}]}}}};
+function renderTabs(d,mode){
+ const bn=$('banner');
+ if(mode===true){bn.hidden=false;bn.className='banner';bn.textContent='โหมดตัวอย่าง: ตัวเลขในทุกแท็บเป็นข้อมูลสมมติ ไม่ใช่ข้อมูลจริง (กด ⚙️ หรือเปิดจากปุ่ม /dash ในบอทเพื่อเชื่อมข้อมูลจริง)'}
+ else if(typeof mode==='string'){bn.hidden=false;bn.className='banner err';bn.textContent='เชื่อมไม่สำเร็จ: '+mode;d={}}
+ else bn.hidden=true;
+ d=d||{};drawHero(d);drawNext(d);drawJobs(d);drawFlights(d);drawMoney(d);
+}
+function none(box,t){box.textContent='';box.appendChild(E('p','muted',t))}
+function drawHero(d){const h=$('hero'),b=d.budget;h.textContent='';h.appendChild(E('small','','🎯 วันนี้ต้องหา'));
+ if(!b||b.err){h.appendChild(E('div','big','—'));h.appendChild(E('small','',b&&b.err?b.err:'ยังไม่มีข้อมูลแผนเงิน (อัปเดตสคริปต์เป็น v10 และมีตารางรายจ่าย)'));return}
+ const big=b.target>0?b.target:(b.shortNow>0?b.shortNow:0);
+ h.appendChild(E('div','big',big>0?fmt(big):'พอแล้ว 🎉'));
+ h.appendChild(E('small','',b.target>0&&b.best?'บาท/วัน ให้ครบทุกรายการตรงเวลาถึง '+b.best.label:(b.shortNow>0?'บาท เพื่อปิดยอดค้างวันนี้':'เงินสดพอจ่ายทุกรายการที่ประเมินได้')));
+ if(b.target>0&&b.shortNow>0){h.appendChild(E('div','','')).appendChild(E('small','','ปิดยอดค้างวันนี้ต้องหา '+fmt(b.shortNow)+' บาท'))}
+ const goal=b.shortNow>0?b.shortNow:b.target;
+ if(goal>0){const bar=E('div','bar'),i=E('i');i.style.width=Math.min(100,Math.round((b.earned||0)/goal*100))+'%';bar.appendChild(i);h.appendChild(bar);h.appendChild(E('small','','หาได้วันนี้ '+fmt(b.earned||0)+' / '+fmt(goal)+' บาท'))}
+ const c=E('div','hchips');c.appendChild(E('span','','ค้าง/ครบวันนี้ '+fmt(b.nowSum)));c.appendChild(E('span',b.noCash?'w':'',b.noCash?'ยังไม่บันทึกเงินสด':'เงินสด '+fmt(b.cash)));h.appendChild(c)}
+function frow(f,ap){const r=E('div','row');r.appendChild(E('div','t',f.est||'--:--'));const m=E('div');m.appendChild(E('div','',f.code+' · '+ap+(f.route?' · '+f.route:'')));
+ m.appendChild(E('div','s',(f.st||'')+(f.dl?'  '+f.dl:'')+(typeof f.d==='number'?(f.d>0?'  · อีก '+f.d+' นาที':'  · ผ่านมา '+(-f.d)+' นาที'):'')));r.appendChild(m);return r}
+function drawNext(d){const box=$('nextFl');box.textContent='';let all=[];['BKK','DMK'].forEach(ap=>{const f=d.flights&&d.flights[ap];if(f&&f.list)f.list.up.forEach(x=>all.push([ap,x]))});
+ all.sort((a,b)=>a[1].d-b[1].d).slice(0,2).forEach(x=>box.appendChild(frow(x[1],x[0])));if(!all.length)none(box,'ยังไม่มีข้อมูลล่าสุด (พิมพ์ /bkk หรือ /dmk ในบอทเพื่ออัปเดต)')}
+function drawJobs(d){const box=$('todayJ'),j=d.jobs;box.textContent='';if(!j){none(box,'ยังไม่มีชีตบันทึกงาน');return}
+ box.appendChild(E('div','ln2','💵 '+fmt(j.gross)+' บาท'));box.appendChild(E('div','ln2','🚖 '+j.count+' เที่ยว (Grab '+j.grab+' | Bolt '+j.bolt+')'));box.appendChild(E('p','muted','รวมเฉพาะงานที่บันทึกในบอท'))}
+function drawFlights(d){const box=$('flBoards');box.textContent='';const names={BKK:'สุวรรณภูมิ (BKK)',DMK:'ดอนเมือง (DMK)'};
+ ['BKK','DMK'].forEach(ap=>{const f=d.flights&&d.flights[ap],pn=E('div','pn'),b=E('b','',names[ap]);if(f&&f.live!==null&&f.live!==undefined)b.appendChild(E('span','tag',f.live?'ข้อมูลสด':'ข้อมูลสำรองจากชีต'));pn.appendChild(b);
+  if(!f||!f.list){pn.appendChild(E('p','muted','ยังไม่มีข้อมูลล่าสุด พิมพ์ /'+ap.toLowerCase()+' ในบอทเพื่ออัปเดต'))}
+  else{pn.appendChild(E('div','muted','กำลังจะลง'));f.list.up.forEach(x=>pn.appendChild(frow(x,ap)));if(!f.list.up.length)pn.appendChild(E('p','muted','ไม่มี'));
+   pn.appendChild(E('div','muted','ลงแล้วล่าสุด'));f.list.landed.forEach(x=>pn.appendChild(frow(x,ap)));if(!f.list.landed.length)pn.appendChild(E('p','muted','ไม่มี'))}
+  box.appendChild(pn)})}
+function svgEl(svg,n,at,t){const e=document.createElementNS('http://www.w3.org/2000/svg',n);for(const k in at)e.setAttribute(k,at[k]);if(t!=null)e.textContent=t;svg.appendChild(e);return e}
+function drawMoney(d){const b=d.budget,pb=$('planBox'),tl=$('tl'),inc=$('inc'),bl=$('bills');[pb,tl,inc,bl].forEach(x=>{x.textContent=''});
+ if(!b||b.err){none(pb,b&&b.err?b.err:'ยังไม่มีข้อมูลแผนเงิน');none(tl,'—')}
+ else{pb.appendChild(E('div','ln2','💵 เงินสดตั้งต้น '+fmt(b.cash)+' บาท'+(b.noCash?' (ยังไม่ได้บันทึก คิดเป็น 0)':'')));
+  b.overdue.forEach(o=>pb.appendChild(E('div','ln2','⚠️ '+o.name+' '+fmt(o.amt)+(o.late?' (เลยกำหนด)':' (ครบวันนี้)'))));
+  if(b.shortNow>0)pb.appendChild(E('div','ln2','🔻 ขาดเพื่อปิดยอดค้างวันนี้ '+fmt(b.shortNow)+' บาท'));
+  if(b.target>0&&b.best)pb.appendChild(E('div','ln2','🎯 เฉลี่ยวันละ '+fmt(b.target)+' บาท ถึง '+b.best.label+' (สะสม '+fmt(b.best.cum)+' · เหลือ '+b.best.days+' วัน)'));
+  if(b.avg)pb.appendChild(E('div','ln2','📈 รายได้เฉลี่ยที่บันทึก '+fmt(b.avg)+' บาท/วัน'+(b.fc?' → ถ้าเท่าเดิม เงินไม่พอครั้งแรก '+b.fc.label+' (ขาด ~'+fmt(b.fc.short)+')':' → พอจ่ายครบในช่วงที่ประเมิน')));
+  pb.appendChild(E('p','muted','ไม่รวมค่าน้ำมัน/ชาร์จ EV/อาหาร และไม่ใช่คำแนะนำทางการเงิน'));
+  const mx=Math.max(b.nowSum||0,...b.up.map(x=>x.sum),1),row=(lab,sum,cls,txt)=>{const r=E('div','tl');r.appendChild(E('span','',lab));const bar=E('div','tlb'+(cls?' '+cls:''),txt);bar.style.width=Math.max(22,Math.round(sum/mx*100))+'%';r.appendChild(bar);tl.appendChild(r)};
+  if(b.nowSum>0)row('ค้างตอนนี้',b.nowSum,'bad',fmt(b.nowSum));
+  b.up.forEach(x=>row(x.label,x.sum,b.best&&x.label===b.best.label?'hot':'',fmt(x.sum)+' · '+x.items.slice(0,2).join(', ')+(x.more?' +'+x.more:'')));
+  if(!b.nowSum&&!b.up.length)none(tl,'ไม่มีภาระใน 30 วันข้างหน้า')}
+ const a=d.daily;if(!a)none(inc,'ยังไม่มีข้อมูล');
+ else{const tgt=(b&&b.target)||0,mx=Math.max(tgt,...a.map(x=>x.v),1),svg=svgEl({appendChild(){}},'svg',{});svg.setAttribute('viewBox','0 0 320 130');svg.setAttribute('role','img');svg.setAttribute('aria-label','รายได้ 7 วันล่าสุด');svg.style.width='100%';
+  a.forEach((x,i)=>{const bh=Math.round(x.v/mx*88),X=8+i*44;svgEl(svg,'rect',{x:X,y:100-bh,width:34,height:bh||1,fill:i===6?'#5ee08a':'#3a4d94'});svgEl(svg,'text',{x:X+17,y:114,'text-anchor':'middle','font-size':10,fill:'#8b97b8'},x.d);if(x.v)svgEl(svg,'text',{x:X+17,y:96-bh,'text-anchor':'middle','font-size':9,fill:'#e8eefc'},fmt(x.v))});
+  if(tgt){const y=100-Math.round(tgt/mx*88);svgEl(svg,'line',{x1:0,x2:320,y1:y,y2:y,stroke:'#ffd166','stroke-dasharray':'4 3'});svgEl(svg,'text',{x:318,y:y-3,'text-anchor':'end','font-size':9,fill:'#ffd166'},'เป้า '+fmt(tgt))}
+  inc.appendChild(svg)}
+ if(!d.bills)none(bl,'ยังไม่มีตารางรายจ่าย');else d.bills.forEach(x=>{const r=E('div','row'),t=E('div','t','วันที่ '+x.day);t.style.fontSize='11px';r.appendChild(t);r.appendChild(E('div','',(x.paid?'✅ ':x.late?'🔴 ':'🟡 ')+x.name+' · '+fmt(x.amt)));bl.appendChild(r)})}
 if(CFG.url&&CFG.key)startPoll();else showOff();
 </script>
 </body>
