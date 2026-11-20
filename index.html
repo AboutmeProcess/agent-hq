@@ -8,13 +8,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+Thai:wght@400;600&display=swap">
 <style>
 :root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#0a0f1f;--ink:#e8eefc;--mut:#8b97b8;--panel:#121a33;--line:#2a3560}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:calc(60px + env(safe-area-inset-top,0px))}@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0,#16224a,var(--bg) 60%);color:var(--ink);font-family:"Noto Sans Thai",system-ui,sans-serif}
 header{padding:12px 16px 2px;text-align:center}
 h1{font-family:"Press Start 2P",monospace;font-size:clamp(18px,5vw,28px);margin:0;letter-spacing:2px;color:#cfeaff;text-shadow:3px 3px 0 #1f4fa8,6px 6px 0 #0a1a40}
 header p{color:var(--mut);margin:14px 0 0;font-size:14px}
-main{max-width:980px;margin:0 auto;padding:8px 12px 88px}
+main{max-width:1100px;margin:0 auto;padding:4px 12px 28px}
 #scene{width:100%;height:auto;display:block;shape-rendering:crispEdges}
 .st{cursor:pointer;outline:none}
 .st:hover .glow,.st:focus-visible .glow{opacity:1}
@@ -52,18 +52,22 @@ button.alt{background:#2a3560;color:var(--ink)}.ev span{display:inline-flex;alig
 .cmdrow{display:flex;gap:8px}.cmdrow input{flex:1;min-width:0;background:#0a0f1f;border:1px solid var(--line);border-radius:4px;padding:10px;color:var(--ink);font:inherit}.cmdrow button{background:#4fd1ff}
 .cmdout{white-space:pre-wrap;margin-top:10px;font-size:13px;line-height:1.7;color:#d6def5}.cmdout:empty{display:none}
 .banner{max-width:956px;margin:8px auto 0;padding:8px 12px;border-radius:6px;font-size:13px;background:#3a2a10;border:1px solid #ffb347;color:#ffe2b0}.banner.err{background:#3a1414;border-color:#ff6b6b;color:#ffd0d0}.banner[hidden]{display:none}
-.pane{display:none}.pane.on{display:block}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0c1329;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:4}
-.tabs button{all:unset;flex:1;text-align:center;padding:9px 0 8px;font-size:20px;cursor:pointer;color:var(--mut)}.tabs button span{display:block;font-size:12px;margin-top:2px}
-.tabs button[aria-selected=true]{color:#4fd1ff;box-shadow:inset 0 2px 0 #4fd1ff}.tabs button:focus-visible{outline:2px solid #4fd1ff;outline-offset:-2px}
 .hero{background:linear-gradient(160deg,#16224a,#0c1329);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 12px;text-align:center}.hero small{color:var(--mut);font-size:13px}
-.hero .big{font:400 clamp(30px,9vw,52px)/1.15 "Press Start 2P",monospace;color:#ffd166;margin:10px 0 2px}
+.hero .big{font:800 clamp(44px,12vw,68px)/1.1 "Noto Sans Thai",system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#ffd166;margin:8px 0 2px}
 .bar{height:14px;background:#0a0f1f;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:12px auto 6px;max-width:520px}.bar i{display:block;height:100%;background:#5ee08a}
 .hchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}.hchips span{background:#0a0f1f;border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:13px}.hchips .w{border-color:#ffb347;color:#ffe2b0}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:12px}.pn{margin-bottom:12px}.grid2 .pn{margin-bottom:0}
-.row{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #1d2850;font-size:13px}.row:first-child{border-top:0}.row .t{font:400 12px "Press Start 2P",monospace;color:#cfeaff}.row .s{font-size:12px;color:var(--mut)}
+.row{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #1d2850;font-size:13px}.row:first-child{border-top:0}.row .t{font:700 15px "Noto Sans Thai",system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#cfeaff}.row .s{font-size:12px;color:var(--mut)}
 .tl{display:grid;grid-template-columns:92px 1fr;gap:8px;align-items:center;font-size:12px;margin:6px 0}.tlb{height:22px;border-radius:3px;background:#3a4d94;color:#fff;padding:2px 6px;white-space:nowrap;overflow:hidden;min-width:70px;box-sizing:border-box}.tlb.hot{background:#c98a1f}.tlb.bad{background:#b33a3a}
 .ln2{margin:5px 0;font-size:14px;line-height:1.6}.muted{color:var(--mut);font-size:12px}.tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 8px;margin-left:6px;color:var(--mut)}
+.secnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:rgba(10,15,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);scrollbar-width:none}.secnav::-webkit-scrollbar{display:none}
+.secnav button{all:unset;flex:none;cursor:pointer;background:#111a36;border:1px solid var(--line);border-radius:14px;padding:5px 12px;font-size:13px;color:var(--ink);white-space:nowrap}.secnav button:hover,.secnav button:focus-visible{background:#18244a;outline:2px solid #4fd1ff}
+.sec{margin-top:6px}.sh{font:700 17px "Noto Sans Thai",system-ui,sans-serif;margin:22px 0 10px;padding-left:10px;border-left:4px solid #4fd1ff}
+.summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:12px}.summary .hero{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-content:start}
+.kpi{background:#0c1329;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}.kl{font-size:12px;color:var(--mut)}.kv{font:800 22px/1.25 "Noto Sans Thai",system-ui,sans-serif;font-variant-numeric:tabular-nums;margin:3px 0 1px;overflow-wrap:anywhere}.ks{font-size:12px;color:var(--mut)}.kpi.bad{border-color:#b33a3a}.kpi.bad .kv{color:#ff9a9a}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;align-items:start}.cols .pn{margin-bottom:0}
+@media (max-width:820px){.summary{grid-template-columns:1fr}.cols{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -71,22 +75,14 @@ button.alt{background:#2a3560;color:var(--ink)}.ev span{display:inline-flex;alig
 <h1>AGENT HQ</h1>
 <p class="connl"><button id="cfgBtn" class="cfg">⚙️ เชื่อมข้อมูลจริง</button> <span id="conn">ยังไม่ได้เชื่อมข้อมูลจริง</span></p>
 </header>
+<nav class="secnav" aria-label="ไปยังหมวด"><button data-go="s-sum">📋 สรุป</button><button data-go="s-office">🏢 ออฟฟิศ</button><button data-go="s-flights">✈️ เที่ยวบิน</button><button data-go="s-money">💰 การเงิน</button><button data-go="s-cmd">⌨️ สั่งการ</button><button data-go="s-log">🧾 บันทึก</button></nav>
 <div id="banner" class="banner" hidden></div>
 <main>
-<section class="pane on" id="p-today">
-<div class="hero" id="hero"></div>
-<div class="grid2"><div class="pn"><b>เที่ยวบินถัดไป</b><div id="nextFl"></div></div><div class="pn"><b>รายได้วันนี้</b><div id="todayJ"></div></div></div>
-<div class="pn"><b>สั่งการ</b>
-<div class="chips" id="qc"><button data-send="วันนี้ต้องหาเท่าไร">🎯 วันนี้ต้องหาเท่าไร</button><button data-send="/bills">🧾 รายการจ่าย</button><button data-send="/summary">📊 สรุปรายได้</button><button data-send="/bkk">✈️ BKK</button><button data-send="/dmk">✈️ DMK</button>
-<button data-fill="บันทึก Grab ">➕ บันทึกงาน</button><button data-fill="เงินสด ">💵 เงินสด</button><button data-fill="จ่ายแล้ว ">✅ จ่ายแล้ว</button><button data-fill="ค้างจ่าย ">📌 ค้างจ่าย</button></div>
-<div class="cmdrow"><input id="cmdIn" placeholder="พิมพ์เหมือนในบอท เช่น บันทึก Grab 250 ทิป 20 สยาม ไป สาทร" autocomplete="off" enterkeyhint="send"><button id="cmdGo">ส่ง</button></div>
-<div id="cmdOut" class="cmdout" aria-live="polite"></div>
-<p class="note" id="cmdNote" style="text-align:left"></p></div>
-</section>
-<section class="pane" id="p-office">
+<section id="s-sum" class="sec"><h2 class="sh">📋 สรุปภาพรวม</h2>
+<div class="summary"><div class="hero" id="hero"></div><div class="kpis" id="kpis"></div></div></section>
+<section id="s-office" class="sec"><h2 class="sh">🏢 ออฟฟิศ AGENT HQ</h2>
 <svg id="scene" viewBox="0 0 1312 816" role="img" aria-label="ออฟฟิศพิกเซลของ Agent HQ"></svg>
 <p class="hint">แตะที่โต๊ะของเอเจนต์เพื่อดูรายละเอียด</p>
-<section class="hq" aria-label="แผงสถานะ">
 <div class="pn"><b>MODULES</b><div class="mrow">
 <button style="--k:#5ee08a" onclick="open('driver')"><strong><i></i>Driver</strong><span id="ms-driver">ยังไม่เชื่อมข้อมูล</span></button>
 <button style="--k:#6ea8ff" onclick="open('captain')"><strong><i></i>Captain</strong><span id="ms-captain">ยังไม่เชื่อมข้อมูล</span></button>
@@ -99,28 +95,28 @@ button.alt{background:#2a3560;color:var(--ink)}.ev span{display:inline-flex;alig
 </div></div>
 <div class="pn"><b>WORKFLOW</b><div class="wf"><span class="nd" style="--c:#e8eefc">คุณ</span><span class="ln"></span><span class="nd" style="--c:#4fd1ff">Telegram</span><span class="ln"></span><span class="nd" style="--c:#9b7bff">App Script</span><span class="ln"></span><span class="nd" style="--c:#5ee08a">เอเจนต์ 6 ระบบ</span></div>
 <div class="sub"><span class="nd" style="--c:#5ee08a">Driver</span><span class="nd" style="--c:#6ea8ff">Captain</span><span class="nd" style="--c:#ffb347">Take Profit</span><span class="nd" style="--c:#ffe066">Solar</span><span class="nd" style="--c:#ff8ad8">Healthy</span><span class="nd" style="--c:#f2c94c">Finance</span></div></div>
-<div class="pn"><b>STATUS</b><div class="ev" id="evp"></div></div>
-
 </section>
-<section class="log" aria-label="บันทึกระบบ">
-<b>SYSTEM LOG</b>
-<ul id="log"></ul>
-</section>
-</section>
-<section class="pane" id="p-flights"><div id="flBoards"></div></section>
-<section class="pane" id="p-money">
+<section id="s-flights" class="sec"><h2 class="sh">✈️ เที่ยวบิน</h2><div class="cols" id="flBoards"></div></section>
+<section id="s-money" class="sec"><h2 class="sh">💰 การเงิน</h2><div class="cols">
 <div class="pn"><b>แผนเงิน</b><div id="planBox"></div></div>
 <div class="pn"><b>ภาระ 30 วันข้างหน้า</b><div id="tl"></div></div>
 <div class="pn"><b>รายได้ 7 วันล่าสุด</b><div id="inc"></div></div>
-<div class="pn"><b>รายการจ่ายเดือนนี้</b><div id="bills"></div></div>
-</section>
+<div class="pn"><b>รายการจ่ายเดือนนี้</b><div id="bills"></div></div></div></section>
+<section id="s-cmd" class="sec"><h2 class="sh">⌨️ สั่งการ</h2>
+<div class="pn">
+<div class="chips" id="qc"><button data-send="วันนี้ต้องหาเท่าไร">🎯 วันนี้ต้องหาเท่าไร</button><button data-send="/bills">🧾 รายการจ่าย</button><button data-send="/summary">📊 สรุปรายได้</button><button data-send="/bkk">✈️ BKK</button><button data-send="/dmk">✈️ DMK</button>
+<button data-fill="บันทึก Grab ">➕ บันทึกงาน</button><button data-fill="เงินสด ">💵 เงินสด</button><button data-fill="จ่ายแล้ว ">✅ จ่ายแล้ว</button><button data-fill="ค้างจ่าย ">📌 ค้างจ่าย</button></div>
+<div class="cmdrow"><input id="cmdIn" placeholder="พิมพ์เหมือนในบอท เช่น บันทึก Grab 250 ทิป 20 สยาม ไป สาทร" autocomplete="off" enterkeyhint="send"><button id="cmdGo">ส่ง</button></div>
+<div id="cmdOut" class="cmdout" aria-live="polite"></div>
+<p class="note" id="cmdNote" style="text-align:left"></p></div></section>
+<section id="s-log" class="sec"><h2 class="sh">🧾 สถานะและบันทึกระบบ</h2>
+<div class="pn"><b>STATUS</b><div class="ev" id="evp"></div></div>
+
+<section class="log" aria-label="บันทึกระบบ">
+<b>SYSTEM LOG</b>
+<ul id="log"></ul>
+</section></section>
 </main>
-<nav class="tabs" role="tablist" aria-label="เมนูหลัก">
-<button data-t="today" role="tab" aria-selected="true">🎯<span>วันนี้</span></button>
-<button data-t="office" role="tab" aria-selected="false">🏢<span>ออฟฟิศ</span></button>
-<button data-t="flights" role="tab" aria-selected="false">✈️<span>เที่ยวบิน</span></button>
-<button data-t="money" role="tab" aria-selected="false">💰<span>การเงิน</span></button>
-</nav>
 <div id="cfgd" role="dialog" aria-modal="true" aria-labelledby="cfgt"><div class="card" style="--c:#4fd1ff">
 <h2 id="cfgt">เชื่อมข้อมูลจริง</h2>
 <p class="r">ใส่ลิงก์ Web app ของ Apps Script (ลงท้าย /exec) และรหัส DASH_KEY ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งไปที่อื่นนอกจากลิงก์ที่คุณใส่ · ไม่อยากกรอกเอง: พิมพ์ /dash ในบอทแล้วกดปุ่มที่ส่งให้ หน้านี้จะเชื่อมเอง</p>
@@ -285,15 +281,13 @@ $('qc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)re
 $('cmdNote').textContent='คำสั่งใช้ชุดเดียวกับในบอท ส่งเฉพาะเมื่อเชื่อมข้อมูลแล้ว และต้องเปิดสิทธิ์สั่งการในฝั่ง Apps Script ก่อน';
 
 // ================== แท็บและหน้าใหม่ ==================
-let OFFICE_ON=false;
+let OFFICE_ON=true;
 const $$=s=>document.querySelectorAll(s);
 function E(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 const fmt=n=>Math.round(Number(n)||0).toLocaleString('en-US');
-function setTab(n){$$('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+n));$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===n?'true':'false'));OFFICE_ON=n==='office';try{localStorage.setItem('hq_tab',n)}catch(e){}window.scrollTo(0,0)}
-$$('.tabs button').forEach(b=>{b.onclick=()=>setTab(b.dataset.t)});
-let tab0='today';try{tab0=localStorage.getItem('hq_tab')||'today'}catch(e){}
-setTab(['today','office','flights','money'].indexOf(tab0)>=0?tab0:'today');
-const SAMPLE={jobs:{count:7,grab:4,bolt:3,gross:1250},
+$$('.secnav button').forEach(b=>{b.onclick=()=>{const t=document.getElementById(b.dataset.go);if(t)t.scrollIntoView({block:'start'})}});
+try{new IntersectionObserver(es=>{OFFICE_ON=es[0].isIntersecting},{threshold:.05}).observe(document.getElementById('scene'))}catch(e){OFFICE_ON=true}
+const SAMPLE={bot:{lastSeenMin:3},jobs:{count:7,grab:4,bolt:3,gross:1250},
  budget:{cash:6472,nowSum:16088,shortNow:9616,target:4760,best:{label:'อ. 1 ธ.ค.',cum:77788,days:15},earned:1250,overdue:[{name:'ค่าผ่อนรถ (ตัวอย่าง)',amt:12088,late:true},{name:'หนี้ค้าง (ตัวอย่าง)',amt:4000,late:true}],
   up:[{dn:9,label:'พ. 25 พ.ย.',sum:9700,items:['ค่าคอนโด (ตัวอย่าง)'],more:0},{dn:15,label:'อ. 1 ธ.ค.',sum:52000,items:['รายการ A','รายการ B','รายการ C'],more:1},{dn:17,label:'พฤ. 3 ธ.ค.',sum:4556,items:['รายการ D','รายการ E'],more:0}],avg:1500,fc:{label:'จ. 23 พ.ย.',short:3200}},
  daily:[{d:'10/11',v:900},{d:'11/11',v:1400},{d:'12/11',v:0},{d:'13/11',v:1800},{d:'14/11',v:2100},{d:'15/11',v:1500},{d:'16/11',v:1250}],
@@ -304,7 +298,7 @@ function renderTabs(d,mode){
  if(mode===true){bn.hidden=false;bn.className='banner';bn.textContent='โหมดตัวอย่าง: ตัวเลขในทุกแท็บเป็นข้อมูลสมมติ ไม่ใช่ข้อมูลจริง (กด ⚙️ หรือเปิดจากปุ่ม /dash ในบอทเพื่อเชื่อมข้อมูลจริง)'}
  else if(typeof mode==='string'){bn.hidden=false;bn.className='banner err';bn.textContent='เชื่อมไม่สำเร็จ: '+mode;d={}}
  else bn.hidden=true;
- d=d||{};drawHero(d);drawNext(d);drawJobs(d);drawFlights(d);drawMoney(d);
+ d=d||{};drawHero(d);drawSummary(d);drawFlights(d);drawMoney(d);
 }
 function none(box,t){box.textContent='';box.appendChild(E('p','muted',t))}
 function drawHero(d){const h=$('hero'),b=d.budget;h.textContent='';h.appendChild(E('small','','🎯 วันนี้ต้องหา'));
@@ -318,10 +312,17 @@ function drawHero(d){const h=$('hero'),b=d.budget;h.textContent='';h.appendChild
  const c=E('div','hchips');c.appendChild(E('span','','ค้าง/ครบวันนี้ '+fmt(b.nowSum)));c.appendChild(E('span',b.noCash?'w':'',b.noCash?'ยังไม่บันทึกเงินสด':'เงินสด '+fmt(b.cash)));h.appendChild(c)}
 function frow(f,ap){const r=E('div','row');r.appendChild(E('div','t',f.est||'--:--'));const m=E('div');m.appendChild(E('div','',f.code+' · '+ap+(f.route?' · '+f.route:'')));
  m.appendChild(E('div','s',(f.st||'')+(f.dl?'  '+f.dl:'')+(typeof f.d==='number'?(f.d>0?'  · อีก '+f.d+' นาที':'  · ผ่านมา '+(-f.d)+' นาที'):'')));r.appendChild(m);return r}
-function drawNext(d){const box=$('nextFl');box.textContent='';let all=[];['BKK','DMK'].forEach(ap=>{const f=d.flights&&d.flights[ap];if(f&&f.list)f.list.up.forEach(x=>all.push([ap,x]))});
- all.sort((a,b)=>a[1].d-b[1].d).slice(0,2).forEach(x=>box.appendChild(frow(x[1],x[0])));if(!all.length)none(box,'ยังไม่มีข้อมูลล่าสุด (พิมพ์ /bkk หรือ /dmk ในบอทเพื่ออัปเดต)')}
-function drawJobs(d){const box=$('todayJ'),j=d.jobs;box.textContent='';if(!j){none(box,'ยังไม่มีชีตบันทึกงาน');return}
- box.appendChild(E('div','ln2','💵 '+fmt(j.gross)+' บาท'));box.appendChild(E('div','ln2','🚖 '+j.count+' เที่ยว (Grab '+j.grab+' | Bolt '+j.bolt+')'));box.appendChild(E('p','muted','รวมเฉพาะงานที่บันทึกในบอท'))}
+function kpi(icon,label,val,sub,cls){const k=E('div','kpi'+(cls?' '+cls:''));k.appendChild(E('div','kl',icon+' '+label));k.appendChild(E('div','kv',val));if(sub)k.appendChild(E('div','ks',sub));return k}
+function drawSummary(d){const box=$('kpis');box.textContent='';const b=d.budget,j=d.jobs,ok=b&&!b.err;
+ box.appendChild(kpi('⚠️','ค้าง/ครบวันนี้',ok?fmt(b.nowSum):'—',ok?(b.shortNow>0?'ขาดเงินสด '+fmt(b.shortNow):'เงินสดพอจ่าย'):'',ok&&b.nowSum>0?'bad':''));
+ box.appendChild(kpi('💵','เงินสด',ok?(b.noCash?'ยังไม่บันทึก':fmt(b.cash)):'—',ok&&b.noCash?'พิมพ์ เงินสด ... ในบอท':''));
+ box.appendChild(kpi('📥','รายได้วันนี้',j?fmt(j.gross):'—',j?j.count+' เที่ยว (Grab '+j.grab+' | Bolt '+j.bolt+')':'ยังไม่มีชีตบันทึกงาน'));
+ let nf=null;['BKK','DMK'].forEach(ap=>{const f=d.flights&&d.flights[ap];if(f&&f.list)f.list.up.forEach(x=>{if(!nf||x.d<nf[1].d)nf=[ap,x]})});
+ box.appendChild(kpi('✈️','เที่ยวบินถัดไป',nf?nf[1].est+' '+nf[1].code:'—',nf?nf[0]+(typeof nf[1].d==='number'?' · อีก '+nf[1].d+' นาที':''):'พิมพ์ /bkk ในบอทเพื่ออัปเดต'));
+ const n1=ok&&b.up&&b.up[0];box.appendChild(kpi('📅','ภาระถัดไป',n1?fmt(n1.sum):'—',n1?n1.label+' · '+n1.items[0]:''));
+ const bot=d.bot,e=d.errors;let sv='—',ss='ยังไม่เชื่อมข้อมูล',cls='';
+ if(bot){sv=bot.lastSeenMin==null?'ยังไม่มีข้อความ':(bot.lastSeenMin<60?bot.lastSeenMin+' นาที':Math.floor(bot.lastSeenMin/60)+' ชม.');ss='ข้อความล่าสุดถึงบอท';if(e&&e.ageMin<1440){ss='ข้อผิดพลาดล่าสุด '+e.t+' น.';cls='bad'}}
+ box.appendChild(kpi('🤖','บอท',sv,ss,cls))}
 function drawFlights(d){const box=$('flBoards');box.textContent='';const names={BKK:'สุวรรณภูมิ (BKK)',DMK:'ดอนเมือง (DMK)'};
  ['BKK','DMK'].forEach(ap=>{const f=d.flights&&d.flights[ap],pn=E('div','pn'),b=E('b','',names[ap]);if(f&&f.live!==null&&f.live!==undefined)b.appendChild(E('span','tag',f.live?'ข้อมูลสด':'ข้อมูลสำรองจากชีต'));pn.appendChild(b);
   if(!f||!f.list){pn.appendChild(E('p','muted','ยังไม่มีข้อมูลล่าสุด พิมพ์ /'+ap.toLowerCase()+' ในบอทเพื่ออัปเดต'))}
