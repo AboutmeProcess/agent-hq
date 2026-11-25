@@ -319,6 +319,9 @@ try {
         localStorage.setItem('hq_url', u);
         localStorage.setItem('hq_key', k);
       } catch (e2) {}
+      try {
+        history.replaceState(null, '', location.pathname + location.search);
+      } catch (e3) {}
     }
   } catch (e) {}
 })();
