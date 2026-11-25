@@ -1,12 +1,14 @@
 # กติกาการทำงานของโปรเจกต์ AboutMeProcess (agent-hq)
 
 ## โครงสร้างโปรเจกต์
-โปรเจกต์นี้เป็นเว็บแอปพลิเคชันแบบ Static Single-File (`index.html`) สำหรับแดชบอร์ด **AboutMeProcess** (งานขับรถ การเงิน เที่ยวบิน และออฟฟิศเอเจนต์) เชื่อมต่อกับ Telegram และ Google Apps Script
+โปรเจกต์นี้เป็นเว็บแอปพลิเคชันแบบ Static Web App สำหรับแดชบอร์ด **AboutMeProcess** (งานขับรถ การเงิน เที่ยวบิน ออฟฟิศเอเจนต์ และโมดูล Captain / Take Profit / Solar / Healthy) เชื่อมต่อกับ Telegram และ Google Apps Script
 
 ไฟล์หลักในโฟลเดอร์โปรเจกต์:
-- `index.html` — หน้าเว็บหลัก (HTML, CSS, JavaScript และ SVG/รูปภาพฝังในไฟล์)
-- `room.jpg` — ภาพพื้นหลังออฟฟิศ
-- `driver_avatar.png`, `driver_stand.png`, `driver_work.png` — ภาพตัวละครเอเจนต์ Driver
+- `index.html` — โครงสร้างหน้าเว็บหลัก
+- `styles.css` — สไตล์ชีตทั้งหมดของแดชบอร์ดและฉากออฟฟิศ
+- `app.js` — โลจิกแอปพลิเคชัน การเชื่อมข้อมูล Apps Script การ์ดเอเจนต์ และแอนิเมชันออฟฟิศ
+- `assets/sprites.js` — ข้อมูลภาพตัวละครเอเจนต์ทั้ง 8 ตัว (`IMG`), ฉากพื้นหลัง (`BG`), และเฟรมเดิน (`WK`)
+- `room.jpg`, `driver_avatar.png`, `driver_stand.png`, `driver_work.png` — ไฟล์ภาพต้นฉบับของออฟฟิศและ Driver
 - Git Remote: `origin` (`https://github.com/AboutmeProcess/agent-hq.git`) · Branch หลัก: `main`
 
 ---
