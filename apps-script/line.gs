@@ -194,7 +194,7 @@ function lineWebhook_(e) {
         if (!text) return;
 
         // คำสั่งเฉพาะเจ้าของ: สร้างและติดตั้ง Rich Menu 6 ปุ่มสวยๆ บน LINE OA อัตโนมัติ
-        if (/^\/setup_richmenu$/i.test(text)) {
+        if (/^\/setup_?richmenu$/i.test(text)) {
           const res = setupLineRichMenu_();
           lineReply_(ev.replyToken, res.ok
             ? ('✅ ติดตั้ง Rich Menu 6 ปุ่มเรียบร้อยแล้วครับ!\n(ID: ' + res.id + ')\nลองปิดแล้วเปิดแชท LINE ใหม่จะเห็นแผงเมนูถาวรด้านล่างจอทันที')
@@ -299,7 +299,7 @@ function setupLineRichMenu_() {
     size: { width: 2500, height: 1686 },
     selected: true,
     name: 'AboutMeProcess_HQ_v1',
-    chatBarText: 'เมนู AboutMeProcess',
+    chatBarText: 'เมนูหลัก HQ',
     areas: [
       { bounds: { x: 0, y: 0, width: w1, height: h }, action: { type: 'message', text: 'วันนี้ต้องหาเท่าไร' } },
       { bounds: { x: w1, y: 0, width: w2, height: h }, action: { type: 'message', text: '/summary' } },
