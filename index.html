@@ -105,10 +105,11 @@
             <!-- Floating Top Agent Strip -->
             <div class="mo-strip" id="moStrip" aria-label="สถานะเอเจนต์ในออฟฟิศ"></div>
 
-            <!-- Interactive SVG Isometric Scene -->
+            <!-- Interactive 3D Isometric Cutaway Diorama -->
             <div class="mo-canvas-wrap" id="moCanvasWrap">
-              <svg id="scene" viewBox="0 0 1312 816" role="img" aria-label="ออฟฟิศ AboutMeProcess"></svg>
-              <div class="mo-night-veil" aria-hidden="true"></div>
+              <canvas id="officeCanvas" aria-label="ออฟฟิศ 3 มิติ AboutMeProcess"></canvas>
+              <div class="mo3-overlay" id="moOverlay"></div>
+              <svg id="scene" viewBox="0 0 1312 816" hidden aria-hidden="true"></svg>
             </div>
 
             <!-- 2D List Fallback View -->
@@ -213,6 +214,7 @@
   </div>
 
   <script src="assets/sprites.js"></script>
+  <script src="office3d.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -348,6 +348,7 @@ function setSt(map) {
     if (e) e.textContent = t;
     setBubble(s.id, t);
   });
+  if (window.OFFICE3D) window.OFFICE3D.syncStatus(map);
 }
 
 function chip(color, t) {
@@ -1633,7 +1634,8 @@ if (animBtn) {
   animBtn.onclick = () => {
     USER_PAUSE = !USER_PAUSE;
     animBtn.setAttribute('aria-pressed', USER_PAUSE ? 'true' : 'false');
-    animBtn.textContent = USER_PAUSE ? '▶️ เล่นภาพเคลื่อนไหว' : '⏸ พักภาพเคลื่อนไหว';
+    animBtn.textContent = USER_PAUSE ? '▶️ เล่นภาพ' : '⏸ พักภาพ';
+    if (window.OFFICE3D) window.OFFICE3D.setPaused(USER_PAUSE);
   };
 }
 
@@ -1744,6 +1746,7 @@ function setCam(next, presetName) {
 }
 
 function focusAgentCam(id) {
+  if (window.OFFICE3D) { window.OFFICE3D.focusAgent(id); return; }
   const pos = POS[id];
   if (!pos) return;
   const w = 680;
@@ -1755,6 +1758,7 @@ function focusAgentCam(id) {
 
 $$('.mo-dbtn[data-cam]').forEach(b => {
   b.onclick = () => {
+    if (window.OFFICE3D) { window.OFFICE3D.setPreset(b.dataset.cam); return; }
     const p = CAM_PRESETS[b.dataset.cam];
     if (p) setCam(p, b.dataset.cam);
   };
@@ -1762,6 +1766,7 @@ $$('.mo-dbtn[data-cam]').forEach(b => {
 
 if ($('moZoomIn')) {
   $('moZoomIn').onclick = () => {
+    if (window.OFFICE3D) { window.OFFICE3D.zoomIn(); return; }
     const nw = Math.max(460, tgtCam.w * 0.8);
     const nh = nw * (816 / 1312);
     setCam({ x: tgtCam.x + (tgtCam.w - nw) / 2, y: tgtCam.y + (tgtCam.h - nh) / 2, w: nw, h: nh }, '');
@@ -1769,6 +1774,7 @@ if ($('moZoomIn')) {
 }
 if ($('moZoomOut')) {
   $('moZoomOut').onclick = () => {
+    if (window.OFFICE3D) { window.OFFICE3D.zoomOut(); return; }
     const nw = Math.min(1312, tgtCam.w * 1.25);
     const nh = nw * (816 / 1312);
     setCam({ x: tgtCam.x + (tgtCam.w - nw) / 2, y: tgtCam.y + (tgtCam.h - nh) / 2, w: nw, h: nh }, nw >= 1310 ? 'overview' : '');
@@ -1783,9 +1789,12 @@ if (moLitBtn && moShell) {
     const isNight = moShell.dataset.lit === 'night';
     moShell.dataset.lit = isNight ? 'day' : 'night';
     moLitBtn.textContent = isNight ? '🌙 กลางคืน' : '☀️ กลางวัน';
+    if (window.OFFICE3D) window.OFFICE3D.setNight(!isNight);
     showMoToast(isNight ? '☀️ สลับเป็นแสงออฟฟิศกลางวัน' : '🌙 สลับเป็นบรรยากาศออฟฟิศกลางคืน');
   };
 }
+window.openAgent = openAgent;
+window.showMoToast = showMoToast;
 
 // 3D Office / 2D List View Switcher
 const moCanvasWrap = $('moCanvasWrap');
@@ -1834,6 +1843,7 @@ if ($('moFeedBtn') && $('moBody')) {
   $('moFeedBtn').onclick = () => {
     const hidden = $('moBody').classList.toggle('no-feed');
     $('moFeedBtn').setAttribute('aria-pressed', hidden ? 'false' : 'true');
+    if (window.OFFICE3D) setTimeout(() => window.OFFICE3D.resize(), 40);
   };
 }
 if ($('moFullBtn') && moShell) {

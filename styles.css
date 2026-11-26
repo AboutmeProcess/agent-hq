@@ -620,13 +620,58 @@ main { max-width: 1120px; margin: 0 auto; padding: 4px 14px 48px; }
 .mo-sp i { width: 7px; height: 7px; border-radius: 50%; background: var(--c, #22c55e); flex: none; }
 .mo-sp small { color: #9ca3af; font-size: 11px; }
 
-.mo-canvas-wrap { position: relative; width: 100%; overflow: hidden; }
+.mo-canvas-wrap { position: relative; width: 100%; overflow: hidden; touch-action: none; }
+#officeCanvas { display: block; width: 100%; user-select: none; }
+.mo3-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+.mo3-np {
+  all: unset;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(15, 20, 30, .86);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, .14);
+  font-size: 11px;
+  font-weight: 600;
+  color: #f9fafb;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .35);
+  transition: border-color .15s;
+}
+.mo3-np:hover { border-color: #f97316; }
+.mo3-np i { width: 7px; height: 7px; border-radius: 50%; background: var(--c, #22c55e); box-shadow: 0 0 6px var(--c, #22c55e); }
+.mo3-bb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .22s ease;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: rgba(17, 24, 39, .94);
+  border: 1.5px solid var(--c, #f97316);
+  color: #f9fafb;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .45);
+}
+.mo3-bb.on { opacity: 1; }
 #scene {
   width: 100%;
   height: auto;
   display: block;
   shape-rendering: crispEdges;
-  transition: filter .35s ease;
 }
 .mo-night-veil {
   position: absolute;
