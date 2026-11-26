@@ -11,11 +11,20 @@
 const SHEET_CAPTAIN = 'Captain_Cases';
 const SHEET_HEALTH = 'Health_Log';
 const SHEET_MSTATE = 'Modules_State';
+const SHEET_SOLAR_M = 'Solar_Monthly';
+// อัตราค่าไฟ TOU บ้านอยู่อาศัย (รวม Ft + VAT 7% โดยประมาณ): On-Peak ~6.31 ฿, Off-Peak ~3.05 ฿, เฉลี่ยโซลาร์ 5 วันทำงาน/2 วันหยุด ~5.38 ฿/หน่วย
+const TOU_ON_PEAK = 6.31;
+const TOU_OFF_PEAK = 3.05;
+const TOU_SOLAR_BLEND = 5.38;
 
 function setupModuleSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   modEnsureSheet_(ss, SHEET_CAPTAIN, ['Timestamp', 'Date', 'Customer', 'Type', 'Premium', 'RenewalDate', 'Status']);
   modEnsureSheet_(ss, SHEET_HEALTH, ['Timestamp', 'Date', 'Activity', 'Minutes', 'Note']);
+  const sm = modEnsureSheet_(ss, SHEET_SOLAR_M, ['Month', 'Produced_kWh', 'Usage_kWh', 'NetGrid_kWh', 'Saved_THB', 'SelfPowered_Pct', 'Note']);
+  if (sm.getLastRow() <= 1) {
+    sm.appendRow(['2026-10', 178.44, 1395.53, 1217.09, 1125.96, 12.8, 'BlueRing ต.ค. 2026 (23 วัน · TOU)']);
+  }
   const st = modEnsureSheet_(ss, SHEET_MSTATE, ['Module', 'Key', 'Value', 'UpdatedAt']);
   if (st.getLastRow() <= 1) {
     const now = Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd'T'HH:mm:ss'+07:00'");
@@ -96,7 +105,54 @@ function modulesCommand_(chat, text) {
   if (low === '/solar' || low === '/home') {
     const s = solarStatus_();
     if (!s) { send_(chat, '☀️ ยังไม่มีข้อมูล Solar (พิมพ์ /cleanup_telegram เพื่อสร้างชีต หรือพิมพ์: โซลาร์ 19 8.88 46.8 875.5)'); return true; }
-    send_(chat, '<b>☀️ BlueRing Solar Energy</b>\n• Self-powered: ' + s.battery + '%\n• ผลิตได้: ' + s.solarKw + ' kWh · ใช้ไฟบ้าน: ' + s.loadKw + ' kWh\n• ประหยัดรอบบิลนี้: ' + modFmtNum_(s.savedThb) + ' บาท');
+    const lines = [
+      '<b>☀️ BlueRing Solar Energy (มิเตอร์ TOU)</b>',
+      '• Self-powered ล่าสุด: <b>' + s.battery + '%</b>',
+      '• ผลิตได้: ' + s.solarKw + ' kWh · ใช้ไฟบ้าน: ' + s.loadKw + ' kWh',
+      '• ประหยัดรอบบิลนี้: <b>' + modFmtNum_(s.savedThb) + ' บาท</b>',
+      '• เรตประเมิน TOU: On-Peak ~' + TOU_ON_PEAK + ' ฿ / Off-Peak ~' + TOU_OFF_PEAK + ' ฿ (เฉลี่ยโซลาร์ ~' + TOU_SOLAR_BLEND + ' ฿/หน่วย)'
+    ];
+    if (s.monthly && s.monthly.length) {
+      lines.push('<b>📅 รายเดือนล่าสุด:</b>');
+      s.monthly.slice(-3).reverse().forEach(function (m) {
+        lines.push('• ' + m.m + ': ผลิต ' + m.prod + ' / ใช้ ' + m.use + ' kWh (' + m.pct + '%) · ประหยัด <b>' + modFmtNum_(m.saved) + ' ฿</b>');
+      });
+    }
+    send_(chat, lines.join('\n'));
+    return true;
+  }
+
+  if (t.indexOf('โซลาร์เดือน ') === 0) {
+    // รูปแบบ: โซลาร์เดือน <YYYY-MM> <ผลิต kWh> <ใช้ไฟ kWh> [<ประหยัดจริง ฿>]
+    const rest = t.slice(12).trim();
+    const m = rest.match(/^(\d{4}-\d{2})\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)(?:\s+(\d+(?:\.\d+)?))?$/);
+    if (!m) {
+      send_(chat, 'รูปแบบไม่ถูกต้อง ตัวอย่าง:\n<code>โซลาร์เดือน 2026-11 210 1350</code> (คำนวณประหยัด TOU อัตโนมัติ)\nหรือระบุยอดจริง: <code>โซลาร์เดือน 2026-10 178.44 1395.53 1125.96</code>');
+      return true;
+    }
+    const ym = m[1], prod = Number(m[2]), use = Number(m[3]);
+    const net = Math.max(0, Math.round((use - prod) * 100) / 100);
+    const pct = use > 0 ? Math.round((prod / use) * 1000) / 10 : 0;
+    const isEst = !m[4];
+    const saved = isEst ? Math.round(prod * TOU_SOLAR_BLEND * 100) / 100 : Number(m[4]);
+    const note = isEst ? ('ประเมิน TOU ~' + TOU_SOLAR_BLEND + ' ฿/หน่วย') : 'ยอดจริงจาก BlueRing';
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = modEnsureSheet_(ss, SHEET_SOLAR_M, ['Month', 'Produced_kWh', 'Usage_kWh', 'NetGrid_kWh', 'Saved_THB', 'SelfPowered_Pct', 'Note']);
+    const rows = sh.getDataRange().getValues();
+    let updated = false;
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === ym) {
+        sh.getRange(i + 1, 1, 1, 7).setValues([[ym, prod, use, net, saved, pct, note]]);
+        updated = true;
+        break;
+      }
+    }
+    if (!updated) sh.appendRow([ym, prod, use, net, saved, pct, note]);
+    if (typeof clearStatusCache_ === 'function') clearStatusCache_();
+    if (typeof logEvent_ === 'function') logEvent_('Solar รายเดือน ' + ym + ': ประหยัด ' + modFmtNum_(saved) + ' ฿');
+    const estFullBillNoSolar = Math.round((prod * TOU_SOLAR_BLEND + net * 4.2) * 100) / 100;
+    send_(chat, '☀️ บันทึก <b>Solar รายเดือน ' + ym + '</b> แล้ว:\n• ผลิตได้: ' + prod + ' kWh · ใช้ไฟ: ' + use + ' kWh · Net Grid: ' + net + ' kWh\n• Self-powered: <b>' + pct + '%</b>\n• ประหยัดค่าไฟ (' + (isEst ? 'ประเมิน TOU' : 'ยอดจริง') + '): <b>' + modFmtNum_(saved) + ' บาท</b>\n• ค่าไฟประเมินแบบไม่มีโซลาร์: ~' + modFmtNum_(estFullBillNoSolar) + ' บาท');
     return true;
   }
 
@@ -326,13 +382,28 @@ function profitStatus_() {
 
 function solarStatus_() {
   const m = modStateMap_('solar');
-  if (!m) return null;
+  const mRows = modReadRows_(SHEET_SOLAR_M);
+  const monthly = mRows.slice(-6).map(function (r) {
+    return {
+      m: String(r[0] || ''),
+      prod: Number(r[1] || 0),
+      use: Number(r[2] || 0),
+      net: Number(r[3] || 0),
+      saved: Number(r[4] || 0),
+      pct: Number(r[5] || 0),
+      note: String(r[6] || '')
+    };
+  }).filter(function (x) { return x.m; });
+  if (!m && !monthly.length) return null;
+  const s = m || {};
   return {
-    battery: Number(m.battery || 0),
-    solarKw: Number(m.solarKw || 0),
-    loadKw: Number(m.loadKw || 0),
-    savedThb: Number(m.savedThb || 0),
-    note: 'ข้อมูลจากชีต Modules_State (solar)'
+    battery: Number(s.battery || 0),
+    solarKw: Number(s.solarKw || 0),
+    loadKw: Number(s.loadKw || 0),
+    savedThb: Number(s.savedThb || 0),
+    tou: { onPeak: TOU_ON_PEAK, offPeak: TOU_OFF_PEAK, blend: TOU_SOLAR_BLEND },
+    monthly: monthly,
+    note: 'BlueRing Solar (TOU: On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿)'
   };
 }
 

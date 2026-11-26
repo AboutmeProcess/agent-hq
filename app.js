@@ -812,6 +812,10 @@ function drawExtendedAgents(d, mode) {
         fill.style.width = pct + '%';
         bar.appendChild(fill);
         body.appendChild(bar);
+        if (s.monthly && s.monthly.length) {
+          const lastM = s.monthly[s.monthly.length - 1];
+          body.appendChild(E('div', 'note', '📅 ล่าสุด ' + lastM.m + ': ผลิต ' + lastM.prod + ' / ใช้ ' + lastM.use + ' kWh (' + lastM.pct + '%) · ประหยัด ' + fmt(lastM.saved) + ' ฿'));
+        }
         if (s.note) body.appendChild(E('p', 'muted', s.note));
       },
       actions: [['/solar', '🔄 เช็กโซลาร์'], ['f:solar', '✏️ อัปเดต BlueRing']]
@@ -930,7 +934,14 @@ const SAMPLE = {
   ],
   captain: { casesToday: 18, renewals: 5, quotesPending: 4, premiumMonth: 148500, note: 'ตัวอย่าง: งานประกันภัยแบรนด์ Captain' },
   profit: { pair: 'XAUUSD', eaOn: true, dayPl: 42.8, floating: -6.4, gridLevel: 2, ddPct: 1.8, note: 'ตัวอย่าง: Grid + Partial Hedging บน MT5' },
-  solar: { battery: 19, solarKw: 8.88, loadKw: 46.8, savedThb: 876, note: 'BlueRing Solar Energy (Self-powered 19% · รอบบิล 7 พ.ย.–6 ธ.ค.)' },
+  solar: {
+    battery: 19,
+    solarKw: 8.88,
+    loadKw: 46.8,
+    savedThb: 876,
+    monthly: [{ m: '2026-10', prod: 178.44, use: 1395.53, net: 1217.09, saved: 1125.96, pct: 12.8 }],
+    note: 'BlueRing Solar (TOU: On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿)'
+  },
   health: { streak: 3, weekDays: 3, weekGoal: 5, weekMin: 115, todayDone: true, todayActivity: 'เดินลู่วิ่ง 35 น.', note: 'ตัวอย่าง: โปรเจกต์ take profit สุขภาพ' },
   errors: null,
   log: [
@@ -1242,10 +1253,10 @@ function fHealth(c, out) {
 
 function fSolar(c, out) {
   const sp = inp('Self-powered % เช่น 19', 'number');
-  const pr = inp('ผลิต kWh เช่น 8.88', 'number');
-  const ld = inp('ใช้ไฟ kWh เช่น 46.8', 'number');
-  const sv = inp('ประหยัด (บาท) เช่น 875.5', 'number');
-  const go = E('button', 'pri g', 'บันทึก BlueRing');
+  const pr = inp('ผลิตวันนี้ kWh เช่น 8.88', 'number');
+  const ld = inp('ใช้ไฟวันนี้ kWh เช่น 46.8', 'number');
+  const sv = inp('ประหยัดรอบบิล (฿) เช่น 875.5', 'number');
+  const go = E('button', 'pri g', 'บันทึกรายวัน');
   go.onclick = async () => {
     const a = Number(sp.value), b = Number(pr.value), d = Number(ld.value), s = Number(sv.value) || 0;
     if (isNaN(a) || !(b >= 0) || !(d >= 0) || sp.value === '' || pr.value === '' || ld.value === '') {
@@ -1257,6 +1268,23 @@ function fSolar(c, out) {
     }
   };
   c.appendChild(frm(sp, pr, ld, sv, go));
+
+  const ym = inp('เดือน เช่น 2026-11');
+  const mpr = inp('ผลิตทั้งเดือน kWh', 'number');
+  const mld = inp('ใช้ไฟทั้งเดือน kWh', 'number');
+  const msv = inp('ประหยัดจริง ฿ (เว้น=คำนวณ TOU)', 'number');
+  const mgo = E('button', 'pri', 'บันทึกรายเดือน (TOU)');
+  mgo.onclick = async () => {
+    const yv = ym.value.trim(), bp = Number(mpr.value), bl = Number(mld.value), bs = msv.value.trim();
+    if (!/^\d{4}-\d{2}$/.test(yv) || !(bp >= 0) || !(bl >= 0) || mpr.value === '' || mld.value === '') {
+      out.textContent = 'ใส่เดือน (เช่น 2026-11), ยอดผลิต kWh และยอดใช้ไฟ kWh ให้ครบ';
+      return;
+    }
+    if (await sendCmd('โซลาร์เดือน ' + yv + ' ' + bp + ' ' + bl + (bs ? ' ' + bs : ''), { out: out })) {
+      ym.value = ''; mpr.value = ''; mld.value = ''; msv.value = '';
+    }
+  };
+  c.appendChild(frm(ym, mpr, mld, msv, mgo));
 }
 
 const FORMS = {
