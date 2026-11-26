@@ -1,7 +1,7 @@
 # กติกาการทำงานของโปรเจกต์ AboutMeProcess (agent-hq)
 
 ## โครงสร้างโปรเจกต์
-โปรเจกต์นี้เป็นเว็บแอปพลิเคชันแบบ Static Web App สำหรับแดชบอร์ด **AboutMeProcess** (งานขับรถ การเงิน เที่ยวบิน ออฟฟิศเอเจนต์ และโมดูล Captain / Take Profit / Solar / Healthy) เชื่อมต่อกับ Telegram และ Google Apps Script
+โปรเจกต์นี้เป็นเว็บแอปพลิเคชันแบบ Static Web App สำหรับแดชบอร์ด **AboutMeProcess** (งานขับรถ การเงิน เที่ยวบิน ออฟฟิศ 3D เอเจนต์ และโมดูล Captain / Take Profit / Solar / Healthy) เชื่อมต่อกับ LINE Official Account (`@025nqoxp`) และ Google Apps Script
 
 ไฟล์หลักในโฟลเดอร์โปรเจกต์:
 - `index.html` — โครงสร้างหน้าเว็บหลัก

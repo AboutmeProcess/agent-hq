@@ -57,7 +57,7 @@
     { id: 'solar', name: 'Solar', home: { x: 4.5, y: 5.8 }, desk: { x: 4.2, y: 5.0 }, color: '#eab308', shirt: '#1e3a5f', hair: '#eab308', helmet: '#facc15', role: 'Solar' },
     { id: 'health', name: 'Healthy', home: { x: 4.6, y: 11.4 }, desk: { x: 4.6, y: 11.4 }, color: '#ec4899', shirt: '#be185d', hair: '#3f2318', sporty: true, role: 'Healthy' },
     { id: 'script', name: 'App Script', home: { x: 4.5, y: 8.2 }, desk: { x: 4.5, y: 7.4 }, color: '#a855f7', shirt: '#5b21b6', hair: '#a855f7', robot: true, role: 'Apps Script' },
-    { id: 'tg', name: 'Telegram', home: { x: 14.2, y: 3.8 }, desk: { x: 14.2, y: 3.0 }, color: '#06b6d4', shirt: '#0e7490', hair: '#1f2937', director: true, role: 'Director Hub' }
+    { id: 'tg', name: 'LINE OA', home: { x: 14.2, y: 3.8 }, desk: { x: 14.2, y: 3.0 }, color: '#06c755', shirt: '#059669', hair: '#1f2937', director: true, role: 'LINE Hub' }
   ];
 
   const WAYPOINTS = [
@@ -451,7 +451,7 @@
 
     // 4) Director's Office Furniture (Telegram Hub)
     box(13.3, 3.9, 0, 1.9, 0.95, 0.75, '#92400e', '#78350f', '#451a03');
-    box(13.8, 4.05, 0.75, 0.65, 0.1, 0.45, '#1e293b', '#38bdf8', '#0f172a');
+    box(13.8, 4.05, 0.75, 0.65, 0.1, 0.45, '#1e293b', '#06c755', '#0f172a');
     if (lamps[3].on) lightPool(14.3, 4.0, 1.2, isNight ? 78 : 34, isNight ? 'rgba(251, 191, 36, 0.45)' : 'rgba(253, 224, 71, 0.18)');
     // Bookshelf
     box(15.2, 3.6, 0, 0.65, 1.3, 1.85, '#78350f', '#92400e', '#451a03');
