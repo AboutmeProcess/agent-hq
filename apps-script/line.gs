@@ -67,8 +67,10 @@ function lineQuickReply_(ctxText) {
       ['📊 สรุปรายได้', '/summary'],
       ['🧾 รายการจ่าย', '/bills'],
       ['🛡️ ประกัน', '/captain'],
+      ['📈 MT5', '/profit'],
       ['💪 สุขภาพ', '/health'],
-      ['🏢 แดชบอร์ด 3D', '/dash']
+      ['🏢 แดชบอร์ด 3D', '/dash'],
+      ['🔐 ความปลอดภัย', '/security']
     ];
   }
   const qr = items.map(function (x) {
@@ -77,7 +79,7 @@ function lineQuickReply_(ctxText) {
   if (!/^\/solar\b|^โซลาร์/i.test(String(ctxText || '').trim())) {
     qr.push({ type: 'action', action: { type: 'location', label: '📍 แชร์พิกัด' } });
   }
-  return { items: qr };
+  return { items: qr.slice(0, 13) };
 }
 
 // ตอบกลับผ่าน Reply API (ฟรีไม่จำกัดข้อความ!)
