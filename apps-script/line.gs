@@ -152,6 +152,37 @@ function lineWebhook_(e) {
         const text = String(msg.text || '').trim();
         if (!text) return;
 
+        // คำสั่งเฉพาะเจ้าของ: ล้างค่า Telegram เก่า + สร้างชีต 4 โมดูล + ตั้งเวลาสรุปเช้า LINE ในคำสั่งเดียว
+        if (/^\/cleanup_telegram$/i.test(text)) {
+          const P = PropertiesService.getScriptProperties();
+          const removedProps = [];
+          ['BOT_TOKEN', 'OWNER_CHAT_ID', 'WORKER_URL', 'WEBHOOK_SECRET'].forEach(function (k) {
+            if (P.getProperty(k) != null) { P.deleteProperty(k); removedProps.push(k); }
+          });
+          const removedTrigs = [];
+          try {
+            ScriptApp.getProjectTriggers().forEach(function (tr) {
+              const fn = tr.getHandlerFunction();
+              if (/budget|briefing|morning|evening/i.test(fn) && fn !== 'runLineDailyBriefing') {
+                ScriptApp.deleteTrigger(tr);
+                removedTrigs.push(fn);
+              }
+            });
+          } catch (te) {}
+          const notes = ['🧹 ล้างค่า Telegram เดิมเรียบร้อยครับ'];
+          notes.push('• Properties ที่ลบ: ' + (removedProps.length ? removedProps.join(', ') : 'ไม่มีค้างแล้ว'));
+          notes.push('• Triggers ที่ลบ: ' + (removedTrigs.length ? removedTrigs.join(', ') : 'ไม่มีค้างแล้ว'));
+          try {
+            if (typeof setupModuleSheets === 'function') { setupModuleSheets(); notes.push('• ✅ สร้างแท็บ 4 โมดูล (Captain_Cases, Health_Log, Modules_State) แล้ว'); }
+          } catch (se) { notes.push('• ⚠️ setupModuleSheets: ' + String(se)); }
+          try {
+            installLineBriefingTrigger();
+            notes.push('• ✅ ตั้งเวลาสรุปเช้า 07:00 น. เข้า LINE อัตโนมัติแล้ว');
+          } catch (ie) { notes.push('• ⚠️ Trigger LINE (อาจต้องกด Run ใน Apps Script 1 ครั้ง): ' + String(ie)); }
+          lineReply_(ev.replyToken, notes.join('\n'));
+          return;
+        }
+
         // กรณี /dash ส่งลิงก์เปิดแดชบอร์ด 3D โดยตรงในแชท LINE
         if (/^\/dash\b|แดชบอร์ด/i.test(text)) {
           const key = prop_('DASH_KEY');
