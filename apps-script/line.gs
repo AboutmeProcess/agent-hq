@@ -44,17 +44,30 @@ function htmlToLineText_(html) {
     .trim();
 }
 
-// ปุ่ม Quick Reply ด้านล่างแชท LINE (กดสั่งงานไวโดยไม่ต้องพิมพ์)
-function lineQuickReply_() {
-  const items = [
-    ['🌅 สรุปเช้า', '/brief'],
-    ['🎯 วันนี้ต้องหา', 'วันนี้ต้องหาเท่าไร'],
-    ['✈️ BKK', '/bkk'],
-    ['✈️ DMK', '/dmk'],
-    ['📊 สรุปรายได้', '/summary'],
-    ['🧾 รายการจ่าย', '/bills'],
-    ['🏢 แดชบอร์ด 3D', '/dash']
-  ];
+// ปุ่ม Quick Reply ด้านล่างแชท LINE (กดสั่งงานไว หรือเลือกดูเดือนย้อนหลังได้ทันที)
+function lineQuickReply_(ctxText) {
+  let items;
+  if (/^\/solar\b|^โซลาร์/i.test(String(ctxText || '').trim())) {
+    items = [
+      ['📊 ดูทุกเดือน', '/solar all'],
+      ['📅 พ.ย. 2026', '/solar 2026-11'],
+      ['📅 ต.ค. 2026', '/solar 2026-10'],
+      ['📅 ก.ย. 2026', '/solar 2026-09'],
+      ['📅 ส.ค. 2026', '/solar 2026-08'],
+      ['🌅 สรุปเช้า', '/brief'],
+      ['🏢 แดชบอร์ด 3D', '/dash']
+    ];
+  } else {
+    items = [
+      ['🌅 สรุปเช้า', '/brief'],
+      ['🎯 วันนี้ต้องหา', 'วันนี้ต้องหาเท่าไร'],
+      ['☀️ โซลาร์', '/solar'],
+      ['✈️ BKK', '/bkk'],
+      ['✈️ DMK', '/dmk'],
+      ['📊 สรุปรายได้', '/summary'],
+      ['🏢 แดชบอร์ด 3D', '/dash']
+    ];
+  }
   return {
     items: items.map(function (x) {
       return { type: 'action', action: { type: 'message', label: x[0], text: x[1] } };
@@ -63,7 +76,7 @@ function lineQuickReply_() {
 }
 
 // ตอบกลับผ่าน Reply API (ฟรีไม่จำกัดข้อความ!)
-function lineReply_(replyToken, text) {
+function lineReply_(replyToken, text, ctxText) {
   const token = lineToken_();
   if (!token || !replyToken) return;
   const clean = htmlToLineText_(text).slice(0, 4800) || 'รับทราบครับ';
@@ -73,7 +86,7 @@ function lineReply_(replyToken, text) {
     headers: { Authorization: 'Bearer ' + token },
     payload: JSON.stringify({
       replyToken: replyToken,
-      messages: [{ type: 'text', text: clean, quickReply: lineQuickReply_() }]
+      messages: [{ type: 'text', text: clean, quickReply: lineQuickReply_(ctxText) }]
     }),
     muteHttpExceptions: true
   });
@@ -241,7 +254,7 @@ function lineWebhook_(e) {
         try {
           handleText_(uid, text);
           const reply = OUT_.join('\n\n') || 'รับทราบครับ';
-          lineReply_(ev.replyToken, reply);
+          lineReply_(ev.replyToken, reply, text);
         } catch (err) {
           console.error(err);
           if (typeof noteError_ === 'function') noteError_(err);

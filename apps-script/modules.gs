@@ -18,15 +18,46 @@ const TOU_OFF_PEAK = 3.00;
 const TOU_SOLAR_BLEND = 5.41;
 const SOLAR_SUB_FEE = 699;   // ค่าบริการรายเดือน BlueRing (บาท/เดือน)
 
+function ensureSolarHistory_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sm = modEnsureSheet_(ss, SHEET_SOLAR_M, ['Month', 'Produced_kWh', 'Usage_kWh', 'NetGrid_kWh', 'Saved_THB', 'SelfPowered_Pct', 'Note']);
+  if (sm.getLastRow() <= 1) {
+    sm.getRange(2, 1, 7, 7).setValues([
+      ['2026-05', 0, 1871, 1871, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
+      ['2026-06', 0, 1779, 1779, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
+      ['2026-07', 0, 1369, 1369, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
+      ['2026-08', 0, 1986, 1986, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
+      ['2026-09', 0, 1775, 1775, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
+      ['2026-10', 178.44, 1960.44, 1782, 1125.96, 9.1, 'บิลจริง กฟน. 6,067.27 ฿ (On 208 / Off 1,574 · 3.40 ฿/หน่วย) · สุทธิ +427 ฿'],
+      ['2026-11', 233, 1983, 1750, 1274, 11.7, 'คาดการณ์เต็มเดือน: บิล กฟน. ~5,960 ฿ · ประหยัด TOU ~1,274 ฿ · สุทธิ +575 ฿']
+    ]);
+  }
+  // ถ้า Modules_State ของ solar ยังเป็นค่าว่าง/0 ให้ใส่ค่าจริงล่าสุดจาก BlueRing
+  const st = ss.getSheetByName(SHEET_MSTATE);
+  if (st) {
+    const rows = st.getDataRange().getValues();
+    let curProd = null;
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === 'solar' && String(rows[i][1]) === 'solarKw') curProd = Number(rows[i][2]);
+    }
+    if (curProd === 0) {
+      const now = Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd'T'HH:mm:ss'+07:00'");
+      const seed = { battery: '19', solarKw: '8.88', loadKw: '46.8', savedThb: '875.5' };
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === 'solar' && seed[String(rows[i][1])] !== undefined) {
+          st.getRange(i + 1, 3, 1, 2).setValues([[seed[String(rows[i][1])], now]]);
+        }
+      }
+    }
+  }
+  return sm;
+}
+
 function setupModuleSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   modEnsureSheet_(ss, SHEET_CAPTAIN, ['Timestamp', 'Date', 'Customer', 'Type', 'Premium', 'RenewalDate', 'Status']);
   modEnsureSheet_(ss, SHEET_HEALTH, ['Timestamp', 'Date', 'Activity', 'Minutes', 'Note']);
-  const sm = modEnsureSheet_(ss, SHEET_SOLAR_M, ['Month', 'Produced_kWh', 'Usage_kWh', 'NetGrid_kWh', 'Saved_THB', 'SelfPowered_Pct', 'Note']);
-  if (sm.getLastRow() <= 1) {
-    sm.appendRow(['2026-10', 178.44, 1960.44, 1782, 1125.96, 9.1, 'บิลจริง กฟน. 6,067.27 ฿ (On 208 / Off 1,574 · 3.40 ฿/หน่วย) · สุทธิ +427 ฿']);
-    sm.appendRow(['2026-11 (คาดการณ์)', 233, 1983, 1750, 1274, 11.7, 'ประมาณการเต็มเดือน: บิล กฟน. ~5,960 ฿ · ประหยัด TOU ~1,274 ฿ · สุทธิ +575 ฿']);
-  }
+  ensureSolarHistory_();
   const st = modEnsureSheet_(ss, SHEET_MSTATE, ['Module', 'Key', 'Value', 'UpdatedAt']);
   if (st.getLastRow() <= 1) {
     const now = Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd'T'HH:mm:ss'+07:00'");
@@ -104,9 +135,47 @@ function modulesCommand_(chat, text) {
     return true;
   }
 
-  if (low === '/solar' || low === '/home') {
+  if (/^\/(solar|home)\b/i.test(low)) {
+    ensureSolarHistory_();
     const s = solarStatus_();
-    if (!s) { send_(chat, '☀️ ยังไม่มีข้อมูล Solar (พิมพ์ /cleanup_telegram เพื่อสร้างชีต หรือพิมพ์: โซลาร์ 19 8.88 46.8 875.5)'); return true; }
+    if (!s) { send_(chat, '☀️ ยังไม่มีข้อมูล Solar'); return true; }
+    const arg = t.replace(/^\/(?:solar|home)\s*/i, '').trim();
+
+    // ดูย้อนหลังทุกเดือน: /solar all หรือ /solar ย้อนหลัง
+    if (/^(all|ย้อนหลัง|ทั้งหมด)$/i.test(arg)) {
+      const lines = ['<b>📅 ประวัติ Solar & กฟน. ย้อนหลังทั้งหมด</b>'];
+      (s.monthly || []).slice().reverse().forEach(function (m) {
+        const netM = m.saved > 0 ? Math.round((m.saved - SOLAR_SUB_FEE) * 100) / 100 : 0;
+        const savTxt = m.saved > 0 ? (' · ประหยัด ' + modFmtNum_(m.saved) + ' ฿ (สุทธิ ' + (netM >= 0 ? '+' : '') + modFmtNum_(netM) + ' ฿)') : ' · ก่อนติดโซลาร์';
+        lines.push('• <b>' + m.m + '</b>: กฟน. ' + modFmtNum_(m.net) + ' หน่วย' + (m.prod > 0 ? (' · ผลิต ' + m.prod + ' kWh') : '') + savTxt);
+      });
+      lines.push('\n💡 พิมพ์ <code>/solar 2026-10</code> เพื่อเจาะจงดูรายเดือน');
+      send_(chat, lines.join('\n'));
+      return true;
+    }
+
+    // เจาะจงดูเดือนที่เลือก: /solar 2026-10
+    if (/^\d{4}-\d{2}$/.test(arg)) {
+      const found = (s.monthly || []).find(function (m) { return m.m.indexOf(arg) === 0; });
+      if (!found) {
+        const avail = (s.monthly || []).map(function (m) { return m.m; }).join(', ');
+        send_(chat, 'ไม่พบข้อมูลเดือน <b>' + esc_(arg) + '</b>\nเดือนที่มีในระบบ: ' + (avail || 'ยังไม่มี'));
+        return true;
+      }
+      const netM = found.saved > 0 ? Math.round((found.saved - SOLAR_SUB_FEE) * 100) / 100 : 0;
+      const lines = [
+        '<b>☀️ รายงาน Solar & กฟน. เดือน ' + esc_(found.m) + '</b>',
+        '• ผลิตโซลาร์: <b>' + found.prod + ' kWh</b> · Self-powered: <b>' + found.pct + '%</b>',
+        '• ใช้ไฟบ้านรวม: ' + modFmtNum_(found.use) + ' kWh · ซื้อ กฟน. สุทธิ: <b>' + modFmtNum_(found.net) + ' kWh</b>'
+      ];
+      if (found.saved > 0) {
+        lines.push('• ประหยัดค่าไฟ: <b>' + modFmtNum_(found.saved) + ' บาท</b> (สุทธิหลังหัก ' + SOLAR_SUB_FEE + ' ฿ = <b>' + (netM >= 0 ? '+' : '') + modFmtNum_(netM) + ' บาท</b>)');
+      }
+      if (found.note) lines.push('• หมายเหตุ: ' + esc_(found.note));
+      send_(chat, lines.join('\n'));
+      return true;
+    }
+
     const lines = [
       '<b>☀️ BlueRing Solar Energy (มิเตอร์ TOU)</b>',
       '• Self-powered ล่าสุด: <b>' + s.battery + '%</b>',
@@ -116,11 +185,12 @@ function modulesCommand_(chat, text) {
       '• เรต TOU จริง (กฟน. 1.3.2): On-Peak ' + TOU_ON_PEAK + ' ฿ / Off-Peak ' + TOU_OFF_PEAK + ' ฿ (เฉลี่ยจริง 3.40 ฿/หน่วย)'
     ];
     if (s.monthly && s.monthly.length) {
-      lines.push('<b>📅 รายเดือนล่าสุด:</b>');
+      lines.push('<b>📅 รายเดือนล่าสุด (เลือกดูเพิ่มได้):</b>');
       s.monthly.slice(-3).reverse().forEach(function (m) {
-        const netM = Math.round((m.saved - SOLAR_SUB_FEE) * 100) / 100;
-        lines.push('• ' + m.m + ': ผลิต ' + m.prod + ' / ใช้ ' + m.use + ' kWh (' + m.pct + '%) · ประหยัด ' + modFmtNum_(m.saved) + ' ฿ (สุทธิ <b>' + (netM >= 0 ? '+' : '') + modFmtNum_(netM) + ' ฿</b>)');
+        const netM = m.saved > 0 ? Math.round((m.saved - SOLAR_SUB_FEE) * 100) / 100 : 0;
+        lines.push('• ' + m.m + ': กฟน. ' + modFmtNum_(m.net) + ' หน่วย' + (m.saved > 0 ? (' · ประหยัด ' + modFmtNum_(m.saved) + ' ฿ (สุทธิ <b>' + (netM >= 0 ? '+' : '') + modFmtNum_(netM) + ' ฿</b>)') : ''));
       });
+      lines.push('💡 พิมพ์ <code>/solar all</code> หรือ <code>/solar 2026-10</code> เพื่อดูย้อนหลัง');
     }
     send_(chat, lines.join('\n'));
     return true;
@@ -387,7 +457,7 @@ function profitStatus_() {
 function solarStatus_() {
   const m = modStateMap_('solar');
   const mRows = modReadRows_(SHEET_SOLAR_M);
-  const monthly = mRows.slice(-6).map(function (r) {
+  const monthly = mRows.slice(-12).map(function (r) {
     return {
       m: String(r[0] || ''),
       prod: Number(r[1] || 0),

@@ -815,8 +815,29 @@ function drawExtendedAgents(d, mode) {
         bar.appendChild(fill);
         body.appendChild(bar);
         if (s.monthly && s.monthly.length) {
-          const lastM = s.monthly[0];
-          body.appendChild(E('div', 'note', '📅 บิลจริง ' + lastM.m + ': ผลิต ' + lastM.prod + ' kWh · กฟน. ' + fmt(lastM.net) + ' หน่วย · ประหยัด ' + fmt(lastM.saved) + ' ฿'));
+          const list = s.monthly.slice().reverse();
+          const row = E('div', 'frow');
+          row.style.margin = '4px 0';
+          const sel = E('select');
+          sel.setAttribute('aria-label', 'เลือกดูเดือนย้อนหลัง Solar');
+          list.forEach((m, idx) => {
+            const opt = E('option', '', '📅 เดือน ' + m.m + (m.saved > 0 ? ' · ประหยัด ' + fmt(m.saved) + ' ฿' : ' · กฟน. ' + fmt(m.net) + ' หน่วย'));
+            opt.value = String(idx);
+            sel.appendChild(opt);
+          });
+          const mBox = E('div', 'note');
+          const showM = idx => {
+            const m = list[idx] || list[0];
+            const netM = m.saved > 0 ? (m.saved - subFee) : 0;
+            mBox.textContent = m.saved > 0
+              ? ('ผลิต ' + m.prod + ' kWh · กฟน. ' + fmt(m.net) + ' หน่วย · ประหยัด ' + fmt(m.saved) + ' ฿ (สุทธิ ' + (netM >= 0 ? '+' : '') + fmt(netM) + ' ฿)' + (m.note ? ' · ' + m.note : ''))
+              : ('กฟน. ' + fmt(m.net) + ' หน่วย' + (m.note ? ' · ' + m.note : ''));
+          };
+          sel.onchange = () => showM(Number(sel.value));
+          showM(0);
+          row.appendChild(sel);
+          body.appendChild(row);
+          body.appendChild(mBox);
         }
         if (s.forecast) {
           body.appendChild(E('div', 'note', '🔮 คาดการณ์ ' + s.forecast.month + ': บิลไฟ ~' + fmt(s.forecast.estBill) + ' ฿ · ประหยัด TOU ~' + fmt(s.forecast.estSaved) + ' ฿ (สุทธิ +' + fmt(s.forecast.estNet) + ' ฿)'));
@@ -947,7 +968,15 @@ const SAMPLE = {
     subFee: 699,
     netSaved: 176.5,
     forecast: { month: '2026-11', estProd: 233, estGrid: 1750, estBill: 5960, estSaved: 1274, estNet: 575 },
-    monthly: [{ m: '2026-10', prod: 178.44, use: 1960.44, net: 1782, saved: 1125.96, pct: 9.1 }],
+    monthly: [
+      { m: '2026-05', prod: 0, use: 1871, net: 1871, saved: 0, pct: 0, note: 'ก่อนติดโซลาร์' },
+      { m: '2026-06', prod: 0, use: 1779, net: 1779, saved: 0, pct: 0, note: 'ก่อนติดโซลาร์' },
+      { m: '2026-07', prod: 0, use: 1369, net: 1369, saved: 0, pct: 0, note: 'ก่อนติดโซลาร์' },
+      { m: '2026-08', prod: 0, use: 1986, net: 1986, saved: 0, pct: 0, note: 'ก่อนติดโซลาร์' },
+      { m: '2026-09', prod: 0, use: 1775, net: 1775, saved: 0, pct: 0, note: 'ก่อนติดโซลาร์' },
+      { m: '2026-10', prod: 178.44, use: 1960.44, net: 1782, saved: 1125.96, pct: 9.1, note: 'บิลจริง กฟน. 6,067.27 ฿' },
+      { m: '2026-11', prod: 233, use: 1983, net: 1750, saved: 1274, pct: 11.7, note: 'คาดการณ์เต็มเดือน' }
+    ],
     note: 'BlueRing 699 ฿/ด. · กฟน. TOU 1.3.2 (เฉลี่ยจริง 3.40 ฿/หน่วย · Off-Peak 88.3%)'
   },
   health: { streak: 3, weekDays: 3, weekGoal: 5, weekMin: 115, todayDone: true, todayActivity: 'เดินลู่วิ่ง 35 น.', note: 'ตัวอย่าง: โปรเจกต์ take profit สุขภาพ' },
