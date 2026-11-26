@@ -439,7 +439,7 @@ function applyData(d) {
   st.script = e && e.ageMin < 1440 ? 'มีข้อผิดพลาดล่าสุด ' + e.t + ' น.' : 'ตอบสนองปกติ';
   if (d.captain) st.captain = 'เคสวันนี้: ' + (d.captain.casesToday ?? 0) + ' · ต่ออายุ ' + (d.captain.renewals ?? 0);
   if (d.profit) st.profit = (d.profit.eaOn ? 'EA ทำงาน' : 'EA หยุด') + (d.profit.dayPl != null ? ' · ' + (d.profit.dayPl >= 0 ? '+' : '') + d.profit.dayPl + '$' : '');
-  if (d.solar) st.solar = 'แบต ' + (d.solar.battery ?? '—') + '% · ผลิต ' + (d.solar.solarKw ?? '—') + ' kW';
+  if (d.solar) st.solar = 'Self-powered ' + (d.solar.battery ?? '—') + '% · ผลิต ' + (d.solar.solarKw ?? '—') + ' kWh';
   if (d.health) st.health = 'ต่อเนื่อง ' + (d.health.streak ?? 0) + ' วัน' + (d.health.todayDone ? ' · สำเร็จแล้ว' : '');
 
   setSt(st);
@@ -796,25 +796,25 @@ function drawExtendedAgents(d, mode) {
     {
       id: 'solar',
       icon: '☀️',
-      title: 'Solar · Smart Home',
+      title: 'Solar · BlueRing',
       color: '#ffe066',
       data: d.solar,
       render(s, body) {
-        const batt = Math.max(0, Math.min(100, Number(s.battery || 0)));
+        const pct = Math.max(0, Math.min(100, Number(s.battery || 0)));
         const g = E('div', 'ag-metrics');
-        g.appendChild(agMetric('แบตเตอรี่', batt + '%', batt >= 50 ? 'pos' : 'neg'));
-        g.appendChild(agMetric('ผลิตโซลาร์', (s.solarKw ?? 0) + ' kW'));
-        g.appendChild(agMetric('ใช้ไฟในบ้าน', (s.loadKw ?? 0) + ' kW'));
-        g.appendChild(agMetric('ประหยัดวันนี้', fmt(s.savedThb || 0) + ' ฿', 'pos'));
+        g.appendChild(agMetric('Self-powered', pct + '%', pct >= 20 ? 'pos' : ''));
+        g.appendChild(agMetric('ผลิตได้ (Produced)', (s.solarKw ?? 0) + ' kWh'));
+        g.appendChild(agMetric('ใช้ไฟบ้าน (Consumed)', (s.loadKw ?? 0) + ' kWh'));
+        g.appendChild(agMetric('ประหยัดรอบบิลนี้', fmt(s.savedThb || 0) + ' ฿', 'pos'));
         body.appendChild(g);
         const bar = E('div', 'ag-bar');
         const fill = E('i');
-        fill.style.width = batt + '%';
+        fill.style.width = pct + '%';
         bar.appendChild(fill);
         body.appendChild(bar);
         if (s.note) body.appendChild(E('p', 'muted', s.note));
       },
-      actions: [['/solar', '🔄 เช็กโซลาร์'], ['/home', '🏠 HomeKit']]
+      actions: [['/solar', '🔄 เช็กโซลาร์'], ['f:solar', '✏️ อัปเดต BlueRing']]
     },
     {
       id: 'health',
@@ -930,7 +930,7 @@ const SAMPLE = {
   ],
   captain: { casesToday: 18, renewals: 5, quotesPending: 4, premiumMonth: 148500, note: 'ตัวอย่าง: งานประกันภัยแบรนด์ Captain' },
   profit: { pair: 'XAUUSD', eaOn: true, dayPl: 42.8, floating: -6.4, gridLevel: 2, ddPct: 1.8, note: 'ตัวอย่าง: Grid + Partial Hedging บน MT5' },
-  solar: { battery: 94, solarKw: 3.6, loadKw: 1.4, savedThb: 145, note: 'ตัวอย่าง: Apple HomeKit + Inverter ออนไลน์' },
+  solar: { battery: 19, solarKw: 8.88, loadKw: 46.8, savedThb: 876, note: 'BlueRing Solar Energy (Self-powered 19% · รอบบิล 7 พ.ย.–6 ธ.ค.)' },
   health: { streak: 3, weekDays: 3, weekGoal: 5, weekMin: 115, todayDone: true, todayActivity: 'เดินลู่วิ่ง 35 น.', note: 'ตัวอย่าง: โปรเจกต์ take profit สุขภาพ' },
   errors: null,
   log: [
@@ -1240,11 +1240,31 @@ function fHealth(c, out) {
   c.appendChild(frm(act, mins, note, go));
 }
 
+function fSolar(c, out) {
+  const sp = inp('Self-powered % เช่น 19', 'number');
+  const pr = inp('ผลิต kWh เช่น 8.88', 'number');
+  const ld = inp('ใช้ไฟ kWh เช่น 46.8', 'number');
+  const sv = inp('ประหยัด (บาท) เช่น 875.5', 'number');
+  const go = E('button', 'pri g', 'บันทึก BlueRing');
+  go.onclick = async () => {
+    const a = Number(sp.value), b = Number(pr.value), d = Number(ld.value), s = Number(sv.value) || 0;
+    if (isNaN(a) || !(b >= 0) || !(d >= 0) || sp.value === '' || pr.value === '' || ld.value === '') {
+      out.textContent = 'กรอก Self-powered %, ผลิต kWh และใช้ไฟ kWh ให้ครบ';
+      return;
+    }
+    if (await sendCmd('โซลาร์ ' + a + ' ' + b + ' ' + d + ' ' + s, { out: out })) {
+      sp.value = ''; pr.value = ''; ld.value = ''; sv.value = '';
+    }
+  };
+  c.appendChild(frm(sp, pr, ld, sv, go));
+}
+
 const FORMS = {
   income: ['➕ บันทึกรายได้ (แยกตามแอป)', fIncome],
   cash: ['💵 เงินสด', fCash],
   pay: ['✅ จ่ายแล้ว / 📌 ค้างจ่าย', fPay],
   captain: ['🛡️ บันทึกเคสประกัน Captain', fCaptain],
+  solar: ['☀️ อัปเดต BlueRing Solar', fSolar],
   health: ['💪 บันทึกออกกำลังกาย Healthy', fHealth]
 };
 
@@ -1281,7 +1301,7 @@ const tbF = $('tbFl'), hF = $('actFl'), tbM = $('tbMoney'), hM = $('actMoney'), 
 [['วันนี้ต้องหาเท่าไร', '🎯 วันนี้ต้องหา'], ['/bills', '🧾 รายการจ่าย'], ['/summary', '📊 สรุปรายได้']]
   .forEach(a => tbBtn(tbM, hM, 'q' + a[0], a[1], quick(a[0])));
 ['income', 'cash', 'pay'].forEach(k => tbBtn(tbM, hM, k, FORMS[k][0].split(' (')[0], FORMS[k][1], FORMS[k][0]));
-['captain', 'health'].forEach(k => tbBtn(tbA, hA, k, FORMS[k][0], FORMS[k][1], FORMS[k][0]));
+['captain', 'solar', 'health'].forEach(k => tbBtn(tbA, hA, k, FORMS[k][0], FORMS[k][1], FORMS[k][0]));
 
 // ---------- รายละเอียดเมื่อกดช่องสรุป + เมนูของหมวดนั้น ----------
 const ln = t => E('div', 'ln2', t);

@@ -26,10 +26,10 @@ function setupModuleSheets() {
       ['profit', 'floating', '0', now],
       ['profit', 'gridLevel', '0', now],
       ['profit', 'ddPct', '0', now],
-      ['solar', 'battery', '100', now],
-      ['solar', 'solarKw', '0', now],
-      ['solar', 'loadKw', '0', now],
-      ['solar', 'savedThb', '0', now]
+      ['solar', 'battery', '19', now],
+      ['solar', 'solarKw', '8.88', now],
+      ['solar', 'loadKw', '46.8', now],
+      ['solar', 'savedThb', '875.5', now]
     ]);
   }
   if (typeof logEvent_ === 'function') logEvent_('ตั้งค่าแท็บโมดูลเสริมทั้ง 4 เอเจนต์แล้ว');
@@ -95,8 +95,38 @@ function modulesCommand_(chat, text) {
 
   if (low === '/solar' || low === '/home') {
     const s = solarStatus_();
-    if (!s) { send_(chat, '☀️ ยังไม่มีข้อมูล Solar (รัน <code>setupModuleSheets()</code> หรือส่ง Webhook เข้ามา)'); return true; }
-    send_(chat, '<b>☀️ Solar & Smart Home</b>\n• แบตเตอรี่: ' + s.battery + '%\n• ผลิตโซลาร์: ' + s.solarKw + ' kW · ใช้ไฟบ้าน: ' + s.loadKw + ' kW\n• ประหยัดวันนี้: ' + modFmtNum_(s.savedThb) + ' บาท');
+    if (!s) { send_(chat, '☀️ ยังไม่มีข้อมูล Solar (พิมพ์ /cleanup_telegram เพื่อสร้างชีต หรือพิมพ์: โซลาร์ 19 8.88 46.8 875.5)'); return true; }
+    send_(chat, '<b>☀️ BlueRing Solar Energy</b>\n• Self-powered: ' + s.battery + '%\n• ผลิตได้: ' + s.solarKw + ' kWh · ใช้ไฟบ้าน: ' + s.loadKw + ' kWh\n• ประหยัดรอบบิลนี้: ' + modFmtNum_(s.savedThb) + ' บาท');
+    return true;
+  }
+
+  if (t.indexOf('โซลาร์ ') === 0) {
+    // รูปแบบ: โซลาร์ <Self-powered%> <ผลิต kWh> <ใช้ไฟ kWh> <ประหยัดบาท>
+    const rest = t.slice(7).trim();
+    const m = rest.match(/^(\d+(?:\.\d+)?)%?\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)(?:\s+(\d+(?:\.\d+)?))?$/);
+    if (!m) {
+      send_(chat, 'รูปแบบไม่ถูกต้อง ตัวอย่าง: <code>โซลาร์ 19 8.88 46.8 875.5</code>\n(Self-powered% / ผลิต kWh / ใช้ไฟ kWh / ประหยัดบาท)');
+      return true;
+    }
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = modEnsureSheet_(ss, SHEET_MSTATE, ['Module', 'Key', 'Value', 'UpdatedAt']);
+    const rows = sh.getDataRange().getValues();
+    const now = Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd'T'HH:mm:ss'+07:00'");
+    const vals = { battery: m[1], solarKw: m[2], loadKw: m[3], savedThb: m[4] || '0' };
+    Object.keys(vals).forEach(function (k) {
+      let found = false;
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === 'solar' && String(rows[i][1]) === k) {
+          sh.getRange(i + 1, 3, 1, 2).setValues([[String(vals[k]), now]]);
+          found = true;
+          break;
+        }
+      }
+      if (!found) sh.appendRow(['solar', k, String(vals[k]), now]);
+    });
+    if (typeof clearStatusCache_ === 'function') clearStatusCache_();
+    if (typeof logEvent_ === 'function') logEvent_('BlueRing Solar: ' + vals.battery + '% · ' + vals.solarKw + ' kWh');
+    send_(chat, '☀️ อัปเดต <b>BlueRing Solar</b> แล้ว:\n• Self-powered: <b>' + vals.battery + '%</b>\n• ผลิตได้: ' + vals.solarKw + ' kWh · ใช้ไฟ: ' + vals.loadKw + ' kWh\n• ประหยัดรอบบิล: <b>' + modFmtNum_(vals.savedThb) + ' บาท</b>');
     return true;
   }
 
