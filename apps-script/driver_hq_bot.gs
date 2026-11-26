@@ -43,6 +43,7 @@ function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k
 function ok_() { return ContentService.createTextOutput('ok'); }
 function doGet(e) {   // ?action=status&k=DASH_KEY → ข้อมูลสถานะให้หน้าแดชบอร์ด (ไม่เรียก API เที่ยวบิน ไม่เสียโควตา)
   const p = (e && e.parameter) || {};
+  if (p.action === 'line') return ok_();   // ให้ LINE Developers กด Verify Webhook ผ่านทันที
   if (p.action !== 'status') return ContentService.createTextOutput('Driver HQ bot is running');
   const key = prop_('DASH_KEY');
   let out;
@@ -80,6 +81,7 @@ function doPost(e) {
   if (!e || !e.postData) return ok_();
   if (e.parameter && e.parameter.action === 'cmd') return webCmd_(e);   // คำสั่งจากหน้าเว็บ (ตรวจ DASH_KEY ในนั้น)
   if (e.parameter && e.parameter.action === 'webhook' && typeof modulesWebhook_ === 'function') return modulesWebhook_(e);   // Webhook จาก MT5 EA / Solar
+  if (e.parameter && e.parameter.action === 'line' && typeof lineWebhook_ === 'function') return lineWebhook_(e);   // Webhook จาก LINE OA (Messaging API)
   try {
     const need = prop_('GAS_SECRET');   // ถ้าตั้งไว้ ต้องมี ?s=รหัส ต่อท้ายลิงก์ที่ Worker เรียก
     if (need && (!e.parameter || e.parameter.s !== need)) return ok_();

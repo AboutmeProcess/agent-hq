@@ -1,0 +1,208 @@
+/**
+ * line.gs — ตัวเชื่อม LINE Official Account (Messaging API) สำหรับ AboutMeProcess HQ
+ * ใช้สมองเดียวกับ driver_hq_bot.gs, budget.js และ modules.js
+ *
+ * จุดเด่นด้านความประหยัด (0 บาท):
+ * - การตอบกลับตอนคุณพิมพ์สั่งงานทั้งหมดใช้ Reply API (ฟรีไม่จำกัดข้อความ)
+ * - การแจ้งเตือนอัตโนมัติ (Push) มีตัวนับโควตารายเดือน (ค่าเริ่มต้นล็อกไม่เกิน 180 ข้อความ/เดือน กันเกินโควตาฟรี 200)
+ *
+ * Script Properties ที่ต้องตั้งค่าใน Apps Script:
+ * - LINE_CHANNEL_TOKEN : Channel Access Token (long-lived) จาก LINE Developers Console
+ * - LINE_USER_ID       : User ID ของคุณ (ถ้ายังไม่ตั้ง ให้ลองทักบอทใน LINE บอทจะตอบ User ID กลับมาให้)
+ * - LINE_PUSH_LIMIT    : (ไม่บังคับ) เพดาน Push ต่อเดือน ค่าเริ่มต้น 180
+ *
+ * Webhook URL ที่นำไปวางใน LINE Developers Console:
+ *   <WEBAPP_EXEC_URL>?action=line
+ */
+
+const LINE_API_BASE = 'https://api.line.me/v2/bot/message/';
+
+function lineToken_() { return String(prop_('LINE_CHANNEL_TOKEN') || '').trim(); }
+function lineOwner_() { return String(prop_('LINE_USER_ID') || '').trim(); }
+
+// แปลง HTML ที่บอทเดิมสร้างสำหรับ Telegram ให้เป็นข้อความอ่านง่ายบน LINE
+function htmlToLineText_(html) {
+  return String(html || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?(?:b|strong|i|em|code|pre|u)>/gi, '')
+    .replace(/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/gi, '$2\n$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// ปุ่ม Quick Reply ด้านล่างแชท LINE (กดสั่งงานไวโดยไม่ต้องพิมพ์)
+function lineQuickReply_() {
+  const items = [
+    ['🌅 สรุปเช้า', '/brief'],
+    ['🎯 วันนี้ต้องหา', 'วันนี้ต้องหาเท่าไร'],
+    ['✈️ BKK', '/bkk'],
+    ['✈️ DMK', '/dmk'],
+    ['📊 สรุปรายได้', '/summary'],
+    ['🧾 รายการจ่าย', '/bills'],
+    ['🏢 แดชบอร์ด 3D', '/dash']
+  ];
+  return {
+    items: items.map(function (x) {
+      return { type: 'action', action: { type: 'message', label: x[0], text: x[1] } };
+    })
+  };
+}
+
+// ตอบกลับผ่าน Reply API (ฟรีไม่จำกัดข้อความ!)
+function lineReply_(replyToken, text) {
+  const token = lineToken_();
+  if (!token || !replyToken) return;
+  const clean = htmlToLineText_(text).slice(0, 4800) || 'รับทราบครับ';
+  UrlFetchApp.fetch(LINE_API_BASE + 'reply', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + token },
+    payload: JSON.stringify({
+      replyToken: replyToken,
+      messages: [{ type: 'text', text: clean, quickReply: lineQuickReply_() }]
+    }),
+    muteHttpExceptions: true
+  });
+}
+
+// ส่งแจ้งเตือนผ่าน Push API (มีตัวคุมโควตาไม่ให้เกินแพ็กเกจฟรี 200 ข้อความ/เดือน)
+function sendLinePush_(text) {
+  const token = lineToken_();
+  const uid = lineOwner_();
+  if (!token || !uid) return { ok: false, error: 'missing_line_config' };
+
+  const P = PropertiesService.getScriptProperties();
+  const ym = Utilities.formatDate(new Date(), TZ, 'yyyyMM');
+  const countKey = 'LINE_PUSH_' + ym;
+  const used = Number(P.getProperty(countKey) || 0);
+  const limit = Number(prop_('LINE_PUSH_LIMIT') || 180);
+
+  if (used >= limit) {
+    if (typeof logEvent_ === 'function') logEvent_('ข้าม LINE Push (ใช้ครบเพดานฟรี ' + used + '/' + limit + ')');
+    return { ok: false, error: 'monthly_push_limit_reached', used: used, limit: limit };
+  }
+
+  const clean = htmlToLineText_(text).slice(0, 4800);
+  const res = UrlFetchApp.fetch(LINE_API_BASE + 'push', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + token },
+    payload: JSON.stringify({
+      to: uid,
+      messages: [{ type: 'text', text: clean, quickReply: lineQuickReply_() }]
+    }),
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() === 200) {
+    P.setProperty(countKey, String(used + 1));
+    return { ok: true, used: used + 1, limit: limit };
+  }
+  return { ok: false, code: res.getResponseCode(), body: res.getContentText() };
+}
+
+// จุดรับ Webhook จาก LINE Messaging API (POST ?action=line)
+function lineWebhook_(e) {
+  try {
+    const body = JSON.parse((e.postData && e.postData.contents) || '{}');
+    const events = body.events || [];
+    if (!events.length) return ok_();   // LINE Verify webhook ส่ง events ว่าง -> ตอบ 200 ok ทันที
+
+    const cache = CacheService.getScriptCache();
+    events.forEach(function (ev) {
+      if (!ev || !ev.replyToken) return;
+      const eid = ev.webhookEventId || ev.replyToken;
+      if (cache.get('line_' + eid)) return;
+      cache.put('line_' + eid, '1', 300);
+
+      const uid = String((ev.source && ev.source.userId) || '').trim();
+      const owner = lineOwner_();
+      if (!owner) {
+        lineReply_(ev.replyToken,
+          '👋 เชื่อม LINE สำเร็จแล้ว!\n\nUser ID ของคุณคือ:\n' + uid +
+          '\n\nให้นำค่านี้ไปใส่ใน Script Properties ชื่อ LINE_USER_ID เพื่อเปิดสิทธิ์สั่งงานเฉพาะคุณครับ');
+        return;
+      }
+      if (uid !== owner) {
+        console.log('ข้อความ LINE จากบุคคลอื่น: ' + uid);
+        return;
+      }
+
+      if (typeof touch_ === 'function') touch_();
+      const msg = ev.message || {};
+
+      // รองรับส่ง Location จาก LINE
+      if (ev.type === 'message' && msg.type === 'location') {
+        const lat = Number(msg.latitude), lng = Number(msg.longitude);
+        cache.put('lat_' + uid, String(lat), 1800);
+        cache.put('lng_' + uid, String(lng), 1800);
+        const link = typeof mapsTrafficUrl_ === 'function'
+          ? mapsTrafficUrl_(lat, lng)
+          : ('https://www.google.com/maps/@' + lat + ',' + lng + ',14z/data=!5m1!1e1');
+        lineReply_(ev.replyToken, '📍 รับพิกัดแล้วครับ\n🗺️ ดูจราจรสดรอบตัวคุณ:\n' + link + '\n\nพิมพ์ "ไป <ชื่อสถานที่>" เพื่อค้นเส้นทางได้เลย');
+        return;
+      }
+
+      // ข้อความปกติ -> ส่งเข้าสมองกลาง handleText_ โดยจับคำตอบผ่าน OUT_ แล้วตอบกลับด้วย Reply API (ฟรี!)
+      if (ev.type === 'message' && msg.type === 'text') {
+        const text = String(msg.text || '').trim();
+        if (!text) return;
+
+        // กรณี /dash ส่งลิงก์เปิดแดชบอร์ด 3D โดยตรงในแชท LINE
+        if (/^\/dash\b|แดชบอร์ด/i.test(text)) {
+          const key = prop_('DASH_KEY');
+          if (!key) {
+            lineReply_(ev.replyToken, '⚠️ ยังไม่ได้ตั้ง DASH_KEY ใน Script Properties');
+            return;
+          }
+          const page = String(prop_('DASH_PAGE_URL') || DASH_PAGE_DEFAULT).replace(/#.*$/, '');
+          const api = prop_('DASH_API_URL') || WEBAPP_URL;
+          const url = page + '#u=' + encodeURIComponent(api) + '&k=' + encodeURIComponent(key);
+          lineReply_(ev.replyToken, '🏢 เปิด AboutMeProcess 3D (เชื่อมข้อมูลจริงแล้ว):\n' + url + '\n\n⚠️ ลิงก์นี้มีรหัสผ่านอยู่ในตัว อย่าส่งต่อให้ผู้อื่น');
+          return;
+        }
+
+        OUT_ = [];
+        try {
+          handleText_(uid, text);
+          const reply = OUT_.join('\n\n') || 'รับทราบครับ';
+          lineReply_(ev.replyToken, reply);
+        } catch (err) {
+          console.error(err);
+          if (typeof noteError_ === 'function') noteError_(err);
+          lineReply_(ev.replyToken, '⚠️ เกิดข้อผิดพลาด: ' + String(err));
+        } finally {
+          OUT_ = null;
+        }
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    if (typeof noteError_ === 'function') noteError_(err);
+  }
+  return ok_();
+}
+
+// ทริกเกอร์ส่งสรุปรวมตอนเช้า 07:00 น. เข้า LINE OA (ใช้แค่ 1 Push/วัน = 30/เดือน อยู่ในโควตาฟรี 200 สบายๆ)
+function runLineDailyBriefing() {
+  OUT_ = [];
+  try {
+    if (typeof sendMorningBriefing_ === 'function') sendMorningBriefing_(lineOwner_());
+    const msg = OUT_.join('\n\n');
+    if (msg) sendLinePush_(msg);
+  } finally {
+    OUT_ = null;
+  }
+}
+
+function installLineBriefingTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'runLineDailyBriefing') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('runLineDailyBriefing').timeBased().everyDays(1).atHour(7).create();
+  console.log('ตั้งเวลาส่งสรุปเช้า 07:00 น. เข้า LINE OA แล้ว (ใช้ ~30 ข้อความ/เดือน)');
+}
