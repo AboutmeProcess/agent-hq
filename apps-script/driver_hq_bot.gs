@@ -47,7 +47,25 @@ function doGet(e) {   // ?action=status&k=DASH_KEY → ข้อมูลสถ�
   const key = prop_('DASH_KEY');
   let out;
   if (!key || p.k !== key) out = { ok: false, error: 'unauthorized' };
-  else { try { out = statusJson_(); } catch (err) { console.error(err); out = { ok: false, error: 'server error' }; } }
+  else {
+    try {
+      const cache = CacheService.getScriptCache();
+      const cached = p.nocache ? null : cache.get('status_json_v12');
+      if (cached) {
+        if (p.callback && /^[A-Za-z_][A-Za-z0-9_]*$/.test(p.callback)) {
+          return ContentService.createTextOutput(p.callback + '(' + cached + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
+        }
+        return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
+      }
+      out = statusJson_();
+      const freshJson = JSON.stringify(out);
+      try { cache.put('status_json_v12', freshJson, 45); } catch (ce) {}
+      if (p.callback && /^[A-Za-z_][A-Za-z0-9_]*$/.test(p.callback)) {
+        return ContentService.createTextOutput(p.callback + '(' + freshJson + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+      return ContentService.createTextOutput(freshJson).setMimeType(ContentService.MimeType.JSON);
+    } catch (err) { console.error(err); out = { ok: false, error: 'server error' }; }
+  }
   const json = JSON.stringify(out);
   if (p.callback && /^[A-Za-z_][A-Za-z0-9_]*$/.test(p.callback)) {
     return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
@@ -109,8 +127,14 @@ function handleCallback_(cq) {
   else if ((m = data.match(/^q_(\d+)$/))) { const q = QUICK[Number(m[1])]; if (q) send_(chat, recordJobToSheet_(chat, 'บันทึก ' + q.p + ' ' + q.f + ' ' + q.o)); }
 }
 
+function clearStatusCache_() {
+  try { CacheService.getScriptCache().remove('status_json_v12'); } catch (e) {}
+}
+
 function handleText_(chat, text) {
+  clearStatusCache_();   // ล้างแคชสถานะทันทีเมื่อมีการสั่งงาน เพื่อให้หน้าเว็บเห็นค่าล่าสุดทันที
   if (/^\/dash|แดชบอร์ด/i.test(text.trim())) return sendDashLink_(chat);   // ลิงก์เปิดหน้า AGENT HQ แบบเชื่อมข้อมูลแล้ว
+  if (/^\/brief|สรุปเช้า|สรุปรวม/i.test(text.trim()) && typeof sendMorningBriefing_ === 'function') return sendMorningBriefing_(chat);
   if (typeof budgetCommand_ === 'function' && budgetCommand_(chat, text)) return;   // แผนเงินรายวัน (ไฟล์ budget.gs)
   if (typeof modulesCommand_ === 'function' && modulesCommand_(chat, text)) return;   // โมดูล Captain / Take Profit / Solar / Healthy (ไฟล์ modules.gs)
   const s = text.toLowerCase();

@@ -129,7 +129,7 @@ function modulesCommand_(chat, text) {
   return false;
 }
 
-// ===================== WEBHOOK (MT5 EA & Solar HomeKit) =====================
+// ===================== WEBHOOK (MT5 EA & Solar HomeKit — ประหยัดโควตาด้วย Throttle + Dirty-check) =====================
 function modulesWebhook_(e) {
   const json = function (o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); };
   let body = {};
@@ -140,25 +140,101 @@ function modulesWebhook_(e) {
   const src = String((e.parameter && e.parameter.source) || body.source || '').toLowerCase();
   if (src !== 'profit' && src !== 'solar') return json({ ok: false, error: 'bad_request' });
 
+  // 1) Throttle: กันระบบภายนอกยิงถี่เกิน 1 ครั้ง/60 วินาที (ยกเว้นส่ง force: true สำหรับแจ้งเตือนด่วน)
+  const cache = CacheService.getScriptCache();
+  const force = String((e.parameter && e.parameter.force) || body.force || '') === 'true';
+  if (!force && cache.get('wh_cool_' + src)) {
+    return json({ ok: true, skipped: 'throttled' });
+  }
+
+  // 2) Dirty-check: ถ้าค่าเหมือนเดิมเป๊ะ ข้ามการเขียน Google Sheet เพื่อประหยัดโควตารายวัน
+  const cleanPayload = {};
+  Object.keys(body).sort().forEach(function (k) {
+    if (k !== 'k' && k !== 'source' && k !== 'force') cleanPayload[k] = String(body[k]);
+  });
+  const sig = JSON.stringify(cleanPayload);
+  if (!force && cache.get('wh_sig_' + src) === sig) {
+    cache.put('wh_cool_' + src, '1', 60);
+    return json({ ok: true, skipped: 'unchanged' });
+  }
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = modEnsureSheet_(ss, SHEET_MSTATE, ['Module', 'Key', 'Value', 'UpdatedAt']);
   const rows = sh.getDataRange().getValues();
   const now = Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd'T'HH:mm:ss'+07:00'");
+  const toAppend = [];
 
-  Object.keys(body).forEach(function (k) {
-    if (k === 'k' || k === 'source') return;
+  Object.keys(cleanPayload).forEach(function (k) {
     let found = false;
     for (let i = 1; i < rows.length; i++) {
       if (String(rows[i][0]) === src && String(rows[i][1]) === k) {
-        sh.getRange(i + 1, 3, 1, 2).setValues([[String(body[k]), now]]);
+        if (String(rows[i][2]) !== cleanPayload[k]) {
+          sh.getRange(i + 1, 3, 1, 2).setValues([[cleanPayload[k], now]]);
+        }
         found = true;
         break;
       }
     }
-    if (!found) sh.appendRow([src, k, String(body[k]), now]);
+    if (!found) toAppend.push([src, k, cleanPayload[k], now]);
   });
+  toAppend.forEach(function (r) { sh.appendRow(r); });
+
+  cache.put('wh_cool_' + src, '1', 60);
+  cache.put('wh_sig_' + src, sig, 3600);
+  if (typeof clearStatusCache_ === 'function') clearStatusCache_();
   if (typeof logEvent_ === 'function') logEvent_('Webhook อัปเดต ' + src);
-  return json({ ok: true });
+  return json({ ok: true, updated: Object.keys(cleanPayload).length });
+}
+
+// ===================== CROSS-AGENT MORNING BRIEFING (/brief) =====================
+function sendMorningBriefing_(chat) {
+  const b = typeof budgetStatus_ === 'function' ? safe_(budgetStatus_) : null;
+  const j = typeof todayJobs_ === 'function' ? safe_(todayJobs_) : null;
+  const c = safe_(captainStatus_);
+  const p = safe_(profitStatus_);
+  const s = safe_(solarStatus_);
+  const h = safe_(healthStatus_);
+
+  const lines = ['<b>🌅 สรุปรวมทีมเอเจนต์ AboutMeProcess</b>'];
+  const alerts = [];
+  if (b && !b.err) {
+    if (b.shortNow > 0) alerts.push('⚠️ เงินสดขาดปิดยอดค้างวันนี้ ' + modFmtNum_(b.shortNow) + ' บาท');
+    lines.push('💰 <b>Finance:</b> เป้าวันนี้ ' + (b.target > 0 ? modFmtNum_(b.target) + ' บาท/วัน' : 'พอจ่ายแล้ว 🎉') + ' · เงินสด ' + modFmtNum_(b.cash) + ' บาท');
+  }
+  if (j) {
+    lines.push('🚖 <b>Driver:</b> วันนี้ ' + j.count + ' เที่ยว · รายได้ ' + modFmtNum_(j.gross) + ' บาท');
+  }
+  if (c) {
+    lines.push('🛡️ <b>Captain:</b> เคสวันนี้ ' + c.casesToday + ' · รอปิด ' + c.quotesPending + ' · ใกล้ต่ออายุ ' + c.renewals);
+    if (c.renewals > 0) alerts.push('🛡️ มีกรมธรรม์ใกล้ต่ออายุ ' + c.renewals + ' ราย');
+  }
+  if (p) {
+    lines.push('📈 <b>Take Profit:</b> ' + esc_(p.pair) + ' (' + (p.eaOn ? 'ON' : 'OFF') + ') · วันนี้ ' + (p.dayPl >= 0 ? '+' : '') + p.dayPl + '$ · DD ' + p.ddPct + '%');
+  }
+  if (s) {
+    lines.push('☀️ <b>Solar:</b> แบต ' + s.battery + '% · ผลิต ' + s.solarKw + ' kW · ประหยัด ' + modFmtNum_(s.savedThb) + ' ฿');
+    if (s.battery > 0 && s.battery < 25) alerts.push('🪫 แบตโซลาร์ต่ำ (' + s.battery + '%)');
+  }
+  if (h) {
+    lines.push('💪 <b>Healthy:</b> ต่อเนื่อง ' + h.streak + ' วัน · สัปดาห์นี้ ' + h.weekDays + '/' + h.weekGoal + ' วัน (' + h.weekMin + ' น.)');
+  }
+  if (alerts.length) {
+    lines.splice(1, 0, '<b>🔔 จุดที่ต้องดูแล:</b>\n' + alerts.join('\n'));
+  }
+  send_(chat, lines.join('\n'));
+}
+
+function runDailyBriefingTrigger() {
+  const owner = typeof owner_ === 'function' ? owner_() : '';
+  if (owner) sendMorningBriefing_(owner);
+}
+
+function installBriefingTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'runDailyBriefingTrigger') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('runDailyBriefingTrigger').timeBased().everyDays(1).atHour(7).create();
+  console.log('ตั้งเวลาส่งสรุปรวมทีมเอเจนต์ทุกเช้า ~07:00 น. แล้ว');
 }
 
 // ===================== STATUS READERS (เรียกจาก statusJson_ ใน driver_hq_bot.gs) =====================

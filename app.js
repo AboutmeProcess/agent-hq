@@ -496,9 +496,12 @@ let timer = null;
 function startPoll() {
   clearInterval(timer);
   pull(true);
-  timer = setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 120000);
+  // รีเฟรชอัตโนมัติทุก 5 นาที (ประหยัดโควตา Apps Script กว่าเดิม 60% และยังกด 🔄 รีเฟรชได้ทันที)
+  timer = setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 300000);
 }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && CFG.url) pull(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && CFG.url && Date.now() - lastPull > 60000) pull();
+});
 
 // Config dialog
 const cd = $('cfgd');
@@ -1666,6 +1669,7 @@ $('cmdGo').onclick = goCmd;
 $('cmdIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); goCmd(); } });
 
 [
+  '/brief',
   'บันทึก Grab 250 ทิป 20 สยาม ไป สาทร',
   'เงินสด 3011+420+3041',
   'ฉันจ่ายหนี้ 4000 แล้ว ด้วยเงินสด',
