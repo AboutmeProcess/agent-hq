@@ -1,34 +1,26 @@
-# คู่มือติดตั้ง Google Apps Script (Backend ของ AboutMeProcess)
+# คู่มืออัปเกรด Google Apps Script (v12 — AboutMeProcess)
 
-ไฟล์ [Code.gs](Code.gs) เป็นหลังบ้านชุดใหม่ที่ออกแบบให้สื่อสารกับหน้าแดชบอร์ดครบทั้ง 8 เอเจนต์ (**Driver, Finance, Flights, Telegram, App Script, Captain, Take Profit, Solar, Healthy**)
+โฟลเดอร์นี้เก็บโค้ดหลังบ้านรุ่นอัปเกรด **v12** ที่ต่อยอดจากบอทจริง (`driver_hq_bot.gs` v11) โดย**ไม่มีข้อมูลส่วนตัวหรือรหัสลับฝังอยู่**
 
-## ขั้นตอนการติดตั้ง (ทำครั้งเดียว ~5 นาที)
+## ไฟล์ในโฟลเดอร์นี้
+- [driver_hq_bot.gs](driver_hq_bot.gs) — บอทหลัก v12:
+  - แก้บั๊กอ่านชีตเที่ยวบินสำรอง ให้รองรับทั้ง `Airport_Flights` และแท็บแยก `BKK_Flights` / `DMK_Flights` ที่มีอยู่ในชีตจริง
+  - เชื่อมต่ออัตโนมัติกับ [modules.gs](modules.gs) สำหรับ 4 เอเจนต์ใหม่ (`captain`, `profit`, `solar`, `health`) และ Webhook `?action=webhook`
+  - **หมายเหตุ:** บรรทัด `WEBAPP_URL` ตั้งเป็น `'PASTE_EXEC_URL'` เพื่อความปลอดภัย ให้วางลิงก์ `/exec` จริงของคุณเองใน Apps Script
+- [modules.gs](modules.gs) — โมดูลเสริมสำหรับ **Captain (ประกันภัย), Take Profit (MT5), Solar (Smart Home), Healthy (ออกกำลังกาย)** วางคู่กับ `driver_hq_bot.gs` และ `budget.gs` เดิมได้เลยโดยไม่กระทบข้อมูลการเงินเดิม
+- [backup.gs](backup.gs) — ตัวช่วยสำรองสถานะ (`backupState()`)
+- [worker.js](worker.js) — Cloudflare Worker ตัวกลาง Telegram Webhook (ห้ามรัน `setupWebhookDirect`)
 
-1. **สร้าง Google Sheet ใหม่** ชื่อ `AboutMeProcess DB`
-2. ไปที่เมนู **Extensions → Apps Script**
-3. ลบโค้ดเดิมทั้งหมด แล้ววางโค้ดจาก [Code.gs](Code.gs) ลงไป จากนั้นกด **Save**
-4. **สร้างชีตอัตโนมัติ:** เลือกฟังก์ชัน `setupSheets` ที่แถบด้านบน แล้วกด **Run** (กดอนุญาตสิทธิ์ Google Sheets ครั้งแรก)
-   - ระบบจะสร้างชีตให้ครบ 7 แท็บ: `Daily_Jobs`, `Bills`, `Cash_Log`, `Captain_Cases`, `Health_Log`, `Modules_State`, `System_Log`
-5. **ตั้งค่า Script Properties** (เมนู **Project Settings ⚙️ → Script Properties → Add script property**):
-   | Property | ตัวอย่างค่า | จำเป็น? |
-   |---|---|---|
-   | `DASH_KEY` | รหัสลับของคุณเอง (ยาวอย่างน้อย 16 ตัวอักษร) | จำเป็น |
-   | `DASH_ALLOW_CMD` | `true` | จำเป็น (เพื่อให้สั่งงานจากหน้าเว็บได้) |
-   | `DASH_URL` | `https://aboutmeprocess.github.io/agent-hq/` | แนะนำ |
-   | `TG_BOT_TOKEN` | Token จาก `@BotFather` | ถ้าใช้ Telegram |
-   | `TG_CHAT_ID` | ตัวเลข Chat ID ของคุณ | แนะนำ (กันคนอื่นสั่งบอท) |
-   | `AERODATABOX_KEY` | RapidAPI Key สำหรับเที่ยวบิน | ไม่บังคับ |
-6. **Deploy เป็น Web App:**
-   - กด **Deploy → New deployment → Web app**
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-   - กด **Deploy** แล้วคัดลอกลิงก์ที่ลงท้ายด้วย `/exec`
-7. **เชื่อมกับหน้าแดชบอร์ด:**
-   - เปิดหน้าแดชบอร์ด กดปุ่ม **เชื่อมข้อมูลจริง ⚙️** มุมขวาบน
-   - วางลิงก์ `/exec` และ `DASH_KEY` แล้วกด **บันทึกและเชื่อม**
+## ขั้นตอนอัปเกรดบน Apps Script เดิมของคุณ (~3 นาที)
+1. เปิดโปรเจกต์ Apps Script เดิมในชีต **"Driver HQ Management System"**
+2. **เก็บไฟล์ `budget.gs` เดิมไว้เหมือนเดิม** (ไม่ต้องแก้)
+3. อัปเดตไฟล์หลักด้วยโค้ดจาก [driver_hq_bot.gs](driver_hq_bot.gs) แล้วแก้ `WEBAPP_URL` เป็นลิงก์ `/exec` จริงของคุณ
+4. สร้างไฟล์ใหม่ใน Apps Script ชื่อ **`modules.gs`** แล้ววางโค้ดจาก [modules.gs](modules.gs)
+5. กดรันฟังก์ชัน **`setupModuleSheets`** 1 ครั้ง เพื่อสร้างแท็บ `Captain_Cases`, `Health_Log`, `Modules_State`
+6. กด **Deploy → Manage deployments → Edit (ไอคอนดินสอ) → New version → Deploy**
+   - ตรวจใน Project Settings → Script Properties ว่าตั้ง `DASH_KEY` และ `DASH_ALLOW_CMD = true` แล้ว
 
 ## การส่งข้อมูลเข้าจาก MT5 EA หรือ Solar/HomeKit (Webhook)
-
 ส่ง HTTP `POST` ไปที่:
 ```text
 <EXEC_URL>?action=webhook&k=<DASH_KEY>&source=profit

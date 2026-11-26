@@ -1078,6 +1078,8 @@ function fIncome(c, out) {
   const other = inp('ชื่อแอป (คำเดียว)');
   const amt = inp('ยอด (บาท)', 'number');
   const tip = inp('ทิป', 'number');
+  const trips = inp('เที่ยว (1)', 'number');
+  trips.style.maxWidth = '92px';
   const route = inp('เส้นทาง เช่น สยาม ไป สาทร (ไม่บังคับ)');
   const msg = E('p', 'note');
   const go = E('button', 'pri g', 'บันทึก');
@@ -1098,7 +1100,9 @@ function fIncome(c, out) {
     const appT = app === 'LINE MAN' ? app : app.replace(/\s+/g, '');
     const a = Number(amt.value);
     const t = Number(tip.value) || 0;
-    const r = route.value.trim();
+    const nTrips = Math.max(1, Math.round(Number(trips.value) || 1));
+    const rBase = route.value.trim();
+    const r = nTrips > 1 ? (rBase ? rBase + ' (' + nTrips + ' เที่ยว)' : nTrips + ' เที่ยว') : rBase;
     if (!appT || /^\d/.test(appT) || /[<>&]/.test(appT)) {
       msg.textContent = 'ใส่ชื่อแอปให้ถูกต้อง (คำเดียว ห้ามขึ้นต้นด้วยตัวเลข)';
       return;
@@ -1106,10 +1110,10 @@ function fIncome(c, out) {
     if (!(a > 0)) { msg.textContent = 'ใส่ยอดเป็นตัวเลขมากกว่า 0'; return; }
     msg.textContent = '';
     if (await sendCmd('บันทึก ' + appT + ' ' + a + (t > 0 ? ' ทิป ' + t : '') + (r ? ' ' + r : ''), { out: out })) {
-      amt.value = ''; tip.value = ''; route.value = '';
+      amt.value = ''; tip.value = ''; trips.value = ''; route.value = '';
     }
   };
-  c.appendChild(frm(sel, other, amt, tip));
+  c.appendChild(frm(sel, other, amt, tip, trips));
   c.appendChild(qc);
   c.appendChild(frm(route, go));
   c.appendChild(msg);
@@ -1589,6 +1593,23 @@ $('refreshBtn').onclick = () => {
   if (CFG.url && CFG.key) pull(true);
   else showOff();
 };
+
+const themeBtn = $('themeBtn');
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  if (themeBtn) themeBtn.textContent = t === 'light' ? '🌙' : '☀️';
+}
+try {
+  const savedTheme = localStorage.getItem('hq_theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') applyTheme(savedTheme);
+} catch (e) {}
+if (themeBtn) {
+  themeBtn.onclick = () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    try { localStorage.setItem('hq_theme', next); } catch (e) {}
+  };
+}
 
 const animBtn = $('animBtn');
 if (animBtn) {
