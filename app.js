@@ -55,10 +55,11 @@ S.slice().sort((a, b) => POS[a.id][1] - POS[b.id][1]).forEach((s, i) => {
   } else {
     g += `<g opacity=".55" stroke="${c}" stroke-width="2" stroke-dasharray="5 4" fill="${c}" fill-opacity=".25"><circle cx="${x}" cy="${y - H + 26}" r="20"/><path d="M${x - 30} ${y} v-52 q0-22 30-22 q30 0 30 22 v52z"/></g><text class="lab" x="${x}" y="${y - H / 2}" style="font-size:20px">?</text>`;
   }
-  g += `</g></g><circle class="dot" cx="${x + H * .27}" cy="${y - H + 8}" r="6" fill="${c}" stroke="#0a0f1f" stroke-width="2"/>`;
-  g += `<text class="lab" x="${x}" y="${y + 24}">${s.n.toUpperCase()}</text>`;
-  const bw = s.st.length * 8 + 24;
-  g += `<g class="bb" id="bb-${s.id}"><rect x="${x - bw / 2}" y="${y - H - 36}" width="${bw}" height="26" rx="5" fill="#fff" stroke="${c}" stroke-width="2"/><polygon points="${x - 6},${y - H - 11} ${x + 6},${y - H - 11} ${x},${y - H - 3}" fill="#fff"/><text x="${x}" y="${y - H - 18}">${s.st}</text></g></g></g>`;
+  g += `</g></g><circle class="dot" cx="${x + H * .27}" cy="${y - H + 8}" r="6" fill="${c}" stroke="#0b0f17" stroke-width="2"/>`;
+  const nw = Math.max(76, s.n.length * 8.5 + 30);
+  g += `<g class="np" pointer-events="none"><rect x="${x - nw / 2}" y="${y + 8}" width="${nw}" height="24" rx="12" fill="rgba(15,20,30,0.88)" stroke="rgba(255,255,255,0.16)" stroke-width="1.5"/><circle cx="${x - nw / 2 + 13}" cy="${y + 20}" r="4" fill="${c}"/><text class="np-txt" x="${x + 6}" y="${y + 24}">${s.n}</text></g>`;
+  const bw = Math.max(90, s.st.length * 8 + 28);
+  g += `<g class="bb" id="bb-${s.id}"><rect x="${x - bw / 2}" y="${y - H - 38}" width="${bw}" height="28" rx="10" fill="rgba(17,24,39,0.94)" stroke="${c}" stroke-width="2"/><polygon points="${x - 6},${y - H - 10} ${x + 6},${y - H - 10} ${x},${y - H - 2}" fill="rgba(17,24,39,0.94)"/><text x="${x}" y="${y - H - 20}">${s.st}</text></g></g></g>`;
   o += g;
 });
 el.innerHTML = o;
@@ -996,6 +997,7 @@ function renderTabs(d, mode) {
   drawMoney(d);
   drawExtendedAgents(d, mode);
   renderAgents(d, mode);
+  if (typeof renderOfficeHud === 'function') renderOfficeHud(d, mode);
   if (SEL) showDetail(SEL);
 }
 
@@ -1541,6 +1543,21 @@ function openAgent(id) {
   sh.appendChild(E('div', 'sect', 'การเชื่อมข้อมูล'));
   sh.appendChild(E('p', '', a.conn));
 
+  // Direct composer at bottom of agent inspector (My Office style)
+  sh.appendChild(E('div', 'sect', 'ส่งคำสั่งถึง ' + s.n));
+  const compOut = E('div', 'cmdout');
+  const compIn = inp('พิมพ์คำสั่งหรือข้อความถึง ' + s.n + '...');
+  const compGo = E('button', 'pri', 'ส่ง');
+  const runComp = async () => {
+    const v = compIn.value.trim();
+    if (!v) return;
+    if (await sendCmd(v, { out: compOut })) compIn.value = '';
+  };
+  compGo.onclick = runComp;
+  compIn.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); runComp(); } });
+  sh.appendChild(frm(compIn, compGo));
+  sh.appendChild(compOut);
+
   $('m').classList.add('on');
   sh.scrollTop = 0;
   x.focus({ preventScroll: true });
@@ -1678,6 +1695,250 @@ function clock() {
 }
 clock();
 setInterval(clock, 30000);
+
+// ---------- My Office Ref: Camera Presets, Zoom, Day/Night, 2D List & Activity Feed ----------
+const CAM_PRESETS = {
+  overview: { x: 0, y: 0, w: 1312, h: 816 },
+  desks: { x: 350, y: 170, w: 660, h: 410 },
+  trade: { x: 60, y: 360, w: 660, h: 410 },
+  solar: { x: 630, y: 210, w: 640, h: 398 }
+};
+let curCam = { x: 0, y: 0, w: 1312, h: 816 };
+let tgtCam = { x: 0, y: 0, w: 1312, h: 816 };
+let camAnim = null;
+
+function setCam(next, presetName) {
+  tgtCam = {
+    w: Math.max(420, Math.min(1312, next.w)),
+    h: Math.max(261, Math.min(816, next.h)),
+    x: 0,
+    y: 0
+  };
+  tgtCam.x = Math.max(0, Math.min(1312 - tgtCam.w, next.x));
+  tgtCam.y = Math.max(0, Math.min(816 - tgtCam.h, next.y));
+
+  if (presetName !== undefined) {
+    $$('.mo-dbtn[data-cam]').forEach(b => b.classList.toggle('on', b.dataset.cam === presetName));
+  }
+  const zoomPct = Math.round((1312 / tgtCam.w) * 100);
+  const zv = $('moZoomVal');
+  if (zv) zv.textContent = zoomPct + '%';
+
+  if (camAnim) cancelAnimationFrame(camAnim);
+  function step() {
+    let done = true;
+    ['x', 'y', 'w', 'h'].forEach(k => {
+      const diff = tgtCam[k] - curCam[k];
+      if (Math.abs(diff) > 0.6) {
+        curCam[k] += diff * 0.22;
+        done = false;
+      } else {
+        curCam[k] = tgtCam[k];
+      }
+    });
+    el.setAttribute('viewBox', `${curCam.x.toFixed(1)} ${curCam.y.toFixed(1)} ${curCam.w.toFixed(1)} ${curCam.h.toFixed(1)}`);
+    if (!done) camAnim = requestAnimationFrame(step);
+    else camAnim = null;
+  }
+  camAnim = requestAnimationFrame(step);
+}
+
+function focusAgentCam(id) {
+  const pos = POS[id];
+  if (!pos) return;
+  const w = 680;
+  const h = 423;
+  setCam({ x: pos[0] - w / 2, y: pos[1] - h / 2 - 30, w, h }, '');
+  const cObj = C.find(c => c.s.id === id);
+  if (cObj) say(cObj, 4, performance.now() / 1000);
+}
+
+$$('.mo-dbtn[data-cam]').forEach(b => {
+  b.onclick = () => {
+    const p = CAM_PRESETS[b.dataset.cam];
+    if (p) setCam(p, b.dataset.cam);
+  };
+});
+
+if ($('moZoomIn')) {
+  $('moZoomIn').onclick = () => {
+    const nw = Math.max(460, tgtCam.w * 0.8);
+    const nh = nw * (816 / 1312);
+    setCam({ x: tgtCam.x + (tgtCam.w - nw) / 2, y: tgtCam.y + (tgtCam.h - nh) / 2, w: nw, h: nh }, '');
+  };
+}
+if ($('moZoomOut')) {
+  $('moZoomOut').onclick = () => {
+    const nw = Math.min(1312, tgtCam.w * 1.25);
+    const nh = nw * (816 / 1312);
+    setCam({ x: tgtCam.x + (tgtCam.w - nw) / 2, y: tgtCam.y + (tgtCam.h - nh) / 2, w: nw, h: nh }, nw >= 1310 ? 'overview' : '');
+  };
+}
+
+// Day / Night Office Lighting
+const moShell = $('moShell');
+const moLitBtn = $('moLitBtn');
+if (moLitBtn && moShell) {
+  moLitBtn.onclick = () => {
+    const isNight = moShell.dataset.lit === 'night';
+    moShell.dataset.lit = isNight ? 'day' : 'night';
+    moLitBtn.textContent = isNight ? '🌙 กลางคืน' : '☀️ กลางวัน';
+    showMoToast(isNight ? '☀️ สลับเป็นแสงออฟฟิศกลางวัน' : '🌙 สลับเป็นบรรยากาศออฟฟิศกลางคืน');
+  };
+}
+
+// 3D Office / 2D List View Switcher
+const moCanvasWrap = $('moCanvasWrap');
+const moListView = $('moListView');
+const moDock = $('moDock');
+const moStrip = $('moStrip');
+function setOfficeView(v) {
+  const isList = v === 'list';
+  if (moShell) moShell.dataset.view = v;
+  if (moCanvasWrap) moCanvasWrap.hidden = isList;
+  if (moDock) moDock.hidden = isList;
+  if (moStrip) moStrip.hidden = isList;
+  if (moListView) moListView.hidden = !isList;
+  if ($('moViewOffice')) $('moViewOffice').classList.toggle('on', !isList);
+  if ($('moViewList')) $('moViewList').classList.toggle('on', isList);
+}
+if ($('moViewOffice')) $('moViewOffice').onclick = () => setOfficeView('office');
+if ($('moViewList')) $('moViewList').onclick = () => setOfficeView('list');
+
+// 2D List Search & Filter
+let moFilterMode = 'all';
+function applyMoListFilter() {
+  const q = (($('moSearch') && $('moSearch').value) || '').trim().toLowerCase();
+  $$('#mods .mod').forEach(card => {
+    const id = card.dataset.id;
+    const s = sOf(id);
+    const a = AG[id];
+    const txt = ((s ? s.n + ' ' + s.st : '') + ' ' + (a ? a.role + ' ' + a.duty : '')).toLowerCase();
+    const isIdle = !s || s.st === ST0;
+    const matchQ = !q || txt.includes(q);
+    const matchF = moFilterMode === 'all' || (moFilterMode === 'active' ? !isIdle : isIdle);
+    card.hidden = !(matchQ && matchF);
+  });
+}
+if ($('moSearch')) $('moSearch').oninput = applyMoListFilter;
+$$('.mo-fbtn').forEach(b => {
+  b.onclick = () => {
+    moFilterMode = b.dataset.f;
+    $$('.mo-fbtn').forEach(x => x.classList.toggle('on', x === b));
+    applyMoListFilter();
+  };
+});
+
+// Toggle Right Activity Feed & Fullscreen
+if ($('moFeedBtn') && $('moBody')) {
+  $('moFeedBtn').onclick = () => {
+    const hidden = $('moBody').classList.toggle('no-feed');
+    $('moFeedBtn').setAttribute('aria-pressed', hidden ? 'false' : 'true');
+  };
+}
+if ($('moFullBtn') && moShell) {
+  $('moFullBtn').onclick = () => {
+    if (!document.fullscreenElement) {
+      if (moShell.requestFullscreen) moShell.requestFullscreen().catch(() => {});
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+}
+
+let toastTimer = null;
+function showMoToast(msg) {
+  const t = $('moToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+
+function renderOfficeHud(d, mode) {
+  const isSample = mode === true;
+  const chip = $('moModeChip');
+  if (chip) {
+    chip.textContent = isSample ? 'DEMO · ข้อมูลตัวอย่าง' : (typeof mode === 'string' ? 'ERR · เชื่อมไม่สำเร็จ' : 'LIVE · ข้อมูลจริง');
+    chip.className = 'mo-chip' + (!isSample && typeof mode !== 'string' ? ' live' : '');
+  }
+
+  // Top floating agent strip
+  if (moStrip) {
+    moStrip.textContent = '';
+    ORDER.forEach(id => {
+      const s = sOf(id);
+      if (!s) return;
+      const b = E('button', 'mo-sp');
+      b.style.setProperty('--c', s.c);
+      b.appendChild(E('i'));
+      b.appendChild(document.createTextNode(s.n + ' '));
+      b.appendChild(E('small', '', (s.st || ST0).slice(0, 18)));
+      b.onclick = () => { focusAgentCam(id); openAgent(id); };
+      moStrip.appendChild(b);
+    });
+  }
+
+  // Right sidebar mini KPIs
+  const mk = $('moMiniKpis');
+  if (mk) {
+    mk.textContent = '';
+    const inc = d.income && d.income.today;
+    const rev = inc ? inc.reduce((a, x) => a + x.gross, 0) : (d.jobs ? d.jobs.gross : 0);
+    const trips = inc ? inc.reduce((a, x) => a + x.n, 0) : (d.jobs ? d.jobs.count : 0);
+    const kpiData = [
+      ['รายได้วันนี้', fmt(rev) + ' ฿'],
+      ['งานวันนี้', trips + ' เที่ยว'],
+      ['เคส Captain', (d.captain ? d.captain.casesToday : '—') + ' เคส'],
+      ['แบต Solar', (d.solar ? d.solar.battery + '%' : '—')]
+    ];
+    kpiData.forEach(pair => {
+      const box = E('div', 'mo-kpi');
+      box.appendChild(E('small', '', pair[0]));
+      box.appendChild(E('b', '', pair[1]));
+      mk.appendChild(box);
+    });
+  }
+
+  // Right sidebar live activity feed
+  const feed = $('moFeed');
+  if (feed) {
+    feed.textContent = '';
+    const items = [];
+    if (d.log && d.log.length) {
+      d.log.slice(-6).reverse().forEach(r => {
+        const agId = /grab|bolt|งาน|เที่ยวบิน|bkk|dmk/i.test(r.m) ? 'driver'
+          : /เงิน|บิล|ค้าง|จ่าย/i.test(r.m) ? 'finance'
+            : /profit|xau|ea|mt5/i.test(r.m) ? 'profit'
+              : /solar|แบต|ไฟ/i.test(r.m) ? 'solar'
+                : /captain|ประกัน/i.test(r.m) ? 'captain'
+                  : /health|ออกกำลัง/i.test(r.m) ? 'health'
+                    : 'script';
+        items.push({ id: agId, t: r.t, m: r.m });
+      });
+    }
+    if (!items.length) {
+      ORDER.slice(0, 5).forEach(id => {
+        const s = sOf(id);
+        if (s) items.push({ id, t: 'ล่าสุด', m: s.st || ST0 });
+      });
+    }
+    items.forEach(it => {
+      const s = sOf(it.id) || { n: 'System', c: '#4fd1ff' };
+      const card = E('div', 'mo-fitem');
+      card.style.setProperty('--c', s.c);
+      const h = E('div', 'mo-fitem-h');
+      h.appendChild(E('strong', '', s.n));
+      h.appendChild(E('time', '', it.t));
+      card.appendChild(h);
+      card.appendChild(E('p', '', it.m));
+      card.onclick = () => { setOfficeView('office'); focusAgentCam(it.id); openAgent(it.id); };
+      feed.appendChild(card);
+    });
+  }
+  applyMoListFilter();
+}
 
 if (CFG.url && CFG.key) startPoll();
 else showOff();

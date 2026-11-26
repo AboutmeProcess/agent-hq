@@ -76,13 +76,82 @@
     <section id="s-office" class="sec">
       <div class="shr">
         <h2 class="sh">🏢 ออฟฟิศ AboutMeProcess</h2>
-        <div class="tb">
-          <button class="pill" id="animBtn" aria-pressed="false">⏸ พักภาพเคลื่อนไหว</button>
+        <span class="muted">คลิกตัวละครหรือปุ่มกล้องเพื่อซูมดูโซนต่างๆ · สลับมุมมอง 3D/2D และกลางวัน/กลางคืนได้</span>
+      </div>
+
+      <div class="mo-shell" id="moShell" data-lit="day" data-view="office">
+        <!-- Top HUD Bar (My Office style) -->
+        <div class="mo-hud">
+          <div class="mo-hud-l">
+            <span class="mo-brand"><i class="mo-live-dot"></i> AboutMeProcess HQ</span>
+            <span class="mo-chip" id="moModeChip">DEMO · ข้อมูลตัวอย่าง</span>
+            <div class="mo-seg" role="group" aria-label="สลับมุมมอง">
+              <button type="button" class="mo-seg-b on" id="moViewOffice" data-v="office">ออฟฟิศ</button>
+              <button type="button" class="mo-seg-b" id="moViewList" data-v="list">2D รายการ</button>
+            </div>
+            <span class="mo-status-pill" id="moStatusPill"><i class="mo-pulse"></i> พร้อมทำงาน 8 เอเจนต์</span>
+          </div>
+          <div class="mo-hud-r">
+            <button type="button" class="mo-ibtn" id="moLitBtn" title="สลับแสงกลางวัน/กลางคืน">🌙 กลางคืน</button>
+            <button type="button" class="mo-ibtn" id="animBtn" aria-pressed="false" title="พัก/เล่นแอนิเมชัน">⏸ พักภาพ</button>
+            <button type="button" class="mo-ibtn" id="moFeedBtn" aria-pressed="true" title="แสดง/ซ่อนแถบกิจกรรม">📋 กิจกรรม</button>
+          </div>
+        </div>
+
+        <!-- Main Workspace: Isometric Stage + Right Activity Feed -->
+        <div class="mo-body" id="moBody">
+          <!-- Center Office Viewport -->
+          <div class="mo-stage" id="moStage">
+            <!-- Floating Top Agent Strip -->
+            <div class="mo-strip" id="moStrip" aria-label="สถานะเอเจนต์ในออฟฟิศ"></div>
+
+            <!-- Interactive SVG Isometric Scene -->
+            <div class="mo-canvas-wrap" id="moCanvasWrap">
+              <svg id="scene" viewBox="0 0 1312 816" role="img" aria-label="ออฟฟิศ AboutMeProcess"></svg>
+              <div class="mo-night-veil" aria-hidden="true"></div>
+            </div>
+
+            <!-- 2D List Fallback View -->
+            <div class="mo-list-view" id="moListView" hidden>
+              <div class="mo-list-bar">
+                <input id="moSearch" type="search" placeholder="ค้นหาเอเจนต์หรือหน้าที่..." autocomplete="off">
+                <div class="mo-filters" id="moFilters">
+                  <button type="button" class="mo-fbtn on" data-f="all">ทั้งหมด</button>
+                  <button type="button" class="mo-fbtn" data-f="active">ทำงานอยู่</button>
+                  <button type="button" class="mo-fbtn" data-f="idle">รอเชื่อม</button>
+                </div>
+              </div>
+              <div class="mods" id="mods"></div>
+            </div>
+
+            <!-- Floating Event Toast -->
+            <div class="mo-toast" id="moToast" aria-live="polite" hidden></div>
+
+            <!-- Bottom Floating Camera Dock -->
+            <div class="mo-dock" id="moDock">
+              <button type="button" class="mo-dbtn on" data-cam="overview">🏢 ภาพรวม</button>
+              <button type="button" class="mo-dbtn" data-cam="desks">💻 โต๊ะหลัก</button>
+              <button type="button" class="mo-dbtn" data-cam="trade">📈 เทรด/สุขภาพ</button>
+              <button type="button" class="mo-dbtn" data-cam="solar">☀️ โซลาร์/ประกัน</button>
+              <span class="mo-sep"></span>
+              <button type="button" class="mo-dbtn mo-zbtn" id="moZoomOut" aria-label="ซูมออก">−</button>
+              <span class="mo-zval" id="moZoomVal">100%</span>
+              <button type="button" class="mo-dbtn mo-zbtn" id="moZoomIn" aria-label="ซูมเข้า">+</button>
+              <button type="button" class="mo-dbtn mo-cta" id="moFullBtn" title="เต็มจอ">⛶</button>
+            </div>
+          </div>
+
+          <!-- Right Activity Sidebar -->
+          <aside class="mo-aside" id="moAside" aria-label="กิจกรรมล่าสุดในออฟฟิศ">
+            <div class="mo-aside-h">
+              <strong>กิจกรรมล่าสุด</strong>
+              <span class="mo-live-tag"><i class="mo-live-dot"></i> สด</span>
+            </div>
+            <div class="mo-kpis" id="moMiniKpis"></div>
+            <div class="mo-feed" id="moFeed"></div>
+          </aside>
         </div>
       </div>
-      <svg id="scene" viewBox="0 0 1312 816" role="img" aria-label="ออฟฟิศพิกเซลของ Agent HQ"></svg>
-      <p class="hint">แตะที่โต๊ะ ตัวละคร หรือการ์ดโมดูลเพื่อดูหน้าที่และคำสั่งของเอเจนต์</p>
-      <div class="mods" id="mods"></div>
     </section>
 
     <section id="s-flights" class="sec">
