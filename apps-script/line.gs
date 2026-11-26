@@ -20,6 +20,15 @@ const LINE_API_BASE = 'https://api.line.me/v2/bot/message/';
 function lineToken_() { return String(prop_('LINE_CHANNEL_TOKEN') || '').trim(); }
 function lineOwner_() { return String(prop_('LINE_USER_ID') || '').trim(); }
 
+// เปรียบเทียบรหัสลับแบบ Constant-time ลดความเสี่ยง Timing Attack
+function lineSafeEq_(a, b) {
+  const s1 = String(a || ''), s2 = String(b || '');
+  if (!s1 || s1.length !== s2.length) return false;
+  let diff = 0;
+  for (let i = 0; i < s1.length; i++) diff |= s1.charCodeAt(i) ^ s2.charCodeAt(i);
+  return diff === 0;
+}
+
 // แปลง HTML ที่บอทเดิมสร้างสำหรับ Telegram ให้เป็นข้อความอ่านง่ายบน LINE
 function htmlToLineText_(html) {
   return String(html || '')
@@ -105,14 +114,26 @@ function sendLinePush_(text) {
   return { ok: false, code: res.getResponseCode(), body: res.getContentText() };
 }
 
-// จุดรับ Webhook จาก LINE Messaging API (POST ?action=line)
+// จุดรับ Webhook จาก LINE Messaging API (POST ?action=line หรือ ?action=line&ls=SECRET)
 function lineWebhook_(e) {
   try {
+    // 1) ถ้าตั้ง LINE_WEBHOOK_SECRET ใน Script Properties ต้องส่ง ?ls=... ตรงกันเท่านั้น
+    const whSecret = String(prop_('LINE_WEBHOOK_SECRET') || '').trim();
+    if (whSecret && !lineSafeEq_(e && e.parameter && e.parameter.ls, whSecret)) {
+      console.log('LINE webhook rejected: invalid secret');
+      return ok_();
+    }
+
     const body = JSON.parse((e.postData && e.postData.contents) || '{}');
     const events = body.events || [];
     if (!events.length) return ok_();   // LINE Verify webhook ส่ง events ว่าง -> ตอบ 200 ok ทันที
 
     const cache = CacheService.getScriptCache();
+    // 2) Rate-limit ต่อนาที (สูงสุด 30 ข้อความ/นาที) ป้องกันการยิงถล่มโควตา Apps Script
+    const rKey = 'line_rate_' + Utilities.formatDate(new Date(), TZ, 'yyyyMMddHHmm');
+    const rCnt = Number(cache.get(rKey) || 0);
+    if (rCnt >= 30) return ok_();
+    cache.put(rKey, String(rCnt + 1), 120);
     events.forEach(function (ev) {
       if (!ev || !ev.replyToken) return;
       const eid = ev.webhookEventId || ev.replyToken;
@@ -151,6 +172,25 @@ function lineWebhook_(e) {
       if (ev.type === 'message' && msg.type === 'text') {
         const text = String(msg.text || '').trim();
         if (!text) return;
+
+        // คำสั่งตรวจสถานะความปลอดภัยของระบบ (ไม่แสดงค่ารหัสลับจริง)
+        if (/^\/security$/i.test(text)) {
+          const P = PropertiesService.getScriptProperties();
+          const ym = Utilities.formatDate(new Date(), TZ, 'yyyyMM');
+          const used = Number(P.getProperty('LINE_PUSH_' + ym) || 0);
+          const lim = Number(prop_('LINE_PUSH_LIMIT') || 180);
+          const report = [
+            '🛡️ สถานะความปลอดภัย AboutMeProcess',
+            '• ล็อกสิทธิ์เฉพาะ LINE User ID ของคุณ: ' + (lineOwner_() ? '✅ เปิดแล้ว' : '⚠️ ยังไม่ตั้ง'),
+            '• LINE Webhook Secret (?ls=): ' + (prop_('LINE_WEBHOOK_SECRET') ? '✅ เปิดแล้ว' : 'ℹ️ ใช้ล็อก User ID อย่างเดียว'),
+            '• รหัส DASH_KEY: ' + (String(prop_('DASH_KEY') || '').length >= 16 ? '✅ ปลอดภัย (≥16 ตัว)' : '⚠️ ควรตั้งยาว ≥16 ตัว'),
+            '• สิทธิ์สั่งงานจากเว็บ (DASH_ALLOW_CMD): ' + (String(prop_('DASH_ALLOW_CMD') || '').toLowerCase() === 'true' ? 'เปิดอยู่' : 'ปิดอยู่'),
+            '• คีย์ Telegram เก่า (BOT_TOKEN): ' + (P.getProperty('BOT_TOKEN') ? '⚠️ ยังค้างอยู่ (พิมพ์ /cleanup_telegram)' : '✅ ลบสะอาดแล้ว'),
+            '• โควตา LINE Push เดือนนี้: ' + used + ' / ' + lim + ' ข้อความ (กันเกินฟรี 200)'
+          ];
+          lineReply_(ev.replyToken, report.join('\n'));
+          return;
+        }
 
         // คำสั่งเฉพาะเจ้าของ: ล้างค่า Telegram เก่า + สร้างชีต 4 โมดูล + ตั้งเวลาสรุปเช้า LINE ในคำสั่งเดียว
         if (/^\/cleanup_telegram$/i.test(text)) {

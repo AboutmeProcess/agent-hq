@@ -1,0 +1,11 @@
+# ป้องกันไฟล์ลับ ไฟล์ตั้งค่า และไฟล์สำรองส่วนตัวหลุดเข้า GitHub
+.DS_Store
+.env
+.env.*
+.clasp.json
+.clasprc.json
+*.zip
+*.xlsx
+*.csv
+apps-script/budget.gs
+apps-script/budget.js
