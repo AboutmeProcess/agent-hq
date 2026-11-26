@@ -802,10 +802,12 @@ function drawExtendedAgents(d, mode) {
       render(s, body) {
         const pct = Math.max(0, Math.min(100, Number(s.battery || 0)));
         const g = E('div', 'ag-metrics');
+        const subFee = s.subFee != null ? Number(s.subFee) : 699;
+        const netSav = s.netSaved != null ? Number(s.netSaved) : (Number(s.savedThb || 0) - subFee);
         g.appendChild(agMetric('Self-powered', pct + '%', pct >= 20 ? 'pos' : ''));
-        g.appendChild(agMetric('ผลิตได้ (Produced)', (s.solarKw ?? 0) + ' kWh'));
-        g.appendChild(agMetric('ใช้ไฟบ้าน (Consumed)', (s.loadKw ?? 0) + ' kWh'));
-        g.appendChild(agMetric('ประหยัดรอบบิลนี้', fmt(s.savedThb || 0) + ' ฿', 'pos'));
+        g.appendChild(agMetric('ผลิต / ใช้ไฟ (kWh)', (s.solarKw ?? 0) + ' / ' + (s.loadKw ?? 0)));
+        g.appendChild(agMetric('ประหยัดรอบบิล', fmt(s.savedThb || 0) + ' ฿', 'pos'));
+        g.appendChild(agMetric('สุทธิหลังหัก ' + subFee + ' ฿', (netSav >= 0 ? '+' : '') + fmt(netSav) + ' ฿', netSav >= 0 ? 'pos' : 'neg'));
         body.appendChild(g);
         const bar = E('div', 'ag-bar');
         const fill = E('i');
@@ -938,9 +940,11 @@ const SAMPLE = {
     battery: 19,
     solarKw: 8.88,
     loadKw: 46.8,
-    savedThb: 876,
+    savedThb: 875.5,
+    subFee: 699,
+    netSaved: 176.5,
     monthly: [{ m: '2026-10', prod: 178.44, use: 1395.53, net: 1217.09, saved: 1125.96, pct: 12.8 }],
-    note: 'BlueRing Solar (TOU: On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿)'
+    note: 'BlueRing 699 ฿/ด. · TOU On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿'
   },
   health: { streak: 3, weekDays: 3, weekGoal: 5, weekMin: 115, todayDone: true, todayActivity: 'เดินลู่วิ่ง 35 น.', note: 'ตัวอย่าง: โปรเจกต์ take profit สุขภาพ' },
   errors: null,

@@ -16,6 +16,7 @@ const SHEET_SOLAR_M = 'Solar_Monthly';
 const TOU_ON_PEAK = 6.31;
 const TOU_OFF_PEAK = 3.05;
 const TOU_SOLAR_BLEND = 5.38;
+const SOLAR_SUB_FEE = 699;   // ค่าบริการรายเดือน BlueRing (บาท/เดือน)
 
 function setupModuleSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -109,13 +110,14 @@ function modulesCommand_(chat, text) {
       '<b>☀️ BlueRing Solar Energy (มิเตอร์ TOU)</b>',
       '• Self-powered ล่าสุด: <b>' + s.battery + '%</b>',
       '• ผลิตได้: ' + s.solarKw + ' kWh · ใช้ไฟบ้าน: ' + s.loadKw + ' kWh',
-      '• ประหยัดรอบบิลนี้: <b>' + modFmtNum_(s.savedThb) + ' บาท</b>',
+      '• ประหยัดรอบบิลนี้: <b>' + modFmtNum_(s.savedThb) + ' บาท</b> (สุทธิหลังหัก ' + SOLAR_SUB_FEE + ' ฿ = <b>' + (s.netSaved >= 0 ? '+' : '') + modFmtNum_(s.netSaved) + ' บาท</b>)',
       '• เรตประเมิน TOU: On-Peak ~' + TOU_ON_PEAK + ' ฿ / Off-Peak ~' + TOU_OFF_PEAK + ' ฿ (เฉลี่ยโซลาร์ ~' + TOU_SOLAR_BLEND + ' ฿/หน่วย)'
     ];
     if (s.monthly && s.monthly.length) {
       lines.push('<b>📅 รายเดือนล่าสุด:</b>');
       s.monthly.slice(-3).reverse().forEach(function (m) {
-        lines.push('• ' + m.m + ': ผลิต ' + m.prod + ' / ใช้ ' + m.use + ' kWh (' + m.pct + '%) · ประหยัด <b>' + modFmtNum_(m.saved) + ' ฿</b>');
+        const netM = Math.round((m.saved - SOLAR_SUB_FEE) * 100) / 100;
+        lines.push('• ' + m.m + ': ผลิต ' + m.prod + ' / ใช้ ' + m.use + ' kWh (' + m.pct + '%) · ประหยัด ' + modFmtNum_(m.saved) + ' ฿ (สุทธิ <b>' + (netM >= 0 ? '+' : '') + modFmtNum_(netM) + ' ฿</b>)');
       });
     }
     send_(chat, lines.join('\n'));
@@ -401,9 +403,11 @@ function solarStatus_() {
     solarKw: Number(s.solarKw || 0),
     loadKw: Number(s.loadKw || 0),
     savedThb: Number(s.savedThb || 0),
+    subFee: SOLAR_SUB_FEE,
+    netSaved: Math.round((Number(s.savedThb || 0) - SOLAR_SUB_FEE) * 100) / 100,
     tou: { onPeak: TOU_ON_PEAK, offPeak: TOU_OFF_PEAK, blend: TOU_SOLAR_BLEND },
     monthly: monthly,
-    note: 'BlueRing Solar (TOU: On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿)'
+    note: 'BlueRing 699 ฿/ด. · TOU On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿'
   };
 }
 
