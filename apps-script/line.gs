@@ -44,41 +44,50 @@ function htmlToLineText_(html) {
     .trim();
 }
 
-// ปุ่ม Quick Reply ด้านล่างแชท LINE (กดสั่งงานไว หรือเลือกดูเดือนย้อนหลังได้ทันที)
+// ปุ่ม Quick Reply ด้านล่างแชท LINE (เต็ม 13 ปุ่ม ไม่ซ้ำกับ 6 ปุ่มบน Rich Menu)
 function lineQuickReply_(ctxText) {
-  let items;
   if (/^\/solar\b|^โซลาร์/i.test(String(ctxText || '').trim())) {
-    items = [
+    const solarItems = [
       ['📊 ดูทุกเดือน', '/solar all'],
       ['📅 พ.ย. 2026', '/solar 2026-11'],
       ['📅 ต.ค. 2026', '/solar 2026-10'],
       ['📅 ก.ย. 2026', '/solar 2026-09'],
       ['📅 ส.ค. 2026', '/solar 2026-08'],
-      ['🌅 สรุปเช้า', '/brief'],
-      ['🏢 แดชบอร์ด 3D', '/dash']
-    ];
-  } else {
-    items = [
-      ['🌅 สรุปเช้า', '/brief'],
-      ['🎯 วันนี้ต้องหา', 'วันนี้ต้องหาเท่าไร'],
-      ['☀️ โซลาร์', '/solar'],
-      ['✈️ BKK', '/bkk'],
-      ['✈️ DMK', '/dmk'],
-      ['📊 สรุปรายได้', '/summary'],
+      ['📅 ก.ค. 2026', '/solar 2026-07'],
+      ['📅 มิ.ย. 2026', '/solar 2026-06'],
+      ['📅 พ.ค. 2026', '/solar 2026-05'],
       ['🧾 รายการจ่าย', '/bills'],
+      ['✈️ DMK', '/dmk'],
       ['🛡️ ประกัน', '/captain'],
       ['📈 MT5', '/profit'],
-      ['💪 สุขภาพ', '/health'],
-      ['🏢 แดชบอร์ด 3D', '/dash'],
-      ['🔐 ความปลอดภัย', '/security']
+      ['💪 สุขภาพ', '/health']
     ];
+    return {
+      items: solarItems.map(function (x) {
+        return { type: 'action', action: { type: 'message', label: x[0], text: x[1] } };
+      })
+    };
   }
+
+  // 12 ปุ่มคำสั่ง + 1 ปุ่มแชร์พิกัด GPS = 13 ปุ่มเต็ม (ไม่ซ้ำกับ Rich Menu: วันนี้ต้องหา, /summary, /bkk, /solar, /brief, /dash)
+  const items = [
+    ['✈️ DMK', '/dmk'],
+    ['🛬 ทั้งสองสนามบิน', '/now'],
+    ['⏭ 3 เที่ยวถัดไป', '/next'],
+    ['🧾 รายการจ่าย', '/bills'],
+    ['💵 เช็กเงินสด', 'เงินสด'],
+    ['🗺️ จราจรสด', '/traffic'],
+    ['⭐ สถานที่โปรด', '/fav'],
+    ['⚡ บันทึกด่วน', '/quick'],
+    ['🛡️ ประกัน', '/captain'],
+    ['📈 MT5', '/profit'],
+    ['💪 สุขภาพ', '/health'],
+    ['🔐 ความปลอดภัย', '/security']
+  ];
   const qr = items.map(function (x) {
     return { type: 'action', action: { type: 'message', label: x[0], text: x[1] } };
   });
-  if (!/^\/solar\b|^โซลาร์/i.test(String(ctxText || '').trim())) {
-    qr.push({ type: 'action', action: { type: 'location', label: '📍 แชร์พิกัด' } });
-  }
+  qr.splice(5, 0, { type: 'action', action: { type: 'location', label: '📍 แชร์พิกัด' } });
   return { items: qr.slice(0, 13) };
 }
 
