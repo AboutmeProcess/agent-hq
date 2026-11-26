@@ -12,10 +12,10 @@ const SHEET_CAPTAIN = 'Captain_Cases';
 const SHEET_HEALTH = 'Health_Log';
 const SHEET_MSTATE = 'Modules_State';
 const SHEET_SOLAR_M = 'Solar_Monthly';
-// อัตราค่าไฟ TOU บ้านอยู่อาศัย (รวม Ft + VAT 7% โดยประมาณ): On-Peak ~6.31 ฿, Off-Peak ~3.05 ฿, เฉลี่ยโซลาร์ 5 วันทำงาน/2 วันหยุด ~5.38 ฿/หน่วย
-const TOU_ON_PEAK = 6.31;
-const TOU_OFF_PEAK = 3.05;
-const TOU_SOLAR_BLEND = 5.38;
+// อัตราค่าไฟ TOU กฟน. ประเภท 1.3.2 (อิงบิลจริง Ft 0.1623 + VAT 7%): On-Peak 6.38 ฿, Off-Peak 3.00 ฿, เฉลี่ยโซลาร์ 5.41 ฿/หน่วย
+const TOU_ON_PEAK = 6.38;
+const TOU_OFF_PEAK = 3.00;
+const TOU_SOLAR_BLEND = 5.41;
 const SOLAR_SUB_FEE = 699;   // ค่าบริการรายเดือน BlueRing (บาท/เดือน)
 
 function setupModuleSheets() {
@@ -24,7 +24,8 @@ function setupModuleSheets() {
   modEnsureSheet_(ss, SHEET_HEALTH, ['Timestamp', 'Date', 'Activity', 'Minutes', 'Note']);
   const sm = modEnsureSheet_(ss, SHEET_SOLAR_M, ['Month', 'Produced_kWh', 'Usage_kWh', 'NetGrid_kWh', 'Saved_THB', 'SelfPowered_Pct', 'Note']);
   if (sm.getLastRow() <= 1) {
-    sm.appendRow(['2026-10', 178.44, 1395.53, 1217.09, 1125.96, 12.8, 'BlueRing ต.ค. 2026 (23 วัน · TOU)']);
+    sm.appendRow(['2026-10', 178.44, 1960.44, 1782, 1125.96, 9.1, 'บิลจริง กฟน. 6,067.27 ฿ (On 208 / Off 1,574 · 3.40 ฿/หน่วย) · สุทธิ +427 ฿']);
+    sm.appendRow(['2026-11 (คาดการณ์)', 233, 1983, 1750, 1274, 11.7, 'ประมาณการเต็มเดือน: บิล กฟน. ~5,960 ฿ · ประหยัด TOU ~1,274 ฿ · สุทธิ +575 ฿']);
   }
   const st = modEnsureSheet_(ss, SHEET_MSTATE, ['Module', 'Key', 'Value', 'UpdatedAt']);
   if (st.getLastRow() <= 1) {
@@ -111,7 +112,8 @@ function modulesCommand_(chat, text) {
       '• Self-powered ล่าสุด: <b>' + s.battery + '%</b>',
       '• ผลิตได้: ' + s.solarKw + ' kWh · ใช้ไฟบ้าน: ' + s.loadKw + ' kWh',
       '• ประหยัดรอบบิลนี้: <b>' + modFmtNum_(s.savedThb) + ' บาท</b> (สุทธิหลังหัก ' + SOLAR_SUB_FEE + ' ฿ = <b>' + (s.netSaved >= 0 ? '+' : '') + modFmtNum_(s.netSaved) + ' บาท</b>)',
-      '• เรตประเมิน TOU: On-Peak ~' + TOU_ON_PEAK + ' ฿ / Off-Peak ~' + TOU_OFF_PEAK + ' ฿ (เฉลี่ยโซลาร์ ~' + TOU_SOLAR_BLEND + ' ฿/หน่วย)'
+      '• 🔮 คาดการณ์เดือนถัดไป: บิล กฟน. ~<b>' + modFmtNum_(s.forecast.estBill) + ' ฿</b> · ประหยัด TOU ~<b>' + modFmtNum_(s.forecast.estSaved) + ' ฿</b> (สุทธิ <b>+' + modFmtNum_(s.forecast.estNet) + ' ฿</b>)',
+      '• เรต TOU จริง (กฟน. 1.3.2): On-Peak ' + TOU_ON_PEAK + ' ฿ / Off-Peak ' + TOU_OFF_PEAK + ' ฿ (เฉลี่ยจริง 3.40 ฿/หน่วย)'
     ];
     if (s.monthly && s.monthly.length) {
       lines.push('<b>📅 รายเดือนล่าสุด:</b>');
@@ -405,9 +407,10 @@ function solarStatus_() {
     savedThb: Number(s.savedThb || 0),
     subFee: SOLAR_SUB_FEE,
     netSaved: Math.round((Number(s.savedThb || 0) - SOLAR_SUB_FEE) * 100) / 100,
-    tou: { onPeak: TOU_ON_PEAK, offPeak: TOU_OFF_PEAK, blend: TOU_SOLAR_BLEND },
+    forecast: { month: '2026-11', estProd: 233, estGrid: 1750, estBill: 5960, estSaved: 1274, estNet: 575 },
+    tou: { onPeak: TOU_ON_PEAK, offPeak: TOU_OFF_PEAK, blend: TOU_SOLAR_BLEND, avgReal: 3.40 },
     monthly: monthly,
-    note: 'BlueRing 699 ฿/ด. · TOU On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿'
+    note: 'BlueRing 699 ฿/ด. · กฟน. TOU 1.3.2 (เฉลี่ยจริง 3.40 ฿/หน่วย · Off-Peak 88.3%)'
   };
 }
 

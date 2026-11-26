@@ -815,8 +815,11 @@ function drawExtendedAgents(d, mode) {
         bar.appendChild(fill);
         body.appendChild(bar);
         if (s.monthly && s.monthly.length) {
-          const lastM = s.monthly[s.monthly.length - 1];
-          body.appendChild(E('div', 'note', '📅 ล่าสุด ' + lastM.m + ': ผลิต ' + lastM.prod + ' / ใช้ ' + lastM.use + ' kWh (' + lastM.pct + '%) · ประหยัด ' + fmt(lastM.saved) + ' ฿'));
+          const lastM = s.monthly[0];
+          body.appendChild(E('div', 'note', '📅 บิลจริง ' + lastM.m + ': ผลิต ' + lastM.prod + ' kWh · กฟน. ' + fmt(lastM.net) + ' หน่วย · ประหยัด ' + fmt(lastM.saved) + ' ฿'));
+        }
+        if (s.forecast) {
+          body.appendChild(E('div', 'note', '🔮 คาดการณ์ ' + s.forecast.month + ': บิลไฟ ~' + fmt(s.forecast.estBill) + ' ฿ · ประหยัด TOU ~' + fmt(s.forecast.estSaved) + ' ฿ (สุทธิ +' + fmt(s.forecast.estNet) + ' ฿)'));
         }
         if (s.note) body.appendChild(E('p', 'muted', s.note));
       },
@@ -943,8 +946,9 @@ const SAMPLE = {
     savedThb: 875.5,
     subFee: 699,
     netSaved: 176.5,
-    monthly: [{ m: '2026-10', prod: 178.44, use: 1395.53, net: 1217.09, saved: 1125.96, pct: 12.8 }],
-    note: 'BlueRing 699 ฿/ด. · TOU On-Peak ~6.31 ฿ / Off-Peak ~3.05 ฿'
+    forecast: { month: '2026-11', estProd: 233, estGrid: 1750, estBill: 5960, estSaved: 1274, estNet: 575 },
+    monthly: [{ m: '2026-10', prod: 178.44, use: 1960.44, net: 1782, saved: 1125.96, pct: 9.1 }],
+    note: 'BlueRing 699 ฿/ด. · กฟน. TOU 1.3.2 (เฉลี่ยจริง 3.40 ฿/หน่วย · Off-Peak 88.3%)'
   },
   health: { streak: 3, weekDays: 3, weekGoal: 5, weekMin: 115, todayDone: true, todayActivity: 'เดินลู่วิ่ง 35 น.', note: 'ตัวอย่าง: โปรเจกต์ take profit สุขภาพ' },
   errors: null,
