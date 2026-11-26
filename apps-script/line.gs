@@ -65,14 +65,19 @@ function lineQuickReply_(ctxText) {
       ['✈️ BKK', '/bkk'],
       ['✈️ DMK', '/dmk'],
       ['📊 สรุปรายได้', '/summary'],
+      ['🧾 รายการจ่าย', '/bills'],
+      ['🛡️ ประกัน', '/captain'],
+      ['💪 สุขภาพ', '/health'],
       ['🏢 แดชบอร์ด 3D', '/dash']
     ];
   }
-  return {
-    items: items.map(function (x) {
-      return { type: 'action', action: { type: 'message', label: x[0], text: x[1] } };
-    })
-  };
+  const qr = items.map(function (x) {
+    return { type: 'action', action: { type: 'message', label: x[0], text: x[1] } };
+  });
+  if (!/^\/solar\b|^โซลาร์/i.test(String(ctxText || '').trim())) {
+    qr.push({ type: 'action', action: { type: 'location', label: '📍 แชร์พิกัด' } });
+  }
+  return { items: qr };
 }
 
 // ตอบกลับผ่าน Reply API (ฟรีไม่จำกัดข้อความ!)
@@ -186,6 +191,15 @@ function lineWebhook_(e) {
         const text = String(msg.text || '').trim();
         if (!text) return;
 
+        // คำสั่งเฉพาะเจ้าของ: สร้างและติดตั้ง Rich Menu 6 ปุ่มสวยๆ บน LINE OA อัตโนมัติ
+        if (/^\/setup_richmenu$/i.test(text)) {
+          const res = setupLineRichMenu_();
+          lineReply_(ev.replyToken, res.ok
+            ? ('✅ ติดตั้ง Rich Menu 6 ปุ่มเรียบร้อยแล้วครับ!\n(ID: ' + res.id + ')\nลองปิดแล้วเปิดแชท LINE ใหม่จะเห็นแผงเมนูถาวรด้านล่างจอทันที')
+            : ('⚠️ ติดตั้ง Rich Menu ไม่สำเร็จ: ' + res.error));
+          return;
+        }
+
         // คำสั่งตรวจสถานะความปลอดภัยของระบบ (ไม่แสดงค่ารหัสลับจริง)
         if (/^\/security$/i.test(text)) {
           const P = PropertiesService.getScriptProperties();
@@ -269,6 +283,55 @@ function lineWebhook_(e) {
     if (typeof noteError_ === 'function') noteError_(err);
   }
   return ok_();
+}
+
+// ===================== LINE RICH MENU (6 ปุ่มถาวรด้านล่างจอ) =====================
+function setupLineRichMenu_() {
+  const token = lineToken_();
+  if (!token) return { ok: false, error: 'ไม่มี LINE_CHANNEL_TOKEN' };
+  const headers = { Authorization: 'Bearer ' + token };
+
+  // 1) สร้างโครง Rich Menu 2500x1686 (2 แถว x 3 คอลัมน์)
+  const w1 = 833, w2 = 834, h = 843;
+  const menuDef = {
+    size: { width: 2500, height: 1686 },
+    selected: true,
+    name: 'AboutMeProcess_HQ_v1',
+    chatBarText: 'เมนู AboutMeProcess',
+    areas: [
+      { bounds: { x: 0, y: 0, width: w1, height: h }, action: { type: 'message', text: 'วันนี้ต้องหาเท่าไร' } },
+      { bounds: { x: w1, y: 0, width: w2, height: h }, action: { type: 'message', text: '/summary' } },
+      { bounds: { x: w1 + w2, y: 0, width: w1, height: h }, action: { type: 'message', text: '/bkk' } },
+      { bounds: { x: 0, y: h, width: w1, height: h }, action: { type: 'message', text: '/solar' } },
+      { bounds: { x: w1, y: h, width: w2, height: h }, action: { type: 'message', text: '/brief' } },
+      { bounds: { x: w1 + w2, y: h, width: w1, height: h }, action: { type: 'message', text: '/dash' } }
+    ]
+  };
+  const r1 = UrlFetchApp.fetch('https://api.line.me/v2/bot/richmenu', {
+    method: 'post', contentType: 'application/json', headers: headers,
+    payload: JSON.stringify(menuDef), muteHttpExceptions: true
+  });
+  if (r1.getResponseCode() !== 200) return { ok: false, error: 'create ' + r1.getResponseCode() + ': ' + r1.getContentText() };
+  const menuId = JSON.parse(r1.getContentText()).richMenuId;
+
+  // 2) ดึงภาพ Rich Menu จาก GitHub Pages ของคุณแล้วอัปโหลดขึ้น LINE (JPEG < 1 MB ตามข้อกำหนด LINE)
+  const imgUrl = String(prop_('DASH_PAGE_URL') || DASH_PAGE_DEFAULT).replace(/\/?$/, '/') + 'assets/line-richmenu.jpg';
+  const imgRes = UrlFetchApp.fetch(imgUrl, { muteHttpExceptions: true });
+  if (imgRes.getResponseCode() !== 200) return { ok: false, error: 'download image ' + imgRes.getResponseCode() };
+  const blob = imgRes.getBlob().getBytes();
+
+  const r2 = UrlFetchApp.fetch('https://api-data.line.me/v2/bot/richmenu/' + menuId + '/content', {
+    method: 'post', contentType: 'image/jpeg', headers: headers,
+    payload: blob, muteHttpExceptions: true
+  });
+  if (r2.getResponseCode() !== 200) return { ok: false, error: 'upload ' + r2.getResponseCode() + ': ' + r2.getContentText() };
+
+  // 3) ตั้งเป็น Default Rich Menu ของ LINE OA
+  const r3 = UrlFetchApp.fetch('https://api.line.me/v2/bot/user/all/richmenu/' + menuId, {
+    method: 'post', headers: headers, muteHttpExceptions: true
+  });
+  if (r3.getResponseCode() !== 200) return { ok: false, error: 'set default ' + r3.getResponseCode() + ': ' + r3.getContentText() };
+  return { ok: true, id: menuId };
 }
 
 // ทริกเกอร์ส่งสรุปรวมตอนเช้า 07:00 น. เข้า LINE OA (ใช้แค่ 1 Push/วัน = 30/เดือน อยู่ในโควตาฟรี 200 สบายๆ)
