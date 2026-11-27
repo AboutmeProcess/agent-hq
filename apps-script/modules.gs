@@ -12,6 +12,21 @@ const SHEET_CAPTAIN = 'Captain_Cases';
 const SHEET_HEALTH = 'Health_Log';
 const SHEET_MSTATE = 'Modules_State';
 const SHEET_SOLAR_M = 'Solar_Monthly';
+const SHEET_LEDGER = 'Driver_Ledger';
+const LEDGER_HEADERS = ['Date', 'Grab', 'Bolt', 'GoPlus', 'SwiftGo', 'Dier', 'inDrive', 'TADA', 'Lalamove', 'Other', 'Tip', 'Total', 'Power', 'Net'];
+const LEDGER_FIELDS = [
+  { key: 'grab',     col: 1,  label: 'Grab',     rx: 'grab|แกร็บ|แกรบ' },
+  { key: 'bolt',     col: 2,  label: 'Bolt',     rx: 'bolt|โบลท์|โบลต์' },
+  { key: 'goplus',   col: 3,  label: 'GoPlus',   rx: 'goplus|go\\+|โกพลัส' },
+  { key: 'swiftgo',  col: 4,  label: 'SwiftGo',  rx: 'swiftgo|สวิฟท์โก|สวิฟโก' },
+  { key: 'dier',     col: 5,  label: 'Dier',     rx: 'dier|เดียร์' },
+  { key: 'indrive',  col: 6,  label: 'inDrive',  rx: 'indrive|in-drive|อินไดรฟ์' },
+  { key: 'tada',     col: 7,  label: 'TADA',     rx: 'tada|ทาดา' },
+  { key: 'lalamove', col: 8,  label: 'Lalamove', rx: 'lalamove|ลาล่ามูฟ|ลาลามูฟ' },
+  { key: 'other',    col: 9,  label: 'Other',    rx: 'other|อื่นๆ|อื่น' },
+  { key: 'tip',      col: 10, label: 'Tip',      rx: 'tip|ทิป' },
+  { key: 'power',    col: 12, label: 'Power',    rx: 'power|ค่าไฟ|ค่าชาร์จ|ชาร์จ|ไฟ' }
+];
 // อัตราค่าไฟ TOU กฟน. ประเภท 1.3.2 (อิงบิลจริง Ft 0.1623 + VAT 7%): On-Peak 6.38 ฿, Off-Peak 3.00 ฿, เฉลี่ยโซลาร์ 5.41 ฿/หน่วย
 const TOU_ON_PEAK = 6.38;
 const TOU_OFF_PEAK = 3.00;
@@ -274,6 +289,44 @@ function modulesCommand_(chat, text) {
     return true;
   }
 
+  // ===================== DRIVER LEDGER (ตารางรายได้ขับรถรายวัน) =====================
+  if (/^(\/ledger|สรุปขับรถ|ยอดขับรถ)(\s+\d{4}-\d{2})?$/i.test(t)) {
+    const ymMatch = t.match(/(\d{4}-\d{2})/);
+    send_(chat, formatDriverLedgerSummary_(ymMatch ? ymMatch[1] : ''));
+    return true;
+  }
+
+  if (/^(ขับรถ|บันทึกขับรถ|แก้ยอดขับรถ|ตั้งยอดขับรถ)\b/i.test(t)) {
+    const mode = /^(แก้ยอดขับรถ|ตั้งยอดขับรถ)/i.test(t) ? 'set' : 'add';
+    const body = t.replace(/^(ขับรถ|บันทึกขับรถ|แก้ยอดขับรถ|ตั้งยอดขับรถ)\s*/i, '').trim();
+    const parsed = parseDriverLedgerInput_(body);
+    if (!parsed || !parsed.hasValues) {
+      send_(chat,
+        '🚘 <b>วิธีบันทึกยอดขับรถ (Driver_Ledger)</b>\n' +
+        '• <code>ขับรถ Grab 1500 Bolt 600 ทิป 50 ไฟ 120</code>\n' +
+        '• <code>ขับรถ 28/11 GoPlus 350 SwiftGo 420 Power 150</code>\n' +
+        '• <code>แก้ยอดขับรถ 27/11 Other 5000</code> (เขียนทับยอด)\n' +
+        '• <code>/ledger</code> หรือ <code>สรุปขับรถ 2026-10</code> (ดูสรุปรายเดือน)\n\n' +
+        'รองรับทุกช่อง: Grab, Bolt, GoPlus, SwiftGo, Dier, inDrive, TADA, Lalamove, Other, Tip, Power/ไฟ'
+      );
+      return true;
+    }
+    const row = upsertDriverLedger_(parsed.date, parsed.values, mode);
+    const parts = [];
+    LEDGER_FIELDS.forEach(function (f) {
+      if (f.key !== 'power' && row[f.key]) parts.push(f.label + ' ' + modFmtDec_(row[f.key]));
+    });
+    send_(chat,
+      '✅ <b>บันทึก Driver_Ledger แล้ว</b> (' + (mode === 'set' ? 'ตั้งยอดใหม่' : 'บวกเพิ่ม') + ')\n' +
+      '📅 วันที่: <b>' + row.date + '</b>\n' +
+      (parts.length ? '🚘 ' + parts.join(' · ') + '\n' : '') +
+      '💰 Total: <b>' + modFmtDec_(row.total) + ' ฿</b>\n' +
+      '⚡ Power: <b>' + modFmtDec_(row.power) + ' ฿</b>\n' +
+      '🟢 Net: <b>' + modFmtDec_(row.net) + ' ฿</b>'
+    );
+    return true;
+  }
+
   return false;
 }
 
@@ -515,4 +568,203 @@ function healthStatus_() {
     todayActivity: todayActivity,
     note: 'ข้อมูลจากชีต Health_Log'
   };
+}
+
+// ===================== DRIVER LEDGER HELPERS =====================
+function modFmtDec_(n) {
+  const v = Number(n) || 0;
+  return v.toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+}
+
+function ensureDriverLedgerSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = modEnsureSheet_(ss, SHEET_LEDGER, LEDGER_HEADERS);
+  if (sh.getLastRow() <= 1 && typeof seedDriverLedgerPrivate_ === 'function') {
+    seedDriverLedgerPrivate_(sh);
+  }
+  return sh;
+}
+
+function ledgerNormDate_(raw) {
+  if (raw instanceof Date) return Utilities.formatDate(raw, TZ, 'yyyy-MM-dd');
+  const s = String(raw || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2);
+  return '';
+}
+
+function parseDriverLedgerInput_(text) {
+  let s = String(text || '').trim();
+  if (!s) return null;
+  let dateStr = modFmtDate_(new Date());
+  const curYear = Number(dateStr.slice(0, 4));
+
+  if (/เมื่อวาน/.test(s)) {
+    dateStr = modFmtDate_(new Date(Date.now() - 86400000));
+    s = s.replace(/เมื่อวาน/g, ' ');
+  } else {
+    let dm = s.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+    if (dm) {
+      dateStr = dm[1] + '-' + ('0' + dm[2]).slice(-2) + '-' + ('0' + dm[3]).slice(-2);
+      s = s.replace(dm[0], ' ');
+    } else {
+      dm = s.match(/(?:วันที่\s*)?\b(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\b/);
+      if (dm) {
+        const y = dm[3] ? Number(dm[3]) : curYear;
+        dateStr = y + '-' + ('0' + dm[2]).slice(-2) + '-' + ('0' + dm[1]).slice(-2);
+        s = s.replace(dm[0], ' ');
+      }
+    }
+  }
+
+  const values = {};
+  let hasValues = false;
+  LEDGER_FIELDS.forEach(function (f) {
+    const re = new RegExp('(?:' + f.rx + ')\\s*[:=]?\\s*([0-9]+(?:,[0-9]{3})*(?:\\.[0-9]+)?)', 'gi');
+    let m;
+    let sum = 0;
+    let found = false;
+    while ((m = re.exec(s)) !== null) {
+      sum += Number(m[1].replace(/,/g, '')) || 0;
+      found = true;
+    }
+    if (found) {
+      values[f.key] = Math.round(sum * 100) / 100;
+      hasValues = true;
+    }
+  });
+
+  return { date: dateStr, values: values, hasValues: hasValues };
+}
+
+function upsertDriverLedger_(dateStr, values, mode) {
+  const sh = ensureDriverLedgerSheet_();
+  const lastRow = sh.getLastRow();
+  let rowIdx = -1;
+  let cur = [dateStr, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  if (lastRow > 1) {
+    const dates = sh.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (let i = 0; i < dates.length; i++) {
+      if (ledgerNormDate_(dates[i][0]) === dateStr) {
+        rowIdx = i + 2;
+        cur = sh.getRange(rowIdx, 1, 1, 14).getValues()[0];
+        cur[0] = dateStr;
+        for (let c = 1; c < 14; c++) cur[c] = Number(cur[c]) || 0;
+        break;
+      }
+    }
+  }
+
+  LEDGER_FIELDS.forEach(function (f) {
+    if (values[f.key] !== undefined) {
+      cur[f.col] = mode === 'set'
+        ? Math.round((Number(values[f.key]) || 0) * 100) / 100
+        : Math.round(((Number(cur[f.col]) || 0) + (Number(values[f.key]) || 0)) * 100) / 100;
+    }
+  });
+
+  let total = 0;
+  for (let c = 1; c <= 10; c++) total += Number(cur[c]) || 0;
+  total = Math.round(total * 100) / 100;
+  const power = Math.round((Number(cur[12]) || 0) * 100) / 100;
+  const net = Math.round((total - power) * 100) / 100;
+  cur[11] = total;
+  cur[12] = power;
+  cur[13] = net;
+
+  if (rowIdx > 0) {
+    sh.getRange(rowIdx, 1, 1, 14).setValues([cur]);
+  } else {
+    sh.appendRow(cur);
+    const nr = sh.getLastRow();
+    sh.getRange(nr, 1).setNumberFormat('@');
+  }
+
+  if (typeof logEvent_ === 'function') logEvent_('Driver Ledger ' + dateStr + ': Net ' + modFmtNum_(net) + ' ฿');
+  return {
+    date: dateStr, grab: cur[1], bolt: cur[2], goplus: cur[3], swiftgo: cur[4],
+    dier: cur[5], indrive: cur[6], tada: cur[7], lalamove: cur[8], other: cur[9],
+    tip: cur[10], total: total, power: power, net: net
+  };
+}
+
+function driverLedgerStatus_() {
+  const sh = ensureDriverLedgerSheet_();
+  const rows = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 14).getValues() : [];
+  const todayStr = modFmtDate_(new Date());
+  const byMonth = {};
+  const rowsByMonth = {};
+  let todayRow = null;
+
+  rows.forEach(function (r) {
+    const dt = ledgerNormDate_(r[0]);
+    if (!dt) return;
+    const obj = {
+      date: dt,
+      grab: Number(r[1]) || 0, bolt: Number(r[2]) || 0, goplus: Number(r[3]) || 0,
+      swiftgo: Number(r[4]) || 0, dier: Number(r[5]) || 0, indrive: Number(r[6]) || 0,
+      tada: Number(r[7]) || 0, lalamove: Number(r[8]) || 0, other: Number(r[9]) || 0,
+      tip: Number(r[10]) || 0, total: Number(r[11]) || 0, power: Number(r[12]) || 0,
+      net: Number(r[13]) || 0
+    };
+    if (dt === todayStr) todayRow = obj;
+    const ym = dt.slice(0, 7);
+    if (!byMonth[ym]) {
+      byMonth[ym] = { m: ym, days: 0, total: 0, power: 0, net: 0, byApp: { grab: 0, bolt: 0, goplus: 0, swiftgo: 0, dier: 0, indrive: 0, tada: 0, lalamove: 0, other: 0, tip: 0 } };
+      rowsByMonth[ym] = [];
+    }
+    const bm = byMonth[ym];
+    if (obj.total > 0 || obj.power > 0) bm.days++;
+    bm.total = Math.round((bm.total + obj.total) * 100) / 100;
+    bm.power = Math.round((bm.power + obj.power) * 100) / 100;
+    bm.net = Math.round((bm.net + obj.net) * 100) / 100;
+    Object.keys(bm.byApp).forEach(function (k) {
+      bm.byApp[k] = Math.round((bm.byApp[k] + obj[k]) * 100) / 100;
+    });
+    rowsByMonth[ym].push(obj);
+  });
+
+  const months = Object.keys(byMonth).sort().map(function (ym) {
+    const bm = byMonth[ym];
+    bm.avgNet = bm.days ? Math.round((bm.net / bm.days) * 100) / 100 : 0;
+    rowsByMonth[ym].sort(function (a, b) { return a.date.localeCompare(b.date); });
+    return bm;
+  });
+
+  // Keep latest 6 months of daily rows in JSON payload for fast dashboard loading
+  const recentRowsByMonth = {};
+  months.slice(-6).forEach(function (bm) { recentRowsByMonth[bm.m] = rowsByMonth[bm.m]; });
+
+  return {
+    months: months,
+    rowsByMonth: recentRowsByMonth,
+    today: todayRow || { date: todayStr, grab: 0, bolt: 0, goplus: 0, swiftgo: 0, dier: 0, indrive: 0, tada: 0, lalamove: 0, other: 0, tip: 0, total: 0, power: 0, net: 0 }
+  };
+}
+
+function formatDriverLedgerSummary_(ymOpt) {
+  const st = driverLedgerStatus_();
+  if (!st || !st.months.length) return '🚘 ยังไม่มีข้อมูลในชีต Driver_Ledger';
+  const target = ymOpt ? st.months.find(function (x) { return x.m === ymOpt; }) : st.months[st.months.length - 1];
+  if (!target) return '🚘 ไม่พบข้อมูล Driver_Ledger เดือน ' + esc_(ymOpt);
+  const topApps = Object.keys(target.byApp)
+    .map(function (k) { return { k: k, v: target.byApp[k] }; })
+    .filter(function (x) { return x.v > 0; })
+    .sort(function (a, b) { return b.v - a.v; });
+  const appLines = topApps.map(function (x) {
+    const f = LEDGER_FIELDS.find(function (ff) { return ff.key === x.k; });
+    return '• ' + (f ? f.label : x.k) + ': ' + modFmtDec_(x.v) + ' ฿';
+  }).join('\n');
+  const histLines = st.months.slice(-5).map(function (bm) {
+    return '• ' + bm.m + ': สุทธิ <b>' + modFmtNum_(bm.net) + ' ฿</b> (รวม ' + modFmtNum_(bm.total) + ' / ไฟ ' + modFmtNum_(bm.power) + ' · ' + bm.days + ' วัน)';
+  }).join('\n');
+  return '🚘 <b>สรุป Driver_Ledger เดือน ' + target.m + '</b>\n' +
+    '• วิ่งทั้งหมด: <b>' + target.days + ' วัน</b>\n' +
+    '• รายได้รวม (Total): <b>' + modFmtDec_(target.total) + ' ฿</b>\n' +
+    '• ค่าชาร์จไฟ (Power): <b>' + modFmtDec_(target.power) + ' ฿</b>\n' +
+    '• รายได้สุทธิ (Net): <b>' + modFmtDec_(target.net) + ' ฿</b> (เฉลี่ย ' + modFmtNum_(target.avgNet) + ' ฿/วัน)\n\n' +
+    '<b>แยกตามแอป</b>\n' + appLines + '\n\n' +
+    '<b>เทียบย้อนหลัง 5 เดือน</b>\n' + histLines;
 }

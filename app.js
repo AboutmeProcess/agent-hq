@@ -208,7 +208,7 @@ const AG = {
       'ค้นเส้นทางไปปลายทาง และเปิดแผนที่จราจรสดใน Google Maps',
       'บันทึกรายได้ทีละรายการ แยกตามแอป (Grab, Bolt, inDrive, LINE MAN ฯลฯ)'
     ],
-    cmds: [['/bkk', '✈️ BKK'], ['/dmk', '✈️ DMK'], ['/next', '⏭ ถัดไป'], ['/summary', '📊 สรุปรายได้']],
+    cmds: [['/bkk', '✈️ BKK'], ['/dmk', '✈️ DMK'], ['/ledger', '🚘 สรุป Driver Ledger'], ['/summary', '📊 สรุปรายได้']],
     with: ['finance', 'tg', 'script'],
     collab: 'ทำงานร่วมกัน: รายได้ที่ Driver บันทึกไว้ ถูก Finance นำไปรวมในเงินสดและเป้าหมายประจำวันทุกครั้งที่คำนวณ',
     conn: 'เชื่อมแล้วเมื่อมีข้อมูล: เที่ยวบิน (AeroDataBox) และชีต Daily_Jobs ส่วนการดูแลคอมมูนิตี้ยังไม่ได้พัฒนา'
@@ -1117,6 +1117,7 @@ function renderTabs(d, mode) {
   drawSummary(d);
   drawFlights(d);
   drawMoney(d);
+  drawDriverLedger(d);
   drawExtendedAgents(d, mode);
   renderAgents(d, mode);
   if (typeof renderOfficeHud === 'function') renderOfficeHud(d, mode);
@@ -2158,6 +2159,175 @@ function renderOfficeHud(d, mode) {
     });
   }
   applyMoListFilter();
+}
+
+// ================== DRIVER LEDGER (ตารางรายได้ขับรถรายวัน) ==================
+const DL_APPS = [
+  ['grab', 'Grab'], ['bolt', 'Bolt'], ['goplus', 'GoPlus'], ['swiftgo', 'SwiftGo'],
+  ['dier', 'Dier'], ['indrive', 'inDrive'], ['tada', 'TADA'], ['lalamove', 'Lalamove'],
+  ['other', 'Other'], ['tip', 'Tip'], ['power', 'Power (ค่าไฟ)']
+];
+let dlSelectedMonth = '';
+const fmtDec = n => {
+  const v = Number(n) || 0;
+  return v ? v.toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }) : '-';
+};
+
+(function initDriverLedgerUI() {
+  const inpBox = $('dlInputs');
+  const dateEl = $('dlDate');
+  const formBtn = $('dlFormBtn');
+  const tableBtn = $('dlTableBtn');
+  const formWrap = $('dlFormWrap');
+  const tableWrap = $('dlTableWrap');
+  const saveBtn = $('dlSaveBtn');
+  if (!inpBox || !dateEl) return;
+
+  const now = new Date();
+  dateEl.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+  const updatePreview = () => {
+    let tot = 0, pwr = 0;
+    DL_APPS.forEach(([k]) => {
+      const el = $('dli-' + k);
+      const v = parseFloat(el && el.value) || 0;
+      if (k === 'power') pwr += v;
+      else tot += v;
+    });
+    const net = tot - pwr;
+    if ($('dlPrevTotal')) $('dlPrevTotal').textContent = 'Total: ' + tot.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿';
+    if ($('dlPrevPower')) $('dlPrevPower').textContent = 'Power: ' + pwr.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿';
+    if ($('dlPrevNet')) $('dlPrevNet').textContent = 'Net: ' + net.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿';
+  };
+
+  DL_APPS.forEach(([k, lbl]) => {
+    const wrap = E('label', 'dl-inp-box');
+    wrap.appendChild(document.createTextNode(lbl));
+    const input = E('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.min = '0';
+    input.placeholder = '0';
+    input.id = 'dli-' + k;
+    input.addEventListener('input', updatePreview);
+    wrap.appendChild(input);
+    inpBox.appendChild(wrap);
+  });
+
+  if (formBtn && formWrap) {
+    formBtn.onclick = () => {
+      const open = formWrap.hidden;
+      formWrap.hidden = !open;
+      formBtn.setAttribute('aria-expanded', String(open));
+      formBtn.textContent = open ? '− ซ่อนฟอร์มบันทึก' : '＋ บันทึกยอดขับรถ';
+    };
+  }
+  if (tableBtn && tableWrap) {
+    tableBtn.onclick = () => {
+      const open = tableWrap.hidden;
+      tableWrap.hidden = !open;
+      tableBtn.setAttribute('aria-expanded', String(open));
+      tableBtn.textContent = open ? '📋 ซ่อนตารางรายวัน' : '📋 ตารางรายวัน';
+    };
+  }
+  if (saveBtn) {
+    saveBtn.onclick = async () => {
+      const mode = ($('dlMode') && $('dlMode').value) || 'add';
+      const dt = dateEl.value;
+      const tokens = [];
+      DL_APPS.forEach(([k]) => {
+        const el = $('dli-' + k);
+        const v = parseFloat(el && el.value) || 0;
+        if (v > 0) tokens.push(k + ' ' + v);
+      });
+      if (!tokens.length) {
+        if ($('dlCmdOut')) $('dlCmdOut').textContent = '⚠️ กรุณากรอกยอดอย่างน้อย 1 ช่องก่อนบันทึก';
+        return;
+      }
+      const prefix = mode === 'set' ? 'แก้ยอดขับรถ ' : 'ขับรถ ';
+      const cmd = prefix + (dt ? dt + ' ' : '') + tokens.join(' ');
+      const ok = await sendCmd(cmd, { out: $('dlCmdOut') });
+      if (ok) {
+        DL_APPS.forEach(([k]) => { const el = $('dli-' + k); if (el) el.value = ''; });
+        updatePreview();
+      }
+    };
+  }
+})();
+
+function drawDriverLedger(d) {
+  const mBox = $('dlMonths');
+  const sBox = $('dlSummary');
+  const tBox = $('dlTableWrap');
+  if (!mBox || !sBox || !tBox) return;
+  const dl = d && d.driverLedger;
+  mBox.textContent = '';
+  sBox.textContent = '';
+  tBox.textContent = '';
+
+  if (!dl || !dl.months || !dl.months.length) {
+    sBox.appendChild(E('p', 'note', 'เชื่อมข้อมูลจริงเพื่อดูสรุปรายได้ขับรถรายเดือน (Driver_Ledger) หรือพิมพ์คำสั่ง "ขับรถ Grab 1200 Bolt 500 ไฟ 150" ใน LINE OA'));
+    return;
+  }
+
+  if (!dlSelectedMonth || !dl.months.some(x => x.m === dlSelectedMonth)) {
+    dlSelectedMonth = dl.months[dl.months.length - 1].m;
+  }
+
+  dl.months.forEach(bm => {
+    const b = E('button', 'dl-mbtn' + (bm.m === dlSelectedMonth ? ' on' : ''), bm.m + ' (' + fmt(bm.net) + ' ฿)');
+    b.type = 'button';
+    b.onclick = () => { dlSelectedMonth = bm.m; drawDriverLedger(LASTD || d); };
+    mBox.appendChild(b);
+  });
+
+  const cur = dl.months.find(x => x.m === dlSelectedMonth) || dl.months[dl.months.length - 1];
+  const kpis = E('div', 'dl-kpis');
+  [
+    ['รายได้รวม (Total)', cur.total.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿', ''],
+    ['ค่าชาร์จไฟ (Power)', cur.power.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿', 'pwr'],
+    ['รายได้สุทธิ (Net)', cur.net.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿', 'net'],
+    ['เฉลี่ย/วัน (' + cur.days + ' วัน)', fmt(cur.avgNet) + ' ฿/วัน', '']
+  ].forEach(([lbl, val, cls]) => {
+    const k = E('div', 'dl-kpi' + (cls ? ' ' + cls : ''));
+    k.appendChild(E('small', '', lbl));
+    k.appendChild(E('strong', '', val));
+    kpis.appendChild(k);
+  });
+  sBox.appendChild(kpis);
+
+  const appsGrid = E('div', 'dl-apps');
+  DL_APPS.filter(([k]) => k !== 'power').forEach(([k, lbl]) => {
+    const v = (cur.byApp && cur.byApp[k]) || 0;
+    if (!v) return;
+    const r = E('div', 'dl-app-row');
+    r.appendChild(E('span', '', lbl));
+    r.appendChild(E('strong', '', v.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ฿'));
+    appsGrid.appendChild(r);
+  });
+  sBox.appendChild(appsGrid);
+
+  const rows = (dl.rowsByMonth && dl.rowsByMonth[cur.m]) || [];
+  if (rows.length) {
+    const tbl = E('table', 'dl-tbl');
+    const thead = E('thead');
+    const hr = E('tr');
+    ['Date', 'Grab', 'Bolt', 'GoPlus', 'SwiftGo', 'Dier', 'inDrive', 'TADA', 'Lalamove', 'Other', 'Tip', 'Total', 'Power', 'Net'].forEach(h => hr.appendChild(E('th', '', h)));
+    thead.appendChild(hr);
+    tbl.appendChild(thead);
+    const tbody = E('tbody');
+    rows.forEach(r => {
+      const tr = E('tr', r.net < 0 ? 'neg' : '');
+      tr.appendChild(E('td', '', r.date));
+      ['grab', 'bolt', 'goplus', 'swiftgo', 'dier', 'indrive', 'tada', 'lalamove', 'other', 'tip'].forEach(k => tr.appendChild(E('td', '', fmtDec(r[k]))));
+      tr.appendChild(E('td', 'tot', fmtDec(r.total)));
+      tr.appendChild(E('td', 'pwr', fmtDec(r.power)));
+      tr.appendChild(E('td', 'net', fmtDec(r.net)));
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    tBox.appendChild(tbl);
+  }
 }
 
 if (CFG.url && CFG.key) startPoll();

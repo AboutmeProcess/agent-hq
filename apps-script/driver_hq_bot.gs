@@ -729,6 +729,7 @@ function statusJson_() {
     profit: safe_(function () { return typeof modulesStatus_ === 'function' ? modulesStatus_().profit : null; }),
     solar: safe_(function () { return typeof modulesStatus_ === 'function' ? modulesStatus_().solar : null; }),
     health: safe_(function () { return typeof modulesStatus_ === 'function' ? modulesStatus_().health : null; }),
+    driverLedger: safe_(function () { return typeof driverLedgerStatus_ === 'function' ? driverLedgerStatus_() : null; }),
     errors: err ? { m: err.m, t: hm(err.ts), ageMin: Math.round((Date.now() - err.ts) / 60000) } : null,
     log: log.map(function (x) { return { t: hm(x.ts), m: x.m }; })
   };

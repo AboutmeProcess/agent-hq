@@ -203,6 +203,41 @@
         <div class="pn"><b>รายได้ 7 วันล่าสุด</b><div id="inc"></div></div>
         <div class="pn"><b>รายการจ่ายเดือนนี้</b><div id="bills"></div></div>
       </div>
+
+      <div class="pn dl-panel" id="driverLedgerPanel">
+        <div class="dl-head">
+          <div>
+            <b>🚘 บันทึกรายได้ขับรถรายวัน (Driver Ledger)</b>
+            <span class="note">แยกตามแอป + ค่าชาร์จไฟ (Power) + ยอดสุทธิ (Net) · สั่งผ่าน LINE ได้ด้วยคำสั่ง <code>ขับรถ Grab 1200 Bolt 500 ไฟ 150</code></span>
+          </div>
+          <div class="tb">
+            <button type="button" class="pri" id="dlFormBtn" aria-expanded="false">＋ บันทึกยอดขับรถ</button>
+            <button type="button" class="pill" id="dlTableBtn" aria-expanded="false">📋 ตารางรายวัน</button>
+          </div>
+        </div>
+        <div id="dlFormWrap" class="dl-form-wrap" hidden>
+          <div class="dl-meta-row">
+            <label>วันที่ <input type="date" id="dlDate"></label>
+            <label>โหมด
+              <select id="dlMode">
+                <option value="add">บวกเพิ่มเข้ายอดวันนั้น</option>
+                <option value="set">ตั้งยอดใหม่ (เขียนทับ)</option>
+              </select>
+            </label>
+          </div>
+          <div class="dl-inputs" id="dlInputs"></div>
+          <div class="dl-preview">
+            <span id="dlPrevTotal">Total: 0 ฿</span>
+            <span id="dlPrevPower">Power: 0 ฿</span>
+            <b id="dlPrevNet">Net: 0 ฿</b>
+            <button type="button" class="pri" id="dlSaveBtn">💾 บันทึกเข้า Driver_Ledger</button>
+          </div>
+          <div id="dlCmdOut" class="cmdout"></div>
+        </div>
+        <div class="dl-months" id="dlMonths"></div>
+        <div id="dlSummary"></div>
+        <div id="dlTableWrap" class="dl-table-wrap" hidden></div>
+      </div>
     </section>
 
     <section id="s-agents" class="sec">
