@@ -36,16 +36,28 @@ const SOLAR_SUB_FEE = 699;   // ค่าบริการรายเดือ
 function ensureSolarHistory_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sm = modEnsureSheet_(ss, SHEET_SOLAR_M, ['Month', 'Produced_kWh', 'Usage_kWh', 'NetGrid_kWh', 'Saved_THB', 'SelfPowered_Pct', 'Note']);
+  const MEA_SEED = [
+    ['2026-05', 0, 1779, 1779, 0, 0, 'บิล กฟน. 05/69 (07/06/69): 6,393.16 ฿ (+159.21) · 1,779 หน่วย (-92)'],
+    ['2026-06', 0, 1369, 1369, 0, 0, 'บิล กฟน. 06/69 (07/07/69): 5,449.30 ฿ (-943.86) · 1,369 หน่วย (-410)'],
+    ['2026-07', 0, 1986, 1986, 0, 0, 'บิล กฟน. 07/69 (07/08/69): 6,925.20 ฿ (+1,475.90) · 1,986 หน่วย (+617)'],
+    ['2026-08', 0, 1775, 1775, 0, 0, 'บิล กฟน. 08/69 (07/09/69): 6,425.15 ฿ (-500.05) · 1,775 หน่วย (-211)'],
+    ['2026-09', 0, 1732, 1732, 0, 0, 'บิล กฟน. 09/69 (07/10/69): 6,123.85 ฿ (-301.30) · 1,732 หน่วย (-43)'],
+    ['2026-10', 178.44, 1960.44, 1782, 1125.96, 9.1, 'บิล กฟน. 10/69 (07/11/69): 6,067.27 ฿ (-56.58) · 1,782 หน่วย (+50) · สุทธิ +427 ฿'],
+    ['2026-11', 233, 1983, 1750, 1274, 11.7, 'คาดการณ์เต็มเดือน: บิล กฟน. ~5,960 ฿ · ประหยัด TOU ~1,274 ฿ · สุทธิ +575 ฿']
+  ];
   if (sm.getLastRow() <= 1) {
-    sm.getRange(2, 1, 7, 7).setValues([
-      ['2026-05', 0, 1871, 1871, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
-      ['2026-06', 0, 1779, 1779, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
-      ['2026-07', 0, 1369, 1369, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
-      ['2026-08', 0, 1986, 1986, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
-      ['2026-09', 0, 1775, 1775, 0, 0, 'ประวัติ กฟน. (ก่อนติดโซลาร์)'],
-      ['2026-10', 178.44, 1960.44, 1782, 1125.96, 9.1, 'บิลจริง กฟน. 6,067.27 ฿ (On 208 / Off 1,574 · 3.40 ฿/หน่วย) · สุทธิ +427 ฿'],
-      ['2026-11', 233, 1983, 1750, 1274, 11.7, 'คาดการณ์เต็มเดือน: บิล กฟน. ~5,960 ฿ · ประหยัด TOU ~1,274 ฿ · สุทธิ +575 ฿']
-    ]);
+    sm.getRange(2, 1, MEA_SEED.length, 7).setValues(MEA_SEED);
+  } else {
+    // อัปเดตข้อมูลบิล กฟน. 05/69–10/69 ให้ตรงตามรอบบิลจริงหากยังเป็นชุดเก่าที่เลื่อนเดือน
+    const existing = sm.getRange(2, 1, sm.getLastRow() - 1, 7).getValues();
+    const needsMeaFix = existing.some(function (r) {
+      const ym = (r[0] instanceof Date) ? Utilities.formatDate(r[0], TZ, 'yyyy-MM') : String(r[0] || '').trim().slice(0, 7);
+      return ym === '2026-05' && Number(r[2]) === 1871;
+    });
+    if (needsMeaFix) {
+      sm.getRange(2, 1, sm.getLastRow() - 1, 7).clearContent();
+      sm.getRange(2, 1, MEA_SEED.length, 7).setValues(MEA_SEED);
+    }
   }
   // ถ้า Modules_State ของ solar ยังเป็นค่าว่าง/0 ให้ใส่ค่าจริงล่าสุดจาก BlueRing
   const st = ss.getSheetByName(SHEET_MSTATE);
@@ -496,6 +508,7 @@ function profitStatus_() {
 }
 
 function solarStatus_() {
+  ensureSolarHistory_();
   const m = modStateMap_('solar');
   const mRows = modReadRows_(SHEET_SOLAR_M);
   const monthly = mRows.slice(-12).map(function (r) {
