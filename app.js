@@ -1363,6 +1363,29 @@ function quick(text) {
 const tbF = $('tbFl'), hF = $('actFl'), tbM = $('tbMoney'), hM = $('actMoney'), tbA = $('tbAgents'), hA = $('actAgents');
 [['/bkk', '🔄 อัปเดต BKK'], ['/dmk', '🔄 อัปเดต DMK'], ['/now', '🛬 ทั้งสองสนามบิน'], ['/next', '⏭ 3 เที่ยวบินถัดไป']]
   .forEach(a => tbBtn(tbF, hF, 'q' + a[0], a[1], quick(a[0])));
+
+// ปุ่ม + สำหรับแสดงและอัปเดตเที่ยวบินทั้งสองสนามบินทันที (ซ่อนไว้เป็นค่าเริ่มต้นเพื่อประหยัดโควตา)
+const flToggleBtn = $('flToggleBtn');
+const flWrap = $('flWrap');
+const flStatus = $('flStatus');
+if (flToggleBtn && flWrap) {
+  flToggleBtn.onclick = async () => {
+    const opening = flWrap.hidden;
+    flWrap.hidden = !opening;
+    flToggleBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+    flToggleBtn.textContent = opening ? '− ซ่อนเที่ยวบิน' : '＋ แสดงและอัปเดตเที่ยวบิน';
+    if (opening) {
+      if (CFG.url && CFG.key) {
+        if (flStatus) flStatus.textContent = 'กำลังอัปเดตเที่ยวบิน BKK และ DMK ล่าสุด…';
+        await sendCmd('/now', { out: flStatus, noConfirm: true });
+      } else if (flStatus) {
+        flStatus.textContent = 'แสดงข้อมูลเที่ยวบินตัวอย่าง (เชื่อมข้อมูลจริงเพื่ออัปเดตสดจาก AeroDataBox)';
+      }
+    } else if (flStatus) {
+      flStatus.textContent = '';
+    }
+  };
+}
 [['วันนี้ต้องหาเท่าไร', '🎯 วันนี้ต้องหา'], ['/bills', '🧾 รายการจ่าย'], ['/summary', '📊 สรุปรายได้']]
   .forEach(a => tbBtn(tbM, hM, 'q' + a[0], a[1], quick(a[0])));
 ['income', 'cash', 'pay'].forEach(k => tbBtn(tbM, hM, k, FORMS[k][0].split(' (')[0], FORMS[k][1], FORMS[k][0]));

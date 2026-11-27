@@ -128,9 +128,10 @@
             <!-- Bottom Floating Camera Dock -->
             <div class="mo-dock" id="moDock">
               <button type="button" class="mo-dbtn on" data-cam="overview">🏢 ภาพรวม</button>
+              <button type="button" class="mo-dbtn" data-cam="ceo">👑 ห้อง CEO</button>
               <button type="button" class="mo-dbtn" data-cam="desks">💻 โต๊ะหลัก</button>
-              <button type="button" class="mo-dbtn" data-cam="trade">📈 เทรด/สุขภาพ</button>
-              <button type="button" class="mo-dbtn" data-cam="solar">☀️ โซลาร์/ประกัน</button>
+              <button type="button" class="mo-dbtn" data-cam="server">🖥️ เซิร์ฟเวอร์</button>
+              <button type="button" class="mo-dbtn" data-cam="line">💬 ห้อง LINE</button>
               <span class="mo-sep"></span>
               <button type="button" class="mo-dbtn mo-zbtn" id="moZoomOut" aria-label="ซูมออก">−</button>
               <span class="mo-zval" id="moZoomVal">100%</span>
@@ -155,10 +156,15 @@
     <section id="s-flights" class="sec">
       <div class="shr">
         <h2 class="sh">✈️ เที่ยวบิน</h2>
-        <div class="tb" id="tbFl"></div>
+        <div class="tb" id="tbFl">
+          <button type="button" class="pri" id="flToggleBtn" aria-expanded="false" aria-controls="flWrap">＋ แสดงและอัปเดตเที่ยวบิน</button>
+        </div>
       </div>
+      <div id="flStatus" class="cmdout" aria-live="polite"></div>
       <div id="actFl"></div>
-      <div class="cols" id="flBoards"></div>
+      <div id="flWrap" hidden>
+        <div class="cols" id="flBoards"></div>
+      </div>
     </section>
 
     <section id="s-money" class="sec">

@@ -592,8 +592,8 @@ main { max-width: 1120px; margin: 0 auto; padding: 4px 14px 48px; }
 
 .mo-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  min-height: 520px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  min-height: 640px;
 }
 .mo-body.no-feed { grid-template-columns: minmax(0, 1fr); }
 .mo-body.no-feed .mo-aside { display: none; }
