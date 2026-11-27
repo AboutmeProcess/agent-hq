@@ -704,7 +704,7 @@ function flightsSummary_(ap) {
   const all = prep_(L.list, nowMin_(), L.live).filter(function (f) { return !GONE.test(f.api || ''); });
   const up = all.filter(function (f) { return !f.landed && f.d >= -STALE_MIN; }).sort(function (a, b) { return a.d - b.d; });
   const landed = all.filter(function (f) { return f.landed; }).sort(function (a, b) { return b.d - a.d; });
-  const row = function (f) { return { code: f.code, route: String(f.route || '').slice(0, 30), sched: f.sched, est: f.est, d: f.d, st: status_(f), dl: delay_(f) }; };
+  const row = function (f) { return { code: f.code, route: String(f.route || '').slice(0, 30), sched: f.sched, est: f.est, d: f.d, st: status_(f), dl: delay_(f), airline: f.airline || '-', craft: f.craft || '-', landed: !!f.landed }; };
   return { live: !!L.live, landed: landed.length, upcoming: up.length, next: up[0] ? up[0].code + ' ' + up[0].est : '',
     list: { landed: landed.slice(0, 5).map(row), up: up.slice(0, 5).map(row) } };
 }

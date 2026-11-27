@@ -642,7 +642,9 @@ function drawSummary(d) {
 
 function drawFlights(d) {
   const box = $('flBoards');
+  const cbox = $('flCards');
   box.textContent = '';
+  if (cbox) cbox.textContent = '';
   const names = { BKK: 'สุวรรณภูมิ (BKK)', DMK: 'ดอนเมือง (DMK)' };
   ['BKK', 'DMK'].forEach(ap => {
     const f = d.flights && d.flights[ap];
@@ -651,7 +653,7 @@ function drawFlights(d) {
     if (f && f.live !== null && f.live !== undefined) b.appendChild(E('span', 'tag', f.live ? 'ข้อมูลสด' : 'ข้อมูลสำรองจากชีต'));
     pn.appendChild(b);
     if (!f || !f.list) {
-      pn.appendChild(E('p', 'muted', 'ยังไม่มีข้อมูลล่าสุด พิมพ์ /' + ap.toLowerCase() + ' ในบอทเพื่ออัปเดต'));
+      pn.appendChild(E('p', 'muted', 'ยังไม่มีข้อมูลล่าสุด กดปุ่ม ＋ เพื่ออัปเดต'));
     } else {
       pn.appendChild(E('div', 'muted', 'กำลังจะลง (ไฮไลต์ฟ้า = ภายใน 30 นาที)'));
       f.list.up.forEach(x => pn.appendChild(frow(x, ap)));
@@ -661,6 +663,60 @@ function drawFlights(d) {
       if (!f.list.landed.length) pn.appendChild(E('p', 'muted', 'ไม่มี'));
     }
     box.appendChild(pn);
+
+    // การ์ดรายละเอียดเที่ยวบิน (ก่อนหน้าเวลาปัจจุบัน 4 ลำ + ถัดไป 2 ลำ)
+    if (cbox) {
+      const cpn = E('div', 'pn');
+      const cb = E('b', '', names[ap] + ' · การ์ดเที่ยวบิน');
+      if (f && f.live !== null && f.live !== undefined) cb.appendChild(E('span', 'tag', f.live ? 'ข้อมูลสด' : 'สำรอง'));
+      cpn.appendChild(cb);
+      if (!f || !f.list) {
+        cpn.appendChild(E('p', 'muted', 'ยังไม่มีข้อมูลล่าสุด กดปุ่มอัปเดตเที่ยวบินก่อน'));
+      } else {
+        const makeCard = (x, isLanded) => {
+          const card = E('div', 'fl-card' + (isLanded ? ' landed' : ''));
+          const rel = typeof x.d === 'number'
+            ? (x.d <= 0 ? ('ลงแล้ว ' + Math.abs(x.d) + ' นาที ที่แล้ว') : ('อีก ' + x.d + ' นาที'))
+            : '';
+          const stFull = [x.st || '-', rel, x.dl || ''].filter(Boolean).join(' · ');
+          const estTxt = (x.est || '-') + (isLanded ? ' (ลงจริง)' : '');
+          const rows = [
+            ['✈️ รหัสเที่ยวบิน :', x.code || '-'],
+            ['🏢 สนามบิน :', names[ap]],
+            ['🛫 ต้นทาง :', x.route || '-'],
+            ['🕐 เวลาตามตาราง :', x.sched || '-'],
+            ['⏰ เวลาคาดการณ์ :', estTxt],
+            ['📌 สถานะ :', stFull],
+            ['🏷 สายการบิน :', x.airline || '-'],
+            ['🛩 ประเภทเครื่องบิน :', x.craft || '-']
+          ];
+          rows.forEach(([k, v]) => {
+            const ln = E('div', 'fl-card-ln');
+            ln.appendChild(E('b', '', k));
+            ln.appendChild(E('span', '', v));
+            card.appendChild(ln);
+          });
+          return card;
+        };
+
+        cpn.appendChild(E('div', 'muted', 'ลงแล้วก่อนหน้า (4 ลำล่าสุด)'));
+        const lWrap = E('div', 'fl-cards-list');
+        const landed4 = (f.list.landed || []).slice(0, 4);
+        if (landed4.length) landed4.forEach(x => lWrap.appendChild(makeCard(x, true)));
+        else lWrap.appendChild(E('p', 'muted', 'ไม่มี'));
+        cpn.appendChild(lWrap);
+
+        const upHead = E('div', 'muted', 'กำลังจะลงถัดไป (2 ลำ)');
+        upHead.style.marginTop = '12px';
+        cpn.appendChild(upHead);
+        const uWrap = E('div', 'fl-cards-list');
+        const up2 = (f.list.up || []).slice(0, 2);
+        if (up2.length) up2.forEach(x => uWrap.appendChild(makeCard(x, false)));
+        else uWrap.appendChild(E('p', 'muted', 'ไม่มี'));
+        cpn.appendChild(uWrap);
+      }
+      cbox.appendChild(cpn);
+    }
   });
 }
 
@@ -990,18 +1046,31 @@ const SAMPLE = {
     BKK: {
       live: false,
       list: {
-        landed: [{ code: 'XX101', route: 'Singapore', sched: '19:00', est: '19:05', d: -40, st: '🧳 รอรับกระเป๋า', dl: '🟡 ช้า 5 น.' }],
+        landed: [
+          { code: 'FD4103', route: 'Chiangmai', sched: '22:05', est: '22:04', d: 0, st: '🛬 เพิ่งลงจอด', dl: '🟢 ตรงเวลา', airline: 'Thai AirAsia', craft: 'Airbus A320', landed: true },
+          { code: 'VZ2305', route: 'Phuket', sched: '21:10', est: '21:54', d: -7, st: '🛬 เพิ่งลงจอด', dl: '⚠️ ล่าช้า 44 น.', airline: 'Thai Vietjet Air', craft: 'Airbus A320', landed: true },
+          { code: 'PG278', route: 'Phuket', sched: '21:25', est: '21:44', d: -17, st: '🧳 ประเมินว่ากำลังรอรับกระเป๋า', dl: '⚠️ ล่าช้า 19 น.', airline: 'Bangkok Airways', craft: 'Airbus A319', landed: true },
+          { code: 'TG360', route: 'Chennai', sched: '21:30', est: '21:43', d: -18, st: '🧳 ประเมินว่ากำลังรอรับกระเป๋า', dl: '🟡 ช้ากว่าตาราง 13 น.', airline: 'Thai Airways', craft: 'Airbus A320', landed: true }
+        ],
         up: [
-          { code: 'XX204', route: 'Tokyo', sched: '20:30', est: '20:38', d: 17, st: '🛬 กำลังลงจอด', dl: '🟡 ช้า 8 น.' },
-          { code: 'XX310', route: 'Dubai', sched: '21:30', est: '21:30', d: 70, st: '✈️ กำลังบินมา', dl: '🟢 ตรงเวลา' }
+          { code: 'TG673', route: 'Osaka', sched: '22:15', est: '22:20', d: 17, st: '🛬 กำลังลงจอด', dl: '🟡 ช้า 5 น.', airline: 'Thai Airways', craft: 'Boeing 787-9', landed: false },
+          { code: 'EK372', route: 'Dubai', sched: '22:45', est: '22:45', d: 42, st: '✈️ กำลังบินมา', dl: '🟢 ตรงเวลา', airline: 'Emirates', craft: 'Airbus A380', landed: false }
         ]
       }
     },
     DMK: {
       live: false,
       list: {
-        landed: [],
-        up: [{ code: 'XX512', route: 'Phuket', sched: '20:55', est: '20:55', d: 34, st: '✈️ กำลังบินมา', dl: '🟢 ตรงเวลา' }]
+        landed: [
+          { code: 'SL617', route: 'Udon Thani', sched: '21:45', est: '21:39', d: -22, st: '🧳 ประเมินว่ากำลังรอรับกระเป๋า', dl: '🟢 ก่อนเวลา 6 น.', airline: 'Thai Lion Air', craft: 'Boeing 737-800', landed: true },
+          { code: 'SL545', route: 'Chiang Rai', sched: '22:00', est: '21:29', d: -32, st: '🧳 ประเมินว่ากำลังรอรับกระเป๋า', dl: '🟢 ก่อนเวลา 31 น.', airline: 'Thai Lion Air', craft: 'Boeing 737-800', landed: true },
+          { code: 'FD3569', route: 'Roi Et', sched: '21:35', est: '21:27', d: -34, st: '🧳 ประเมินว่ากำลังรอรับกระเป๋า', dl: '🟢 ก่อนเวลา 8 น.', airline: 'Thai AirAsia', craft: 'Airbus A320', landed: true },
+          { code: 'FD254', route: 'Yangon', sched: '20:30', est: '21:26', d: -35, st: '🧳 ประเมินว่ากำลังรอรับกระเป๋า', dl: '⚠️ ล่าช้า 56 น.', airline: 'Thai AirAsia', craft: 'Airbus A320', landed: true }
+        ],
+        up: [
+          { code: 'DD311', route: 'Udon Thani', sched: '22:02', est: '22:02', d: 1, st: '✈️ กำลังบินมา', dl: '🟢 ตรงเวลา', airline: 'Nok Air', craft: 'Boeing 737-800', landed: false },
+          { code: 'FD3024', route: 'Phuket', sched: '22:30', est: '22:30', d: 29, st: '✈️ กำลังบินมา', dl: '🟢 ตรงเวลา', airline: 'Thai AirAsia', craft: 'Airbus A320', landed: false }
+        ]
       }
     }
   }
@@ -1364,26 +1433,44 @@ const tbF = $('tbFl'), hF = $('actFl'), tbM = $('tbMoney'), hM = $('actMoney'), 
 [['/bkk', '🔄 อัปเดต BKK'], ['/dmk', '🔄 อัปเดต DMK'], ['/now', '🛬 ทั้งสองสนามบิน'], ['/next', '⏭ 3 เที่ยวบินถัดไป']]
   .forEach(a => tbBtn(tbF, hF, 'q' + a[0], a[1], quick(a[0])));
 
-// ปุ่ม + สำหรับแสดงและอัปเดตเที่ยวบินทั้งสองสนามบินทันที (ซ่อนไว้เป็นค่าเริ่มต้นเพื่อประหยัดโควตา)
+// ปุ่ม + สำหรับแสดงเฉพาะกระดาน 2 คอลัมน์ (รูปที่ 1) และอัปเดตเที่ยวบินเงียบๆ เบื้องหลัง
 const flToggleBtn = $('flToggleBtn');
+const flCardsBtn = $('flCardsBtn');
 const flWrap = $('flWrap');
+const flCardsWrap = $('flCardsWrap');
 const flStatus = $('flStatus');
+
+async function silentUpdateFlights() {
+  if (!CFG.url || !CFG.key) {
+    if (flStatus) flStatus.textContent = 'แสดงข้อมูลตัวอย่าง (เชื่อมข้อมูลจริงเพื่ออัปเดตสด)';
+    return;
+  }
+  if (flStatus) flStatus.textContent = '🔄 กำลังอัปเดตเที่ยวบิน BKK และ DMK ล่าสุด…';
+  const dummy = document.createElement('div');
+  const ok = await sendCmd('/now', { out: dummy, noConfirm: true });
+  if (flStatus) flStatus.textContent = ok ? '✅ อัปเดตเที่ยวบินล่าสุดแล้ว' : '⚠️ อัปเดตไม่สำเร็จ (แสดงข้อมูลล่าสุดที่มี)';
+}
+
 if (flToggleBtn && flWrap) {
   flToggleBtn.onclick = async () => {
     const opening = flWrap.hidden;
     flWrap.hidden = !opening;
     flToggleBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
-    flToggleBtn.textContent = opening ? '− ซ่อนเที่ยวบิน' : '＋ แสดงและอัปเดตเที่ยวบิน';
-    if (opening) {
-      if (CFG.url && CFG.key) {
-        if (flStatus) flStatus.textContent = 'กำลังอัปเดตเที่ยวบิน BKK และ DMK ล่าสุด…';
-        await sendCmd('/now', { out: flStatus, noConfirm: true });
-      } else if (flStatus) {
-        flStatus.textContent = 'แสดงข้อมูลเที่ยวบินตัวอย่าง (เชื่อมข้อมูลจริงเพื่ออัปเดตสดจาก AeroDataBox)';
-      }
-    } else if (flStatus) {
-      flStatus.textContent = '';
-    }
+    flToggleBtn.textContent = opening ? '− ซ่อนกระดานเที่ยวบิน' : '＋ แสดงและอัปเดตเที่ยวบิน';
+    if (opening) await silentUpdateFlights();
+    else if (flStatus) flStatus.textContent = '';
+  };
+}
+
+// ปุ่มแยกสำหรับแสดงผลแบบการ์ดรายละเอียด (ก่อนหน้า 4 ลำ + ถัดไป 2 ลำ)
+if (flCardsBtn && flCardsWrap) {
+  flCardsBtn.onclick = async () => {
+    const opening = flCardsWrap.hidden;
+    flCardsWrap.hidden = !opening;
+    flCardsBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+    flCardsBtn.classList.toggle('active', opening);
+    if (opening) await silentUpdateFlights();
+    else if (flStatus) flStatus.textContent = '';
   };
 }
 [['วันนี้ต้องหาเท่าไร', '🎯 วันนี้ต้องหา'], ['/bills', '🧾 รายการจ่าย'], ['/summary', '📊 สรุปรายได้']]

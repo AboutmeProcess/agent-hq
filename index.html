@@ -79,10 +79,30 @@
             <span class="mo-status-pill" id="moStatusPill"><i class="mo-pulse"></i> พร้อมทำงาน 8 เอเจนต์</span>
           </div>
           <div class="mo-hud-r">
+            <button type="button" class="mo-ibtn mo-build-toggle" id="moBuildBtn" aria-pressed="false" title="โหมดแต่งออฟฟิศแบบ The Sims">🛠️ แต่งออฟฟิศ</button>
             <button type="button" class="mo-ibtn" id="moSumBtn" aria-pressed="true" title="แสดง/ซ่อนสรุปภาพรวม">📊 สรุป</button>
             <button type="button" class="mo-ibtn" id="moLitBtn" title="สลับแสงกลางวัน/กลางคืน">🌙 กลางคืน</button>
             <button type="button" class="mo-ibtn" id="animBtn" aria-pressed="false" title="พัก/เล่นแอนิเมชัน">⏸ พักภาพ</button>
             <button type="button" class="mo-ibtn" id="moFeedBtn" aria-pressed="true" title="แสดง/ซ่อนแถบกิจกรรม">📋 กิจกรรม</button>
+          </div>
+        </div>
+
+        <!-- The Sims Build Mode Panel (hidden until 🛠️ แต่งออฟฟิศ is active) -->
+        <div class="mo-build-bar" id="moBuildBar" hidden>
+          <div class="mo-b-tabs" id="moBTabs">
+            <button type="button" class="mo-fbtn on" data-btab="furn">🪑 เฟอร์นิเจอร์</button>
+            <button type="button" class="mo-fbtn" data-btab="wall">🧱 ฉากกั้น (4 แบบ)</button>
+            <button type="button" class="mo-fbtn" data-btab="floor">🎨 พื้น & สี</button>
+            <span class="mo-b-hint">ลากวางลงพื้น 3D หรือคลิกชิ้นเดิมเพื่อลากย้าย/หมุน</span>
+            <button type="button" class="mo-ibtn" id="moResetLayout">↩️ รีเซ็ตผังเดิม</button>
+          </div>
+          <div class="mo-b-palette" id="moBPalette"></div>
+          <div class="mo-b-sel" id="moBSel" hidden>
+            <strong id="moBSelName">เลือกเฟอร์นิเจอร์</strong>
+            <button type="button" class="mo-ibtn" id="moRotBtn">↻ หมุน 90°</button>
+            <div class="mo-swatches" id="moBSwatches"></div>
+            <button type="button" class="mo-ibtn" id="moDupBtn">📋 ก๊อปปี้</button>
+            <button type="button" class="mo-ibtn mo-del" id="moDelBtn">🗑️ ลบ</button>
           </div>
         </div>
 
@@ -158,12 +178,16 @@
         <h2 class="sh">✈️ เที่ยวบิน</h2>
         <div class="tb" id="tbFl">
           <button type="button" class="pri" id="flToggleBtn" aria-expanded="false" aria-controls="flWrap">＋ แสดงและอัปเดตเที่ยวบิน</button>
+          <button type="button" class="pill" id="flCardsBtn" aria-expanded="false" aria-controls="flCardsWrap">🗂 การ์ดเที่ยวบิน (4+2)</button>
         </div>
       </div>
-      <div id="flStatus" class="cmdout" aria-live="polite"></div>
+      <div id="flStatus" class="note" aria-live="polite"></div>
       <div id="actFl"></div>
       <div id="flWrap" hidden>
         <div class="cols" id="flBoards"></div>
+      </div>
+      <div id="flCardsWrap" hidden>
+        <div class="cols" id="flCards"></div>
       </div>
     </section>
 

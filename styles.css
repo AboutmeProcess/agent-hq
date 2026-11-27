@@ -567,6 +567,85 @@ main { max-width: 1120px; margin: 0 auto; padding: 4px 14px 48px; }
 }
 .mo-ibtn:hover { background: #1f2937; border-color: rgba(249, 115, 22, .6); color: #fff; }
 .mo-ibtn[aria-pressed="true"] { border-color: #f97316; color: #fdba74; }
+.mo-build-toggle[aria-pressed="true"] { background: rgba(249, 115, 22, .22); color: #fff; }
+
+/* The Sims Build Mode Bar */
+.mo-build-bar {
+  padding: 10px 14px;
+  background: #0f1626;
+  border-bottom: 1px solid rgba(249, 115, 22, .35);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mo-build-bar[hidden], .mo-b-sel[hidden] { display: none !important; }
+.mo-b-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.mo-b-hint { font-size: 12px; color: #9ca3af; margin-left: auto; }
+.mo-b-palette {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.mo-b-palette::-webkit-scrollbar { display: none; }
+.mo-b-item {
+  all: unset;
+  box-sizing: border-box;
+  cursor: grab;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 10px;
+  background: #161b26;
+  border: 1px solid rgba(255, 255, 255, .11);
+  color: #e5e7eb;
+  font-size: 12px;
+  white-space: nowrap;
+  user-select: none;
+}
+.mo-b-item:hover { border-color: #f97316; background: #1f2937; }
+.mo-b-item.on { border-color: #f97316; background: rgba(249, 115, 22, .2); color: #fff; }
+.mo-b-sel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #161b26;
+  border: 1px solid rgba(249, 115, 22, .45);
+  font-size: 12px;
+}
+.mo-swatches { display: flex; gap: 5px; align-items: center; }
+.mo-sw {
+  all: unset;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .25);
+}
+.mo-sw:hover, .mo-sw.on { border-color: #fff; transform: scale(1.12); }
+.mo-ibtn.mo-del { border-color: rgba(239, 68, 68, .5); color: #fca5a5; }
+.mo-ibtn.mo-del:hover { background: rgba(239, 68, 68, .22); color: #fff; }
+
+/* Flight Detail Cards (4 landed + 2 upcoming) */
+.fl-cards-list { display: grid; gap: 10px; margin-top: 6px; }
+.fl-card {
+  background: rgba(10, 15, 31, .72);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--acc);
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.fl-card.landed { border-left-color: var(--ok); }
+.fl-card-ln { display: flex; gap: 6px; flex-wrap: wrap; }
+.fl-card-ln b { color: #cfeaff; font-weight: 600; }
 
 /* Integrated Summary Band inside AboutMeProcess Office Shell */
 .mo-sum-band {
