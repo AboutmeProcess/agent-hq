@@ -1318,3 +1318,29 @@ main { max-width: 1120px; margin: 0 auto; padding: 4px 14px 48px; }
   font-weight: 700;
   box-shadow: 3px 3px 0 #263042;
 }
+.zyra-av-prev {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(236, 229, 216, .12);
+  border: 1px solid rgba(255, 255, 255, .14);
+}
+.zyra-av-prev img {
+  width: 68px;
+  height: 85px;
+  object-fit: contain;
+  background: #ece5d8;
+  border: 2px solid #263042;
+  border-radius: 10px;
+  flex: none;
+}
+.zyra-av-pbtns {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.zyra-av-pbtns strong { font-size: 13px; color: #f9fafb; }

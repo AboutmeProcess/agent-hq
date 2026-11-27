@@ -167,25 +167,25 @@
     return it.rot ? { w: def.d, d: def.w } : { w: def.w, d: def.d };
   }
 
-  // CEO Custom Avatar
-  let ceoCustom = { shirt: '#334155', hair: '#231710', acc: 'crown' };
-  try {
-    const savedCeo = JSON.parse(localStorage.getItem(CEO_AV_KEY) || 'null');
-    if (savedCeo && savedCeo.shirt) ceoCustom = savedCeo;
-  } catch (e) {}
+  // Per-character Custom Avatars (Zyra Avatar Studio — saved for all 9 characters!)
+  const AVATARS_KEY = 'hq_avatars_zyra_v1';
+  let savedAvatars = {};
+  try { savedAvatars = JSON.parse(localStorage.getItem(AVATARS_KEY) || '{}') || {}; } catch (e) {}
+  function saveAvatars() { try { localStorage.setItem(AVATARS_KEY, JSON.stringify(savedAvatars)); } catch (e) {} }
 
   // 9 Characters: CEO (OWNER) + LINE/Script (ADMIN) + 6 Agents (AGENT)
-  const AGENT_DEF = [
-    { id: 'ceo', name: '👑 CEO', roleTag: 'OWNER', home: { x: 19.8, y: 4.9 }, color: '#f59e0b', shirt: ceoCustom.shirt, hair: ceoCustom.hair, crown: ceoCustom.acc === 'crown', glasses: ceoCustom.acc === 'glasses', hat: ceoCustom.acc === 'hat' ? '#f97316' : '', stay: true },
-    { id: 'tg', name: 'LINE OA', roleTag: 'ADMIN', home: { x: 19.7, y: 10.9 }, color: '#06c755', shirt: '#10b981', hair: '#1f2937', stay: true },
-    { id: 'solar', name: 'Solar', roleTag: 'AGENT', home: { x: 2.9, y: 5.9 }, color: '#eab308', shirt: '#2563eb', hair: '#eab308', helmet: '#facc15' },
-    { id: 'script', name: 'App Script', roleTag: 'ADMIN', home: { x: 5.7, y: 5.9 }, color: '#a855f7', shirt: '#7c3aed', hair: '#a855f7', robot: true },
-    { id: 'driver', name: 'Driver', roleTag: 'AGENT', home: { x: 9.7, y: 4.5 }, color: '#22c55e', shirt: '#16a34a', hair: '#2c1c12', hat: '#22c55e' },
-    { id: 'finance', name: 'Finance', roleTag: 'AGENT', home: { x: 13.5, y: 4.5 }, color: '#f59e0b', shirt: '#d97706', hair: '#1e1b18', glasses: true },
-    { id: 'profit', name: 'Take Profit', roleTag: 'AGENT', home: { x: 9.7, y: 7.7 }, color: '#f97316', shirt: '#ea580c', hair: '#4a2c16' },
-    { id: 'captain', name: 'Captain', roleTag: 'AGENT', home: { x: 13.5, y: 7.7 }, color: '#3b82f6', shirt: '#2563eb', hair: '#111827' },
-    { id: 'health', name: 'Healthy', roleTag: 'AGENT', home: { x: 3.1, y: 10.1 }, color: '#ec4899', shirt: '#db2777', hair: '#4a2518', sporty: true }
+  const AGENT_DEFAULTS = [
+    { id: 'ceo',     name: '👑 CEO',       roleTag: 'OWNER', home: { x: 19.8, y: 4.9 },  color: '#f59e0b', skin: '#fde0c2', hairStyle: 'short', hair: '#231710', shirt: '#334155', pants: '#1e293b', acc: 'crown',  stay: true },
+    { id: 'tg',      name: 'LINE OA',      roleTag: 'ADMIN', home: { x: 19.7, y: 10.9 }, color: '#06c755', skin: '#fde0c2', hairStyle: 'bangs', hair: '#1f2937', shirt: '#10b981', pants: '#1e293b', acc: 'headphones', stay: true },
+    { id: 'solar',   name: 'Solar',        roleTag: 'AGENT', home: { x: 2.9,  y: 5.9 },  color: '#eab308', skin: '#f5cba7', hairStyle: 'short', hair: '#eab308', shirt: '#2563eb', pants: '#334155', acc: 'helmet' },
+    { id: 'script',  name: 'App Script',   roleTag: 'ADMIN', home: { x: 5.7,  y: 5.9 },  color: '#a855f7', skin: '#fde0c2', hairStyle: 'robot', hair: '#a855f7', shirt: '#7c3aed', pants: '#1e293b', acc: 'none' },
+    { id: 'driver',  name: 'Driver',       roleTag: 'AGENT', home: { x: 9.7,  y: 4.5 },  color: '#22c55e', skin: '#f5cba7', hairStyle: 'short', hair: '#2c1c12', shirt: '#16a34a', pants: '#1e293b', acc: 'hat' },
+    { id: 'finance', name: 'Finance',      roleTag: 'AGENT', home: { x: 13.5, y: 4.5 },  color: '#f59e0b', skin: '#fde0c2', hairStyle: 'short', hair: '#1e1b18', shirt: '#d97706', pants: '#334155', acc: 'glasses' },
+    { id: 'profit',  name: 'Take Profit',  roleTag: 'AGENT', home: { x: 9.7,  y: 7.7 },  color: '#f97316', skin: '#fde0c2', hairStyle: 'spiky', hair: '#4a2c16', shirt: '#ea580c', pants: '#1e293b', acc: 'none' },
+    { id: 'captain', name: 'Captain',      roleTag: 'AGENT', home: { x: 13.5, y: 7.7 },  color: '#3b82f6', skin: '#fde0c2', hairStyle: 'short', hair: '#111827', shirt: '#2563eb', pants: '#1e293b', acc: 'none' },
+    { id: 'health',  name: 'Healthy',      roleTag: 'AGENT', home: { x: 3.1,  y: 10.1 }, color: '#ec4899', skin: '#fde0c2', hairStyle: 'long',  hair: '#4a2518', shirt: '#db2777', pants: '#334155', acc: 'headphones', sporty: true }
   ];
+  const AGENT_DEF = AGENT_DEFAULTS.map(def => Object.assign({}, def, savedAvatars[def.id] || {}));
 
   const WAYPOINTS = [
     { x: 11.6, y: 10.2, label: 'ประชุมวางแผนทีม 🗣️' },
@@ -459,8 +459,8 @@
     g.fillStyle = 'rgba(15, 23, 42, 0.24)';
     g.beginPath(); g.ellipse(cx, cy + 0.34 * u, 0.32 * u, 0.13 * u, 0, 0, Math.PI * 2); g.fill();
 
-    // Cute tiny legs
-    g.fillStyle = '#334155'; g.strokeStyle = INK; g.lineWidth = lw;
+    // Cute tiny legs (customizable pants color)
+    g.fillStyle = a.pants || '#334155'; g.strokeStyle = INK; g.lineWidth = lw;
     g.fillRect(cx - 0.17 * u, cy + 0.16 * u + legOff, 0.13 * u, 0.18 * u);
     g.strokeRect(cx - 0.17 * u, cy + 0.16 * u + legOff, 0.13 * u, 0.18 * u);
     g.fillRect(cx + 0.04 * u, cy + 0.16 * u - legOff, 0.13 * u, 0.18 * u);
@@ -475,32 +475,47 @@
 
     // Head
     const hy = cy - 0.36 * u;
-    if (a.robot) {
-      g.fillStyle = '#7c3aed'; g.strokeStyle = INK; g.lineWidth = lw;
+    const hStyle = a.hairStyle || (a.robot ? 'robot' : 'short');
+    const acc = a.acc || (a.crown ? 'crown' : a.helmet ? 'helmet' : a.hat ? 'hat' : a.glasses ? 'glasses' : 'none');
+
+    if (hStyle === 'robot') {
+      g.fillStyle = a.hair || '#7c3aed'; g.strokeStyle = INK; g.lineWidth = lw;
       g.beginPath(); g.roundRect(cx - 0.28 * u, hy - 0.24 * u, 0.56 * u, 0.48 * u, 0.1 * u); g.fill(); g.stroke();
-      // Antenna
       g.beginPath(); g.moveTo(cx, hy - 0.24 * u); g.lineTo(cx, hy - 0.38 * u); g.stroke();
       g.fillStyle = '#38bdf8'; g.beginPath(); g.arc(cx, hy - 0.4 * u, 0.08 * u, 0, Math.PI * 2); g.fill(); g.stroke();
-      // Visor screen + glowing eyes
       g.fillStyle = '#1e1b4b'; g.fillRect(cx - 0.2 * u, hy - 0.1 * u, 0.4 * u, 0.2 * u);
       g.fillStyle = '#38bdf8';
       g.fillRect(cx - 0.13 * u, hy - 0.04 * u, 0.09 * u, 0.09 * u);
       g.fillRect(cx + 0.04 * u, hy - 0.04 * u, 0.09 * u, 0.09 * u);
     } else {
-      g.fillStyle = '#fde0c2'; g.strokeStyle = INK; g.lineWidth = lw;
+      // Back hair for 'long' style
+      if (hStyle === 'long') {
+        g.fillStyle = a.hair || '#231710'; g.strokeStyle = INK; g.lineWidth = lw;
+        g.beginPath(); g.roundRect(cx - 0.31 * u, hy - 0.18 * u, 0.62 * u, 0.56 * u, 0.14 * u); g.fill(); g.stroke();
+      }
+      // Face
+      g.fillStyle = a.skin || '#fde0c2'; g.strokeStyle = INK; g.lineWidth = lw;
       g.beginPath(); g.arc(cx, hy, 0.28 * u, 0, Math.PI * 2); g.fill(); g.stroke();
 
       // Hair / Hat / Helmet cap
-      g.fillStyle = a.helmet || a.hat || a.hair || '#231710';
-      g.beginPath(); g.arc(cx, hy - 0.04 * u, 0.29 * u, Math.PI * 0.92, Math.PI * 2.08); g.closePath(); g.fill(); g.stroke();
-
-      // Crown for CEO
-      if (a.crown) {
-        g.fillStyle = '#facc15'; g.strokeStyle = INK; g.lineWidth = lw * 0.9;
+      const capColor = acc === 'helmet' ? '#facc15' : acc === 'hat' ? (a.shirt || '#22c55e') : (a.hair || '#231710');
+      g.fillStyle = capColor;
+      if (hStyle === 'spiky' && acc !== 'helmet' && acc !== 'hat') {
         g.beginPath();
-        g.moveTo(cx - 0.18 * u, hy - 0.26 * u); g.lineTo(cx - 0.12 * u, hy - 0.44 * u);
-        g.lineTo(cx, hy - 0.32 * u); g.lineTo(cx + 0.12 * u, hy - 0.44 * u);
-        g.lineTo(cx + 0.18 * u, hy - 0.26 * u); g.closePath(); g.fill(); g.stroke();
+        g.arc(cx, hy - 0.04 * u, 0.29 * u, Math.PI * 0.95, Math.PI * 2.05);
+        g.lineTo(cx + 0.22 * u, hy - 0.36 * u); g.lineTo(cx + 0.09 * u, hy - 0.28 * u);
+        g.lineTo(cx, hy - 0.42 * u); g.lineTo(cx - 0.09 * u, hy - 0.28 * u);
+        g.lineTo(cx - 0.22 * u, hy - 0.36 * u); g.closePath(); g.fill(); g.stroke();
+      } else {
+        g.beginPath(); g.arc(cx, hy - 0.04 * u, 0.29 * u, Math.PI * 0.92, Math.PI * 2.08); g.closePath(); g.fill(); g.stroke();
+        if (hStyle === 'bangs' && acc !== 'helmet' && acc !== 'hat') {
+          g.fillRect(cx - 0.22 * u, hy - 0.16 * u, 0.44 * u, 0.11 * u);
+        }
+      }
+      if (acc === 'hat') {
+        g.fillStyle = shade(capColor, -24);
+        g.fillRect(cx - 0.24 * u, hy - 0.14 * u, 0.48 * u, 0.08 * u);
+        g.strokeRect(cx - 0.24 * u, hy - 0.14 * u, 0.48 * u, 0.08 * u);
       }
 
       // Expressive pixel eyes + white sparkle + rosy cheeks
@@ -514,15 +529,28 @@
       g.fillRect(cx - 0.19 * u, hy + 0.07 * u, 0.07 * u, 0.04 * u);
       g.fillRect(cx + 0.12 * u, hy + 0.07 * u, 0.07 * u, 0.04 * u);
 
-      if (a.helmet) {
+      // Accessories
+      if (acc === 'crown') {
+        g.fillStyle = '#facc15'; g.strokeStyle = INK; g.lineWidth = lw * 0.9;
+        g.beginPath();
+        g.moveTo(cx - 0.18 * u, hy - 0.26 * u); g.lineTo(cx - 0.12 * u, hy - 0.44 * u);
+        g.lineTo(cx, hy - 0.32 * u); g.lineTo(cx + 0.12 * u, hy - 0.44 * u);
+        g.lineTo(cx + 0.18 * u, hy - 0.26 * u); g.closePath(); g.fill(); g.stroke();
+      } else if (acc === 'helmet') {
         g.fillStyle = 'rgba(56, 189, 248, 0.78)';
         g.fillRect(cx - 0.19 * u, hy - 0.06 * u, 0.38 * u, 0.11 * u);
         g.strokeRect(cx - 0.19 * u, hy - 0.06 * u, 0.38 * u, 0.11 * u);
-      } else if (a.glasses) {
+      } else if (acc === 'glasses') {
         g.strokeStyle = INK; g.lineWidth = lw * 0.9;
         g.strokeRect(cx - 0.17 * u, hy - 0.04 * u, 0.14 * u, 0.12 * u);
         g.strokeRect(cx + 0.03 * u, hy - 0.04 * u, 0.14 * u, 0.12 * u);
         g.beginPath(); g.moveTo(cx - 0.03 * u, hy + 0.01 * u); g.lineTo(cx + 0.03 * u, hy + 0.01 * u); g.stroke();
+      } else if (acc === 'headphones') {
+        g.strokeStyle = '#38bdf8'; g.lineWidth = lw * 1.4;
+        g.beginPath(); g.arc(cx, hy - 0.02 * u, 0.32 * u, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
+        g.fillStyle = '#1e293b'; g.strokeStyle = INK; g.lineWidth = lw * 0.9;
+        g.fillRect(cx - 0.35 * u, hy - 0.06 * u, 0.09 * u, 0.18 * u); g.strokeRect(cx - 0.35 * u, hy - 0.06 * u, 0.09 * u, 0.18 * u);
+        g.fillRect(cx + 0.26 * u, hy - 0.06 * u, 0.09 * u, 0.18 * u); g.strokeRect(cx + 0.26 * u, hy - 0.06 * u, 0.09 * u, 0.18 * u);
       }
     }
   }
@@ -1136,9 +1164,83 @@
       zBody.appendChild(form);
       zBody.scrollTop = zBody.scrollHeight;
     } else if (activeZTab === 'avatar') {
-      zTitle.textContent = '🎭 ปรับแต่งอวาตาร์ CEO';
-      const ceo = agents[0];
-      const mkSec = (lbl, items, curVal, onPick) => {
+      zTitle.textContent = '🎭 ปรับแต่งอวาตาร์ (Zyra Studio)';
+      if (!window._avEditId) window._avEditId = 'ceo';
+      const target = agents.find(x => x.id === window._avEditId) || agents[0];
+
+      // 1) Character selector
+      const selBox = document.createElement('div'); selBox.className = 'zyra-tcard';
+      const selRow = document.createElement('div'); selRow.className = 'zyra-av-row';
+      agents.forEach(ag => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'zyra-av-opt' + (ag.id === target.id ? ' on' : '');
+        b.textContent = ag.name;
+        b.onclick = () => { window._avEditId = ag.id; renderZyraDrawer(); };
+        selRow.appendChild(b);
+      });
+      selBox.appendChild(selRow);
+      zBody.appendChild(selBox);
+
+      // 2) Live Chibi Preview + Randomize / Reset
+      delete avatarCache[target.id];
+      const prevCard = document.createElement('div'); prevCard.className = 'zyra-av-prev';
+      const prevImg = document.createElement('img');
+      prevImg.src = renderAgentAvatar(target.id);
+      prevImg.alt = target.name;
+      const prevBtns = document.createElement('div'); prevBtns.className = 'zyra-av-pbtns';
+      const lblName = document.createElement('strong'); lblName.textContent = target.name;
+      const rndBtn = document.createElement('button'); rndBtn.type = 'button'; rndBtn.className = 'zyra-av-opt'; rndBtn.textContent = '🎲 สุ่มลุค';
+      const rstBtn = document.createElement('button'); rstBtn.type = 'button'; rstBtn.className = 'zyra-av-opt'; rstBtn.textContent = '↩️ ค่าเริ่มต้น';
+      const applyProp = patch => {
+        Object.assign(target, patch);
+        savedAvatars[target.id] = {
+          skin: target.skin, hairStyle: target.hairStyle, hair: target.hair,
+          shirt: target.shirt, pants: target.pants, acc: target.acc
+        };
+        saveAvatars();
+        delete avatarCache[target.id];
+        renderZyraDrawer();
+      };
+      const SKINS = ['#fde0c2', '#f5cba7', '#e5b288', '#c68642', '#8d5524'];
+      const HAIRS = ['#231710', '#5c3a21', '#a67346', '#eab308', '#991b1b', '#94a3b8'];
+      const SHIRTS = ['#334155', '#2563eb', '#16a34a', '#ea580c', '#7c3aed', '#db2777', '#dc2626', '#f8fafc'];
+      const PANTS = ['#1e293b', '#0f172a', '#78350f', '#1d4ed8'];
+      const HSTYLES = [['short', 'สั้น'], ['bangs', 'ผมม้า'], ['spiky', 'ผมตั้ง'], ['long', 'ผมยาว'], ['robot', '🤖 หุ่นยนต์']];
+      const ACCS = [['crown', '👑 มงกุฎ'], ['glasses', '🕶️ แว่น'], ['hat', '🧢 หมวก'], ['helmet', '🪖 นิรภัย'], ['headphones', '🎧 หูฟัง'], ['none', '✨ ไม่มี']];
+      const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+      rndBtn.onclick = () => applyProp({
+        skin: pick(SKINS), hairStyle: pick(HSTYLES)[0], hair: pick(HAIRS),
+        shirt: pick(SHIRTS), pants: pick(PANTS), acc: pick(ACCS)[0]
+      });
+      rstBtn.onclick = () => {
+        const def = AGENT_DEFAULTS.find(x => x.id === target.id);
+        if (!def) return;
+        delete savedAvatars[target.id];
+        saveAvatars();
+        Object.assign(target, { skin: def.skin, hairStyle: def.hairStyle, hair: def.hair, shirt: def.shirt, pants: def.pants, acc: def.acc });
+        delete avatarCache[target.id];
+        renderZyraDrawer();
+      };
+      prevBtns.appendChild(lblName); prevBtns.appendChild(rndBtn); prevBtns.appendChild(rstBtn);
+      prevCard.appendChild(prevImg); prevCard.appendChild(prevBtns);
+      zBody.appendChild(prevCard);
+
+      const mkSwatches = (lbl, cols, curVal, key) => {
+        const box = document.createElement('div'); box.className = 'zyra-tcard';
+        const h = document.createElement('small'); h.textContent = lbl; box.appendChild(h);
+        const row = document.createElement('div'); row.className = 'mo-swatches';
+        cols.forEach(hex => {
+          const sw = document.createElement('button');
+          sw.type = 'button';
+          sw.className = 'mo-sw' + (curVal === hex ? ' on' : '');
+          sw.style.background = hex;
+          sw.onclick = () => applyProp({ [key]: hex });
+          row.appendChild(sw);
+        });
+        box.appendChild(row); zBody.appendChild(box);
+      };
+      const mkChips = (lbl, items, curVal, key) => {
         const box = document.createElement('div'); box.className = 'zyra-tcard';
         const h = document.createElement('small'); h.textContent = lbl; box.appendChild(h);
         const row = document.createElement('div'); row.className = 'zyra-av-row';
@@ -1147,22 +1249,18 @@
           b.type = 'button';
           b.className = 'zyra-av-opt' + (curVal === val ? ' on' : '');
           b.textContent = text;
-          b.onclick = () => {
-            onPick(val);
-            try { localStorage.setItem(CEO_AV_KEY, JSON.stringify(ceoCustom)); } catch (e) {}
-            delete avatarCache.ceo;
-            renderZyraDrawer();
-          };
+          b.onclick = () => applyProp({ [key]: val });
           row.appendChild(b);
         });
         box.appendChild(row); zBody.appendChild(box);
       };
-      mkSec('สีสูทผู้บริหาร', [['#334155', '🖤 ดำกรม'], ['#2563eb', '💙 น้ำเงิน'], ['#16a34a', '💚 เขียว'], ['#7c3aed', '💜 ม่วง'], ['#dc2626', '❤️ แดง']], ceoCustom.shirt, v => { ceoCustom.shirt = v; if (ceo) ceo.shirt = v; });
-      mkSec('เครื่องประดับศีรษะ', [['crown', '👑 มงกุฎ'], ['glasses', '🕶️ แว่นตา'], ['hat', '🧢 หมวก'], ['none', '✨ ปกติ']], ceoCustom.acc, v => {
-        ceoCustom.acc = v;
-        if (ceo) { ceo.crown = v === 'crown'; ceo.glasses = v === 'glasses'; ceo.hat = v === 'hat' ? '#f97316' : ''; }
-      });
-      mkSec('สีผม', [['#231710', 'ดำ'], ['#6b4226', 'น้ำตาล'], ['#eab308', 'ทอง'], ['#94a3b8', 'เทาเงิน']], ceoCustom.hair, v => { ceoCustom.hair = v; if (ceo) ceo.hair = v; });
+
+      mkChips('ทรงผม', HSTYLES, target.hairStyle || 'short', 'hairStyle');
+      mkChips('เครื่องประดับ', ACCS, target.acc || 'none', 'acc');
+      mkSwatches('สีผิว', SKINS, target.skin || '#fde0c2', 'skin');
+      mkSwatches('สีผม / สีหัวหุ่นยนต์', HAIRS, target.hair || '#231710', 'hair');
+      mkSwatches('สีเสื้อ / สูท', SHIRTS, target.shirt || '#334155', 'shirt');
+      mkSwatches('สีกางเกง', PANTS, target.pants || '#1e293b', 'pants');
     }
   }
   if (zRail) zRail.querySelectorAll('.zyra-rbtn').forEach(b => { b.onclick = () => setZTab(b.dataset.ztab === activeZTab && b.dataset.ztab !== 'map' ? 'map' : b.dataset.ztab); });
