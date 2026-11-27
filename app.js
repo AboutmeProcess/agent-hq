@@ -37,7 +37,8 @@ let o = `<image href="${BG}" x="0" y="0" width="1312" height="816"/>`;
 
 S.slice().sort((a, b) => POS[a.id][1] - POS[b.id][1]).forEach((s, i) => {
   const [x, y] = POS[s.id];
-  const im = IMG[s.id];
+  const av3d = typeof window.getOfficeAvatar === 'function' ? window.getOfficeAvatar(s.id) : '';
+  const im = av3d ? { u: av3d, w: 160, h: 200 } : IMG[s.id];
   const c = s.c;
   const H = im ? (SC[s.id] || 104) : 110;
   let g = `<g class="st" tabindex="0" role="button" aria-label="${s.n}: ${s.role}" data-id="${s.id}"><g id="mv-${s.id}">`;
@@ -48,7 +49,7 @@ S.slice().sort((a, b) => POS[a.id][1] - POS[b.id][1]).forEach((s, i) => {
     const k = H / im.h;
     const w = im.w * k;
     g += `<image id="im-${s.id}" href="${im.u}" x="${x - w / 2}" y="${y - H}" width="${w}" height="${H}"/>`;
-    if (WK[s.id]) {
+    if (!av3d && WK[s.id]) {
       const q = WK[s.id];
       g += `<image id="wk-${s.id}" display="none" href="${q.f[0]}" x="${x - q.w / 2}" y="${y - q.h}" width="${q.w}" height="${q.h}"/>`;
     }
@@ -1695,11 +1696,12 @@ function openAgent(id) {
   sh.textContent = '';
   sh.style.setProperty('--c', s.c);
   const hd = E('div', 'ahead');
-  const im = IMG[id];
+  const av3d = typeof window.getOfficeAvatar === 'function' ? window.getOfficeAvatar(id) : '';
+  const im = av3d ? { u: av3d } : IMG[id];
   if (im) {
     const i = E('img', 'aimg');
     i.src = im.u;
-    i.alt = '';
+    i.alt = s.n;
     hd.appendChild(i);
   } else {
     hd.appendChild(E('div', 'aimg q', '?'));
