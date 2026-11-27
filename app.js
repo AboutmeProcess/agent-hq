@@ -1685,7 +1685,7 @@ try {
       }
     });
   }, { rootMargin: '-25% 0px -60% 0px', threshold: 0.01 });
-  ['s-sum', 's-office', 's-flights', 's-money', 's-agents', 's-log'].forEach(id => {
+  ['s-office', 's-flights', 's-money', 's-agents', 's-log'].forEach(id => {
     const s = $(id);
     if (s) secObs.observe(s);
   });
@@ -1926,6 +1926,15 @@ $$('.mo-fbtn').forEach(b => {
     applyMoListFilter();
   };
 });
+
+// Toggle Integrated Summary Band inside Office HQ
+if ($('moSumBtn') && $('moSumBand')) {
+  $('moSumBtn').onclick = () => {
+    const hidden = !$('moSumBand').hidden;
+    $('moSumBand').hidden = hidden;
+    $('moSumBtn').setAttribute('aria-pressed', hidden ? 'false' : 'true');
+  };
+}
 
 // Toggle Right Activity Feed & Fullscreen
 if ($('moFeedBtn') && $('moBody')) {

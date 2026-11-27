@@ -568,6 +568,28 @@ main { max-width: 1120px; margin: 0 auto; padding: 4px 14px 48px; }
 .mo-ibtn:hover { background: #1f2937; border-color: rgba(249, 115, 22, .6); color: #fff; }
 .mo-ibtn[aria-pressed="true"] { border-color: #f97316; color: #fdba74; }
 
+/* Integrated Summary Band inside AboutMeProcess Office Shell */
+.mo-sum-band {
+  padding: 14px;
+  background: linear-gradient(180deg, #0f1626, #0b0f17);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.mo-sum-band[hidden] { display: none !important; }
+.mo-sum-band .hero {
+  background: linear-gradient(160deg, #17233f, #0f172a);
+  border-color: rgba(255, 255, 255, .1);
+  padding: 16px 14px;
+}
+.mo-sum-band .kpi {
+  background: #161b26;
+  border-color: rgba(255, 255, 255, .09);
+}
+.mo-sum-band .kpi:hover { border-color: #f97316; }
+.mo-sum-band .detail {
+  background: #111827;
+  border-color: #f97316;
+}
+
 .mo-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
