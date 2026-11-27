@@ -119,6 +119,23 @@
         <div class="mo-body" id="moBody">
           <!-- Center Office Viewport -->
           <div class="mo-stage" id="moStage">
+            <!-- Zyra-style Left Vertical Icon Rail -->
+            <nav class="zyra-rail" id="zyraRail" aria-label="แถบเครื่องมือออฟฟิศเสมือน">
+              <button type="button" class="zyra-rbtn on" data-ztab="map" title="แผนที่ออฟฟิศ"><span>🗺️</span><small>แผนที่</small></button>
+              <button type="button" class="zyra-rbtn" data-ztab="team" title="ทีม &amp; บทบาท"><span>👥</span><small>ทีม</small></button>
+              <button type="button" class="zyra-rbtn" data-ztab="chat" title="แชทในออฟฟิศ"><span>💬</span><small>แชท</small><i class="zyra-badge" id="zyraChatBadge" hidden>1</i></button>
+              <button type="button" class="zyra-rbtn" data-ztab="avatar" title="ปรับแต่งอวาตาร์ CEO"><span>🎭</span><small>อวาตาร์</small></button>
+            </nav>
+
+            <!-- Zyra-style Floating Drawer (Team / Office Chat / CEO Avatar) -->
+            <div class="zyra-drawer" id="zyraDrawer" hidden>
+              <div class="zyra-dh">
+                <strong id="zyraDrawerTitle">👥 ทีมในออฟฟิศ</strong>
+                <button type="button" class="mo-ibtn" id="zyraDrawerClose" aria-label="ปิดหน้าต่าง">✕</button>
+              </div>
+              <div class="zyra-dbody" id="zyraDrawerBody"></div>
+            </div>
+
             <!-- Floating Top Agent Strip -->
             <div class="mo-strip" id="moStrip" aria-label="สถานะเอเจนต์ในออฟฟิศ"></div>
 
@@ -128,6 +145,9 @@
               <div class="mo3-overlay" id="moOverlay"></div>
               <svg id="scene" viewBox="0 0 1312 816" hidden aria-hidden="true"></svg>
             </div>
+
+            <!-- Proximity Chat Bar (pops up when CEO walks near an Agent) -->
+            <div class="zyra-prox" id="zyraProxBar" hidden></div>
 
             <!-- 2D List Fallback View -->
             <div class="mo-list-view" id="moListView" hidden>

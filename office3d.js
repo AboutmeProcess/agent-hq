@@ -154,17 +154,24 @@
     { x: 16.5, y: 1.4, speed: 1.65, color: '#f97316', accent: '#fed7aa' }
   ];
 
-  // 9 Characters: CEO + 8 Agents
+  // 9 Characters: CEO (OWNER) + LINE/Script (ADMIN) + 6 Agents (AGENT)
+  const CEO_AV_KEY = 'hq_ceo_avatar_v1';
+  let ceoCustom = { shirt: '#1e293b', hair: '#18181b', acc: 'crown' };
+  try {
+    const savedCeo = JSON.parse(localStorage.getItem(CEO_AV_KEY) || 'null');
+    if (savedCeo && savedCeo.shirt) ceoCustom = savedCeo;
+  } catch (e) {}
+
   const AGENT_DEF = [
-    { id: 'ceo', name: '👑 CEO', home: { x: 19.5, y: 6.1 }, color: '#ffd166', shirt: '#1e293b', hair: '#18181b', crown: true, stay: true },
-    { id: 'tg', name: 'LINE OA', home: { x: 19.5, y: 12.1 }, color: '#06c755', shirt: '#059669', hair: '#1f2937', stay: true },
-    { id: 'solar', name: 'Solar', home: { x: 4.0, y: 6.6 }, color: '#eab308', shirt: '#1e3a5f', hair: '#eab308', helmet: '#facc15' },
-    { id: 'script', name: 'App Script', home: { x: 6.2, y: 7.4 }, color: '#a855f7', shirt: '#5b21b6', hair: '#a855f7', robot: true },
-    { id: 'driver', name: 'Driver', home: { x: 9.5, y: 7.4 }, color: '#22c55e', shirt: '#15803d', hair: '#231710', hat: '#22c55e' },
-    { id: 'finance', name: 'Finance', home: { x: 13.5, y: 7.4 }, color: '#f59e0b', shirt: '#b45309', hair: '#1e1b18', glasses: true },
-    { id: 'profit', name: 'Take Profit', home: { x: 9.5, y: 11.8 }, color: '#f97316', shirt: '#c2410c', hair: '#3b2412' },
-    { id: 'captain', name: 'Captain', home: { x: 13.5, y: 11.8 }, color: '#3b82f6', shirt: '#1d4ed8', hair: '#111827' },
-    { id: 'health', name: 'Healthy', home: { x: 4.9, y: 14.3 }, color: '#ec4899', shirt: '#be185d', hair: '#3f2318', sporty: true }
+    { id: 'ceo', name: '👑 CEO', roleTag: 'OWNER', home: { x: 19.5, y: 6.1 }, color: '#ffd166', shirt: ceoCustom.shirt, hair: ceoCustom.hair, crown: ceoCustom.acc === 'crown', glasses: ceoCustom.acc === 'glasses', hat: ceoCustom.acc === 'hat' ? '#f97316' : '', stay: true },
+    { id: 'tg', name: 'LINE OA', roleTag: 'ADMIN', home: { x: 19.5, y: 12.1 }, color: '#06c755', shirt: '#059669', hair: '#1f2937', stay: true },
+    { id: 'solar', name: 'Solar', roleTag: 'AGENT', home: { x: 4.0, y: 6.6 }, color: '#eab308', shirt: '#1e3a5f', hair: '#eab308', helmet: '#facc15' },
+    { id: 'script', name: 'App Script', roleTag: 'ADMIN', home: { x: 6.2, y: 7.4 }, color: '#a855f7', shirt: '#5b21b6', hair: '#a855f7', robot: true },
+    { id: 'driver', name: 'Driver', roleTag: 'AGENT', home: { x: 9.5, y: 7.4 }, color: '#22c55e', shirt: '#15803d', hair: '#231710', hat: '#22c55e' },
+    { id: 'finance', name: 'Finance', roleTag: 'AGENT', home: { x: 13.5, y: 7.4 }, color: '#f59e0b', shirt: '#b45309', hair: '#1e1b18', glasses: true },
+    { id: 'profit', name: 'Take Profit', roleTag: 'AGENT', home: { x: 9.5, y: 11.8 }, color: '#f97316', shirt: '#c2410c', hair: '#3b2412' },
+    { id: 'captain', name: 'Captain', roleTag: 'AGENT', home: { x: 13.5, y: 11.8 }, color: '#3b82f6', shirt: '#1d4ed8', hair: '#111827' },
+    { id: 'health', name: 'Healthy', roleTag: 'AGENT', home: { x: 4.9, y: 14.3 }, color: '#ec4899', shirt: '#be185d', hair: '#3f2318', sporty: true }
   ];
 
   const WAYPOINTS = [
@@ -190,7 +197,7 @@
       np.type = 'button';
       np.className = 'mo3-np';
       np.style.setProperty('--c', a.color);
-      np.innerHTML = '<i></i><span>' + a.name + '</span>';
+      np.innerHTML = '<i></i><span>' + a.name + '</span><span class="zyra-np-role">' + (a.roleTag || 'AGENT') + '</span>';
       np.onclick = ev => {
         ev.stopPropagation();
         if (buildMode) return;
@@ -525,7 +532,23 @@
     const batt = (window.LASTD && window.LASTD.solar && window.LASTD.solar.battery) || 19;
     ctx.fillText(batt + '%', mp.x, mp.y);
 
-    // 3) Depth-sorted Furniture + Partitions + Characters
+    // 3) Depth-sorted Furniture + Partitions + Characters + Zyra Proximity Ring
+    if (!buildMode && ceoTarget) {
+      const tp = iso(ceoTarget.x, ceoTarget.y, 0.03);
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.75)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(tp.x, tp.y, 12 * s, 6 * s, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (!buildMode && proxAgent) {
+      const ceo = agents[0];
+      const p1 = iso(ceo.x, ceo.y, 0.05), p2 = iso(proxAgent.x, proxAgent.y, 0.05);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(74, 222, 128, 0.72)'; ctx.lineWidth = 2.5;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.ellipse(p2.x, p2.y, 20 * s, 10 * s, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
     const drawables = [];
     layout.items.forEach(it => {
       const dm = itemDims(it);
@@ -552,6 +575,60 @@
   }
 
   let lastTs = 0;
+  let ceoTarget = null;
+  let proxAgent = null;
+  let lastProxId = null;
+  const officeChatMsgs = [
+    { who: 'LINE OA', color: '#06c755', text: 'ระบบออฟฟิศเสมือนพร้อมใช้งาน — คลิกพื้นหรือกด WASD เพื่อเดินคุยกับเอเจนต์ได้เลย!' }
+  ];
+
+  function addOfficeChat(who, color, text) {
+    officeChatMsgs.push({ who, color, text });
+    if (officeChatMsgs.length > 30) officeChatMsgs.shift();
+    if (activeZTab === 'chat') renderZyraDrawer();
+    else {
+      const b = document.getElementById('zyraChatBadge');
+      if (b) b.hidden = false;
+    }
+  }
+
+  function walkCeoTo(gx, gy) {
+    const pos = clampToRoom(gx, gy, 0.6, 0.6);
+    ceoTarget = { x: pos.x, y: pos.y };
+  }
+
+  function updateProximity(now) {
+    const ceo = agents[0];
+    if (!ceo || buildMode) { proxAgent = null; return; }
+    let nearest = null, minD = 2.35;
+    for (let i = 1; i < agents.length; i++) {
+      const d = Math.hypot(ceo.x - agents[i].x, ceo.y - agents[i].y);
+      if (d < minD) { minD = d; nearest = agents[i]; }
+    }
+    proxAgent = nearest;
+    const bar = document.getElementById('zyraProxBar');
+    if (nearest && nearest.id !== lastProxId) {
+      lastProxId = nearest.id;
+      const msg = nearest.statusText || 'พร้อมรับคำสั่งครับ CEO!';
+      nearest.bubbleText = '💬 ' + msg;
+      nearest.bubbleUntil = now + 4.5;
+      addOfficeChat(nearest.name, nearest.color, 'เดินเข้ามาคุย: ' + msg);
+    } else if (!nearest) {
+      lastProxId = null;
+    }
+    if (bar) {
+      if (nearest && !buildMode) {
+        bar.hidden = false;
+        bar.innerHTML = '<span>🟢 ใกล้ <b>' + nearest.name + '</b> · ' + (nearest.statusText || 'พร้อมทำงาน') + '</span>' +
+          '<button type="button" id="zyraProxTalk">💬 คุย/สั่งงาน</button>';
+        const btn = document.getElementById('zyraProxTalk');
+        if (btn) btn.onclick = () => { if (typeof window.openAgent === 'function') window.openAgent(nearest.id); };
+      } else {
+        bar.hidden = true;
+      }
+    }
+  }
+
   function frame(ts) {
     const now = ts / 1000, dt = Math.min(0.08, now - lastTs || 0.016);
     lastTs = now;
@@ -559,8 +636,16 @@
 
     if (!paused && !buildMode) {
       vehicles.forEach(v => { v.x += v.speed * dt; if (v.x > 24.5) v.x = -1.8; });
+      // CEO direct WASD / click-to-walk movement
+      const ceo = agents[0];
+      if (ceo && ceoTarget) {
+        const dx = ceoTarget.x - ceo.x, dy = ceoTarget.y - ceo.y, d = Math.hypot(dx, dy), st = 2.9 * dt;
+        if (d <= st) { ceo.x = ceoTarget.x; ceo.y = ceoTarget.y; ceo.state = 'work'; ceoTarget = null; }
+        else { ceo.x += (dx / d) * st; ceo.y += (dy / d) * st; ceo.state = 'walk'; }
+      }
       const walkingCount = agents.filter(a => a.state === 'walk' || a.state === 'back').length;
       agents.forEach(a => {
+        if (a.id === 'ceo') return;
         if (a.state === 'work') {
           if (now > a.timer) {
             if (walkingCount < 2 && Math.random() < 0.42 && !a.stay) {
@@ -581,6 +666,7 @@
           } else { a.x += (dx / dist) * step; a.y += (dy / dist) * step; }
         } else if (a.state === 'chat' && now > a.timer) { a.state = 'back'; }
       });
+      updateProximity(now);
     }
 
     drawScene(now);
@@ -709,13 +795,15 @@
         } else if (typeof window.openAgent === 'function') window.openAgent(hit.id);
         return;
       }
-      // Clickable lamps in Live Mode
+      // Clickable lamps in Live Mode, otherwise walk CEO to clicked floor tile
       const g = screenToGrid(p.x, p.y);
       const lhit = findItemAtGrid(g.x, g.y);
       if (lhit && lhit.type === 'lamp') {
         lhit.on = lhit.on === false ? true : false;
         saveLayout();
         if (typeof window.showMoToast === 'function') window.showMoToast(lhit.on ? '💡 เปิดโคมไฟแล้ว' : '🌑 ปิดโคมไฟแล้ว');
+      } else if (g.x >= 2.0 && g.x <= 22.4 && g.y >= 3.4 && g.y <= 17.4) {
+        walkCeoTo(g.x, g.y);
       }
     }
   });
@@ -890,10 +978,174 @@
   };
 
   document.addEventListener('keydown', ev => {
-    if (!buildMode || !selectedId || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName)) return;
-    if (ev.key === 'r' || ev.key === 'R') { ev.preventDefault(); if (rotBtn) rotBtn.click(); }
-    if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); if (delBtn) delBtn.click(); }
+    if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName)) return;
+    if (buildMode && selectedId) {
+      if (ev.key === 'r' || ev.key === 'R') { ev.preventDefault(); if (rotBtn) rotBtn.click(); }
+      if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); if (delBtn) delBtn.click(); }
+      return;
+    }
+    if (!buildMode && !paused) {
+      const ceo = agents[0];
+      if (!ceo) return;
+      const step = 0.85;
+      if (ev.key === 'w' || ev.key === 'W' || ev.key === 'ArrowUp') { ev.preventDefault(); walkCeoTo(ceo.x, ceo.y - step); }
+      else if (ev.key === 's' || ev.key === 'S' || ev.key === 'ArrowDown') { ev.preventDefault(); walkCeoTo(ceo.x, ceo.y + step); }
+      else if (ev.key === 'a' || ev.key === 'A' || ev.key === 'ArrowLeft') { ev.preventDefault(); walkCeoTo(ceo.x - step, ceo.y); }
+      else if (ev.key === 'd' || ev.key === 'D' || ev.key === 'ArrowRight') { ev.preventDefault(); walkCeoTo(ceo.x + step, ceo.y); }
+    }
   });
+
+  // ---- Zyra-style Left Vertical Icon Rail & Floating Drawer (Team / Office Chat / CEO Avatar) ----
+  let activeZTab = 'map';
+  const zRail = document.getElementById('zyraRail');
+  const zDrawer = document.getElementById('zyraDrawer');
+  const zTitle = document.getElementById('zyraDrawerTitle');
+  const zBody = document.getElementById('zyraDrawerBody');
+  const zClose = document.getElementById('zyraDrawerClose');
+
+  function setZTab(tab) {
+    activeZTab = tab;
+    if (zRail) zRail.querySelectorAll('.zyra-rbtn').forEach(b => b.classList.toggle('on', b.dataset.ztab === tab));
+    if (!zDrawer) return;
+    if (tab === 'map') { zDrawer.hidden = true; return; }
+    zDrawer.hidden = false;
+    if (tab === 'chat') {
+      const b = document.getElementById('zyraChatBadge');
+      if (b) b.hidden = true;
+    }
+    renderZyraDrawer();
+  }
+
+  function renderZyraDrawer() {
+    if (!zBody || !zTitle) return;
+    zBody.textContent = '';
+    if (activeZTab === 'team') {
+      zTitle.textContent = '👥 ทีม & บทบาทในออฟฟิศ';
+      agents.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'zyra-tcard';
+        const roleCls = (a.roleTag || 'AGENT').toLowerCase();
+        card.innerHTML =
+          '<div class="zyra-tcard-h" style="--c:' + a.color + '">' +
+            '<i class="zyra-dot"></i><strong>' + a.name + '</strong>' +
+            '<span class="zyra-role ' + roleCls + '">' + (a.roleTag || 'AGENT') + '</span>' +
+          '</div>' +
+          '<small>' + (a.statusText || 'พร้อมทำงาน') + '</small>';
+        const acts = document.createElement('div');
+        acts.className = 'zyra-tacts';
+        if (a.id !== 'ceo') {
+          const walkBtn = document.createElement('button');
+          walkBtn.type = 'button';
+          walkBtn.textContent = '🚶 เดินไปหา';
+          walkBtn.onclick = () => {
+            walkCeoTo(a.x - 1.1, a.y + 0.4);
+            focusAgent(a.id);
+            setZTab('map');
+          };
+          acts.appendChild(walkBtn);
+        }
+        const infoBtn = document.createElement('button');
+        infoBtn.type = 'button';
+        infoBtn.textContent = a.id === 'ceo' ? '🎭 แต่งอวาตาร์' : '📋 สั่งงาน';
+        infoBtn.onclick = () => {
+          if (a.id === 'ceo') setZTab('avatar');
+          else if (typeof window.openAgent === 'function') window.openAgent(a.id);
+        };
+        acts.appendChild(infoBtn);
+        card.appendChild(acts);
+        zBody.appendChild(card);
+      });
+    } else if (activeZTab === 'chat') {
+      zTitle.textContent = '💬 แชทในออฟฟิศ (Always-Open)';
+      const log = document.createElement('div');
+      log.className = 'zyra-chat-log';
+      officeChatMsgs.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'zyra-msg';
+        item.style.setProperty('--c', m.color || '#22c55e');
+        const b = document.createElement('b');
+        b.textContent = m.who;
+        const t = document.createElement('span');
+        t.textContent = m.text;
+        item.appendChild(b);
+        item.appendChild(t);
+        log.appendChild(item);
+      });
+      zBody.appendChild(log);
+      const form = document.createElement('form');
+      form.className = 'zyra-chat-form';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'พิมพ์คำสั่ง (เช่น /brief, /ledger, /solar)...';
+      const btn = document.createElement('button');
+      btn.type = 'submit';
+      btn.textContent = 'ส่ง';
+      form.onsubmit = async ev => {
+        ev.preventDefault();
+        const v = inp.value.trim();
+        if (!v) return;
+        addOfficeChat('👑 CEO', '#ffd166', v);
+        inp.value = '';
+        if (typeof window.sendCmd === 'function') {
+          const dummy = document.createElement('div');
+          await window.sendCmd(v, { out: dummy });
+          const reply = (dummy.textContent || '').trim();
+          if (reply) addOfficeChat('LINE OA', '#06c755', reply.slice(0, 220));
+        }
+      };
+      form.appendChild(inp);
+      form.appendChild(btn);
+      zBody.appendChild(form);
+      zBody.scrollTop = zBody.scrollHeight;
+    } else if (activeZTab === 'avatar') {
+      zTitle.textContent = '🎭 ปรับแต่งอวาตาร์ CEO';
+      const ceo = agents[0];
+      const mkSec = (lbl, items, curVal, onPick) => {
+        const box = document.createElement('div');
+        box.className = 'zyra-tcard';
+        const h = document.createElement('small');
+        h.textContent = lbl;
+        box.appendChild(h);
+        const row = document.createElement('div');
+        row.className = 'zyra-av-row';
+        items.forEach(([val, text]) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'zyra-av-opt' + (curVal === val ? ' on' : '');
+          b.textContent = text;
+          b.onclick = () => {
+            onPick(val);
+            try { localStorage.setItem(CEO_AV_KEY, JSON.stringify(ceoCustom)); } catch (e) {}
+            delete avatarCache.ceo;
+            renderZyraDrawer();
+          };
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+        zBody.appendChild(box);
+      };
+      mkSec('สีสูทผู้บริหาร', [
+        ['#1e293b', '🖤 ดำกรม'], ['#1d4ed8', '💙 น้ำเงิน'], ['#15803d', '💚 เขียว'],
+        ['#7c3aed', '💜 ม่วง'], ['#b91c1c', '❤️ แดง']
+      ], ceoCustom.shirt, v => { ceoCustom.shirt = v; if (ceo) ceo.shirt = v; });
+      mkSec('เครื่องประดับศีรษะ', [
+        ['crown', '👑 มงกุฎ'], ['glasses', '🕶️ แว่นตา'], ['hat', '🧢 หมวก'], ['none', '✨ ปกติ']
+      ], ceoCustom.acc, v => {
+        ceoCustom.acc = v;
+        if (ceo) { ceo.crown = v === 'crown'; ceo.glasses = v === 'glasses'; ceo.hat = v === 'hat' ? '#f97316' : ''; }
+      });
+      mkSec('สีผม', [
+        ['#18181b', 'ดำ'], ['#5b3719', 'น้ำตาล'], ['#eab308', 'ทอง'], ['#94a3b8', 'เทาเงิน']
+      ], ceoCustom.hair, v => { ceoCustom.hair = v; if (ceo) ceo.hair = v; });
+    }
+  }
+
+  if (zRail) {
+    zRail.querySelectorAll('.zyra-rbtn').forEach(b => {
+      b.onclick = () => setZTab(b.dataset.ztab === activeZTab && b.dataset.ztab !== 'map' ? 'map' : b.dataset.ztab);
+    });
+  }
+  if (zClose) zClose.onclick = () => setZTab('map');
 
   function updateZoomLabel() {
     const zv = document.getElementById('moZoomVal');

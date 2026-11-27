@@ -1996,6 +1996,7 @@ if (moLitBtn && moShell) {
   };
 }
 window.openAgent = openAgent;
+window.sendCmd = sendCmd;
 window.showMoToast = showMoToast;
 
 // 3D Office / 2D List View Switcher
