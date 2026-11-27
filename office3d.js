@@ -1,10 +1,11 @@
 /**
- * office3d.js — The Sims-style Interactive 3D Isometric Cutaway Office Designer for AboutMeProcess HQ
+ * office3d.js — Classic Zyra-World Style 2.5D Top-Down Pixel-Art Virtual Office for AboutMeProcess HQ
  * Features:
- * - Full Build Mode (🛠️ แต่งออฟฟิศ): Drag & Drop furniture & 4 partition types onto the 3D isometric grid
- * - Move (drag), Rotate 90° (↻ / R key), Recolor (color swatches), Duplicate, Delete (Del), Reset
- * - Customizable Floor & Wall colors/materials, auto-saved to localStorage
- * - Separate Server & Solar Room, CEO Executive Office (with 👑 CEO), LINE OA Hub Room, Open Desk Bay
+ * - Classic 2.5D top-down pixel-art floor plan (warm tiles, corkboards, posters, glass partitions, dark outlines)
+ * - Full Build Mode (🛠️ แต่งออฟฟิศ): Drag & Drop 11 furniture + 4 partition types, Move, Rotate 90° (R), Recolor, Duplicate, Delete, Floor & Wall themes
+ * - Zyra Left Vertical Icon Rail: Map, Team & Role Badges (OWNER / ADMIN / AGENT), Always-Open Office Chat, CEO Avatar Customizer
+ * - Controllable CEO (Click-to-Walk / WASD / Arrows) + Proximity Chat Ring & Bar
+ * - Exported window.getOfficeAvatar(id) for matching chibi pixel-art avatars in agent detail modals
  */
 (function () {
   const canvas = document.getElementById('officeCanvas');
@@ -12,19 +13,23 @@
   if (!canvas || !overlay) return;
   const ctx = canvas.getContext('2d');
 
-  const STORAGE_KEY = 'hq_office_sims_v1';
-  const TW = 32, TH = 16, ZH = 22, CX = 12.2, CY = 10.2;
+  const STORAGE_KEY = 'hq_office_zyra_v2';
+  const CEO_AV_KEY = 'hq_ceo_avatar_v1';
+  const TILE = 42; // 1 grid tile = 42px at 100% zoom
+  const MAP_W = 24, MAP_H = 15; // 24x15 tiles classic office floor plan
+  const CX = MAP_W / 2, CY = MAP_H / 2;
+  const INK = '#263042';
 
-  const cam = { x: 0, y: 12, z: 1.0, tx: 0, ty: 12, tz: 1.0 };
+  const cam = { x: 0, y: 0, z: 1.0, tx: 0, ty: 0, tz: 1.0 };
   const PRESETS = {
-    overview: { x: 0, y: 12, z: 1.0 },
-    ceo: { x: -340, y: 80, z: 1.85 },
-    desks: { x: 18, y: -12, z: 1.65 },
-    server: { x: 240, y: 105, z: 1.85 },
-    line: { x: -230, y: -55, z: 1.85 }
+    overview: { x: 0, y: 0, z: 1.0 },
+    ceo:      { x: -330, y: 120, z: 1.65 },
+    desks:    { x: 10, y: -15, z: 1.55 },
+    server:   { x: 330, y: 125, z: 1.65 },
+    line:     { x: -330, y: -135, z: 1.65 }
   };
 
-  let W = 960, H = 640, DPR = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 960, H = 620, DPR = Math.min(window.devicePixelRatio || 1, 2);
   let baseScale = 1.0;
   let isNight = false;
   let paused = false;
@@ -36,50 +41,49 @@
   let draggingItem = null;
   let dragStart = { x: 0, y: 0, cx: 0, cy: 0, ox: 0, oy: 0 };
   let dragMoved = false;
-  let ghost = null; // { type, x, y } while dragging from palette onto canvas
+  let ghost = null;
 
-  // Furniture & Partition Catalog
   const CATALOG = {
-    desk:       { label: '💻 โต๊ะทำงาน 2 จอ', cat: 'furn', w: 2.0, d: 1.1, h: 1.2, defColor: '#38bdf8' },
-    ceo_desk:   { label: '👑 โต๊ะ CEO',      cat: 'furn', w: 2.8, d: 1.2, h: 1.3, defColor: '#78350f' },
-    server:     { label: '🖥️ ตู้เซิร์ฟเวอร์',  cat: 'furn', w: 0.85, d: 0.85, h: 2.1, defColor: '#1e293b' },
-    meeting:    { label: '🤝 โต๊ะประชุม',     cat: 'furn', w: 2.6, d: 1.35, h: 0.72, defColor: '#f8fafc' },
-    sofa:       { label: '🛋️ โซฟา',          cat: 'furn', w: 1.8, d: 0.85, h: 0.65, defColor: '#334155' },
-    bookshelf:  { label: '📚 ชั้นหนังสือ',     cat: 'furn', w: 0.75, d: 1.6, h: 2.0, defColor: '#78350f' },
-    vending:    { label: '🟣 ตู้กดน้ำ',        cat: 'furn', w: 1.0, d: 0.85, h: 2.0, defColor: '#7e22ce' },
-    coffee:     { label: '☕ บาร์กาแฟ',       cat: 'furn', w: 2.2, d: 0.85, h: 1.2, defColor: '#b08968' },
-    treadmill:  { label: '🏃 ลู่วิ่ง',          cat: 'furn', w: 1.5, d: 0.75, h: 1.1, defColor: '#ec4899' },
-    plant:      { label: '🌿 ต้นไม้',         cat: 'furn', w: 0.65, d: 0.65, h: 1.1, defColor: '#22c55e' },
-    lamp:       { label: '💡 โคมไฟ',          cat: 'furn', w: 0.4, d: 0.4, h: 1.3, defColor: '#f97316' },
-    wall_glass: { label: '🪟 ฉากกระจกกรอบดำ', cat: 'wall', w: 3.4, d: 0.18, h: 2.4, defColor: '#93c5fd' },
-    wall_wood:  { label: '🪵 ฉากไม้ระแนง',    cat: 'wall', w: 3.4, d: 0.2, h: 2.4, defColor: '#92400e' },
-    wall_solid: { label: '🧱 ฉากทึบสีขาว',    cat: 'wall', w: 3.4, d: 0.24, h: 2.4, defColor: '#e2e8f0' },
-    wall_half:  { label: '📏 ฉากกั้นครึ่งตัว', cat: 'wall', w: 2.6, d: 0.2, h: 1.2, defColor: '#64748b' }
+    desk:       { label: '💻 โต๊ะทำงาน',       cat: 'furn', w: 2.2, d: 1.2, defColor: '#60a5fa' },
+    ceo_desk:   { label: '👑 โต๊ะ CEO',        cat: 'furn', w: 2.8, d: 1.3, defColor: '#8c5230' },
+    server:     { label: '🖥️ ตู้เซิร์ฟเวอร์',    cat: 'furn', w: 1.0, d: 1.0, defColor: '#334155' },
+    meeting:    { label: '🤝 โต๊ะประชุม',       cat: 'furn', w: 2.8, d: 1.6, defColor: '#e4b97f' },
+    sofa:       { label: '🛋️ โซฟา',            cat: 'furn', w: 2.0, d: 1.0, defColor: '#4f7cac' },
+    bookshelf:  { label: '📚 ชั้นหนังสือ',       cat: 'furn', w: 1.6, d: 0.8, defColor: '#a67346' },
+    vending:    { label: '🟣 ตู้กดน้ำ',          cat: 'furn', w: 1.0, d: 0.9, defColor: '#7c3aed' },
+    coffee:     { label: '☕ บาร์กาแฟ',         cat: 'furn', w: 2.4, d: 0.9, defColor: '#b07d52' },
+    treadmill:  { label: '🏃 ลู่วิ่ง',            cat: 'furn', w: 1.6, d: 0.9, defColor: '#ec4899' },
+    plant:      { label: '🌿 ต้นไม้',           cat: 'furn', w: 0.85, d: 0.85, defColor: '#22c55e' },
+    lamp:       { label: '💡 โคมไฟ',            cat: 'furn', w: 0.7, d: 0.7, defColor: '#f59e0b' },
+    wall_glass: { label: '🪟 ฉากกระจกกรอบดำ',   cat: 'wall', w: 3.4, d: 0.25, defColor: '#93c5fd' },
+    wall_wood:  { label: '🪵 ฉากไม้ระแนง',      cat: 'wall', w: 3.4, d: 0.28, defColor: '#a67346' },
+    wall_solid: { label: '🧱 ผนังทึบคลาสสิก',    cat: 'wall', w: 3.4, d: 0.32, defColor: '#b8c7dc' },
+    wall_half:  { label: '📏 ฉากกั้นครึ่งตัว',   cat: 'wall', w: 2.6, d: 0.25, defColor: '#94a3b8' }
   };
 
   const FLOOR_STYLES = [
-    { name: 'กระเบื้องขาว', day: '#f1f5f9', night: '#cbd5e1' },
-    { name: 'ไม้โอ๊คอ่อน', day: '#e2c799', night: '#8f7249' },
-    { name: 'ไม้วอลนัท', day: '#b88352', night: '#6b4222' },
-    { name: 'เซิร์ฟเวอร์ฟ้า', day: '#dbeafe', night: '#1e293b' },
-    { name: 'พรมเขียว LINE', day: '#dcfce7', night: '#133025' },
-    { name: 'หินขัดเข้ม', day: '#475569', night: '#1e293b' }
+    { name: 'ครีมคลาสสิก (Zyra)', day: '#ece5d8', line: '#dcd3c2', night: '#1f2937' },
+    { name: 'ไม้โอ๊คอบอุ่น',      day: '#e6c99e', line: '#d4b282', night: '#3f2e1f' },
+    { name: 'กระเบื้องฟ้าอ่อน',   day: '#d4e2f4', line: '#bfd2eb', night: '#1e2c42' },
+    { name: 'กระเบื้องมิ้นต์',     day: '#d4f0df', line: '#bde2cc', night: '#173026' },
+    { name: 'หินอ่อนขาว',         day: '#f1f5f9', line: '#dde4ed', night: '#1b2434' },
+    { name: 'พรมกรมท่า',          day: '#cbd5e1', line: '#b6c2d1', night: '#111827' }
   ];
 
   const WALL_COLORS = [
-    { name: 'ขาว', c: '#ffffff' },
-    { name: 'ครีม', c: '#fef3c7' },
-    { name: 'เทา', c: '#cbd5e1' },
-    { name: 'น้ำเงิน', c: '#334155' },
-    { name: 'ไม้', c: '#c89563' },
-    { name: 'มินต์', c: '#d1fae5' }
+    { name: 'ฟ้าอมเทา (Zyra)', hex: '#b8c7dc' },
+    { name: 'ขาวครีม',         hex: '#e8e2d5' },
+    { name: 'เขียวมิ้นต์',      hex: '#bfe6cf' },
+    { name: 'ไม้วอร์ม',        hex: '#d9b88c' },
+    { name: 'เทาโมเดิร์น',     hex: '#cbd5e1' },
+    { name: 'ชมพูพาสเทล',      hex: '#f3d1dc' }
   ];
 
-  const ITEM_SWATCHES = ['#38bdf8', '#22c55e', '#f97316', '#ffd166', '#ec4899', '#a855f7', '#78350f', '#f8fafc', '#1e293b'];
+  const ITEM_SWATCHES = ['#60a5fa', '#22c55e', '#f59e0b', '#ec4899', '#a855f7', '#e4b97f', '#8c5230', '#4f7cac', '#334155'];
 
   let uidCounter = 1;
   function mkItem(type, x, y, rot, color) {
-    const def = CATALOG[type];
+    const def = CATALOG[type] || CATALOG.desk;
     return { id: 'it_' + (uidCounter++), type, x, y, rot: rot ? 1 : 0, color: color || def.defColor, on: true };
   }
 
@@ -87,104 +91,113 @@
     uidCounter = 1;
     return {
       floorIdx: 0,
-      wallColor: '#ffffff',
+      wallColor: '#b8c7dc',
       items: [
-        // Server Room (Top-Left)
-        mkItem('server', 2.4, 3.65, 0, '#1e293b'),
-        mkItem('server', 3.4, 3.65, 0, '#1e293b'),
-        mkItem('server', 4.4, 3.65, 0, '#1e293b'),
-        mkItem('server', 5.4, 3.65, 0, '#1e293b'),
-        mkItem('wall_glass', 7.6, 3.4, 1, '#93c5fd'),
-        mkItem('wall_glass', 2.1, 9.0, 0, '#93c5fd'),
-        // CEO Office (Top-Right)
-        mkItem('ceo_desk', 18.0, 4.7, 0, '#78350f'),
-        mkItem('bookshelf', 21.4, 3.7, 0, '#78350f'),
-        mkItem('sofa', 17.0, 7.3, 0, '#334155'),
-        mkItem('lamp', 20.4, 4.8, 0, '#ffd166'),
-        mkItem('wall_glass', 16.4, 3.4, 1, '#93c5fd'),
-        mkItem('wall_glass', 16.5, 9.0, 0, '#93c5fd'),
-        mkItem('wall_glass', 19.3, 9.0, 0, '#93c5fd'),
-        // LINE OA Room (Mid-Right)
-        mkItem('desk', 18.4, 10.7, 0, '#06c755'),
-        mkItem('lamp', 20.6, 10.8, 0, '#06c755'),
-        mkItem('wall_glass', 16.4, 9.5, 1, '#4ade80'),
-        mkItem('wall_glass', 16.5, 14.8, 0, '#4ade80'),
-        mkItem('wall_glass', 19.3, 14.8, 0, '#4ade80'),
-        // Main Open Desks (Center)
-        mkItem('desk', 8.6, 6.2, 0, '#22c55e'),
-        mkItem('desk', 12.6, 6.2, 0, '#f59e0b'),
-        mkItem('desk', 8.6, 10.6, 0, '#f97316'),
-        mkItem('desk', 12.6, 10.6, 0, '#3b82f6'),
-        mkItem('lamp', 10.7, 6.3, 0, '#f97316'),
-        // Lounge, Vending, Coffee, Meeting & Healthy
-        mkItem('vending', 2.3, 10.6, 0, '#7e22ce'),
-        mkItem('treadmill', 4.2, 13.9, 0, '#ec4899'),
-        mkItem('coffee', 5.8, 16.1, 0, '#b08968'),
-        mkItem('meeting', 10.6, 15.3, 0, '#f8fafc'),
-        mkItem('plant', 8.0, 3.6, 0, '#22c55e'),
-        mkItem('plant', 15.3, 3.6, 0, '#22c55e'),
-        mkItem('plant', 2.3, 16.2, 0, '#22c55e'),
-        mkItem('plant', 21.4, 16.0, 0, '#22c55e')
+        // === 1. SERVER & SOLAR ROOM (Top-Left: x 1..7.5, y 1.5..6.8) ===
+        mkItem('server', 1.6, 2.0, 0, '#334155'),
+        mkItem('server', 2.8, 2.0, 0, '#334155'),
+        mkItem('server', 4.0, 2.0, 0, '#334155'),
+        mkItem('server', 5.2, 2.0, 0, '#334155'),
+        mkItem('desk', 1.8, 4.6, 0, '#eab308'),   // Solar
+        mkItem('desk', 4.6, 4.6, 0, '#a855f7'),   // App Script
+        mkItem('wall_solid', 7.3, 1.5, 1, '#b8c7dc'),
+        mkItem('wall_glass', 1.2, 6.7, 0, '#93c5fd'),
+        mkItem('wall_glass', 4.7, 6.7, 0, '#93c5fd'),
+
+        // === 2. CEO EXECUTIVE OFFICE (Top-Right: x 16.5..22.8, y 1.5..7.0) ===
+        mkItem('bookshelf', 17.6, 1.8, 0, '#8c5230'),
+        mkItem('bookshelf', 20.4, 1.8, 0, '#8c5230'),
+        mkItem('ceo_desk', 18.4, 3.6, 0, '#8c5230'),
+        mkItem('sofa', 18.8, 5.6, 0, '#4f7cac'),
+        mkItem('lamp', 17.2, 3.6, 0, '#f59e0b'),
+        mkItem('plant', 21.8, 2.0, 0, '#22c55e'),
+        mkItem('plant', 21.8, 5.6, 0, '#22c55e'),
+        mkItem('wall_wood', 16.4, 1.5, 1, '#a67346'),
+        mkItem('wall_glass', 16.5, 7.0, 0, '#93c5fd'),
+        mkItem('wall_glass', 20.0, 7.0, 0, '#93c5fd'),
+
+        // === 3. LINE OA HUB ROOM (Bottom-Right: x 16.5..22.8, y 8.2..13.6) ===
+        mkItem('desk', 18.6, 9.6, 0, '#22c55e'),
+        mkItem('sofa', 18.8, 12.1, 0, '#059669'),
+        mkItem('plant', 17.2, 12.2, 0, '#22c55e'),
+        mkItem('plant', 21.8, 9.2, 0, '#22c55e'),
+        mkItem('wall_glass', 16.4, 8.6, 1, '#93c5fd'),
+
+        // === 4. MAIN OPEN WORK HALL (Center: x 8..16, y 2..13.5) ===
+        mkItem('desk', 8.6, 3.2, 0, '#22c55e'),   // Driver
+        mkItem('desk', 12.4, 3.2, 0, '#f59e0b'),  // Finance
+        mkItem('desk', 8.6, 6.4, 0, '#f97316'),   // Take Profit
+        mkItem('desk', 12.4, 6.4, 0, '#3b82f6'),  // Captain
+        mkItem('meeting', 10.2, 10.6, 0, '#e4b97f'), // Classic Meeting Table
+        mkItem('plant', 8.0, 12.5, 0, '#22c55e'),
+        mkItem('plant', 15.0, 12.5, 0, '#22c55e'),
+
+        // === 5. WELLNESS & CAFE CORNER (Bottom-Left: x 1.2..7.2, y 8.2..13.6) ===
+        mkItem('treadmill', 2.0, 9.0, 0, '#ec4899'), // Healthy
+        mkItem('coffee', 2.0, 12.2, 0, '#b07d52'),
+        mkItem('vending', 5.4, 12.1, 0, '#7c3aed'),
+        mkItem('plant', 1.4, 12.3, 0, '#22c55e'),
+        mkItem('lamp', 5.8, 8.8, 0, '#f59e0b')
       ]
     };
   }
 
-  let layout = defaultLayout();
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (saved && Array.isArray(saved.items) && saved.items.length) {
-      layout = saved;
-      uidCounter = layout.items.length + 100;
-    }
-  } catch (e) {}
-
-  function saveLayout() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); } catch (e) {}
+  function loadLayout() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p && Array.isArray(p.items)) {
+          p.items.forEach(it => {
+            const n = parseInt(String(it.id || '').replace('it_', ''), 10);
+            if (!isNaN(n) && n >= uidCounter) uidCounter = n + 1;
+          });
+          return p;
+        }
+      }
+    } catch (e) {}
+    return defaultLayout();
   }
+
+  let layout = loadLayout();
+  function saveLayout() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); } catch (e) {} }
 
   function itemDims(it) {
-    const def = CATALOG[it.type] || { w: 1, d: 1, h: 1 };
-    return it.rot ? { w: def.d, d: def.w, h: def.h } : { w: def.w, d: def.d, h: def.h };
+    const def = CATALOG[it.type] || { w: 1, d: 1 };
+    return it.rot ? { w: def.d, d: def.w } : { w: def.w, d: def.d };
   }
 
-  // Animated delivery scooters on exterior street
-  const vehicles = [
-    { x: -1.5, y: 1.4, speed: 1.5, color: '#22c55e', accent: '#bbf7d0' },
-    { x: 7.5, y: 1.4, speed: 1.25, color: '#38bdf8', accent: '#bae6fd' },
-    { x: 16.5, y: 1.4, speed: 1.65, color: '#f97316', accent: '#fed7aa' }
-  ];
-
-  // 9 Characters: CEO (OWNER) + LINE/Script (ADMIN) + 6 Agents (AGENT)
-  const CEO_AV_KEY = 'hq_ceo_avatar_v1';
-  let ceoCustom = { shirt: '#1e293b', hair: '#18181b', acc: 'crown' };
+  // CEO Custom Avatar
+  let ceoCustom = { shirt: '#334155', hair: '#231710', acc: 'crown' };
   try {
     const savedCeo = JSON.parse(localStorage.getItem(CEO_AV_KEY) || 'null');
     if (savedCeo && savedCeo.shirt) ceoCustom = savedCeo;
   } catch (e) {}
 
+  // 9 Characters: CEO (OWNER) + LINE/Script (ADMIN) + 6 Agents (AGENT)
   const AGENT_DEF = [
-    { id: 'ceo', name: '👑 CEO', roleTag: 'OWNER', home: { x: 19.5, y: 6.1 }, color: '#ffd166', shirt: ceoCustom.shirt, hair: ceoCustom.hair, crown: ceoCustom.acc === 'crown', glasses: ceoCustom.acc === 'glasses', hat: ceoCustom.acc === 'hat' ? '#f97316' : '', stay: true },
-    { id: 'tg', name: 'LINE OA', roleTag: 'ADMIN', home: { x: 19.5, y: 12.1 }, color: '#06c755', shirt: '#059669', hair: '#1f2937', stay: true },
-    { id: 'solar', name: 'Solar', roleTag: 'AGENT', home: { x: 4.0, y: 6.6 }, color: '#eab308', shirt: '#1e3a5f', hair: '#eab308', helmet: '#facc15' },
-    { id: 'script', name: 'App Script', roleTag: 'ADMIN', home: { x: 6.2, y: 7.4 }, color: '#a855f7', shirt: '#5b21b6', hair: '#a855f7', robot: true },
-    { id: 'driver', name: 'Driver', roleTag: 'AGENT', home: { x: 9.5, y: 7.4 }, color: '#22c55e', shirt: '#15803d', hair: '#231710', hat: '#22c55e' },
-    { id: 'finance', name: 'Finance', roleTag: 'AGENT', home: { x: 13.5, y: 7.4 }, color: '#f59e0b', shirt: '#b45309', hair: '#1e1b18', glasses: true },
-    { id: 'profit', name: 'Take Profit', roleTag: 'AGENT', home: { x: 9.5, y: 11.8 }, color: '#f97316', shirt: '#c2410c', hair: '#3b2412' },
-    { id: 'captain', name: 'Captain', roleTag: 'AGENT', home: { x: 13.5, y: 11.8 }, color: '#3b82f6', shirt: '#1d4ed8', hair: '#111827' },
-    { id: 'health', name: 'Healthy', roleTag: 'AGENT', home: { x: 4.9, y: 14.3 }, color: '#ec4899', shirt: '#be185d', hair: '#3f2318', sporty: true }
+    { id: 'ceo', name: '👑 CEO', roleTag: 'OWNER', home: { x: 19.8, y: 4.9 }, color: '#f59e0b', shirt: ceoCustom.shirt, hair: ceoCustom.hair, crown: ceoCustom.acc === 'crown', glasses: ceoCustom.acc === 'glasses', hat: ceoCustom.acc === 'hat' ? '#f97316' : '', stay: true },
+    { id: 'tg', name: 'LINE OA', roleTag: 'ADMIN', home: { x: 19.7, y: 10.9 }, color: '#06c755', shirt: '#10b981', hair: '#1f2937', stay: true },
+    { id: 'solar', name: 'Solar', roleTag: 'AGENT', home: { x: 2.9, y: 5.9 }, color: '#eab308', shirt: '#2563eb', hair: '#eab308', helmet: '#facc15' },
+    { id: 'script', name: 'App Script', roleTag: 'ADMIN', home: { x: 5.7, y: 5.9 }, color: '#a855f7', shirt: '#7c3aed', hair: '#a855f7', robot: true },
+    { id: 'driver', name: 'Driver', roleTag: 'AGENT', home: { x: 9.7, y: 4.5 }, color: '#22c55e', shirt: '#16a34a', hair: '#2c1c12', hat: '#22c55e' },
+    { id: 'finance', name: 'Finance', roleTag: 'AGENT', home: { x: 13.5, y: 4.5 }, color: '#f59e0b', shirt: '#d97706', hair: '#1e1b18', glasses: true },
+    { id: 'profit', name: 'Take Profit', roleTag: 'AGENT', home: { x: 9.7, y: 7.7 }, color: '#f97316', shirt: '#ea580c', hair: '#4a2c16' },
+    { id: 'captain', name: 'Captain', roleTag: 'AGENT', home: { x: 13.5, y: 7.7 }, color: '#3b82f6', shirt: '#2563eb', hair: '#111827' },
+    { id: 'health', name: 'Healthy', roleTag: 'AGENT', home: { x: 3.1, y: 10.1 }, color: '#ec4899', shirt: '#db2777', hair: '#4a2518', sporty: true }
   ];
 
   const WAYPOINTS = [
-    { x: 11.6, y: 15.6, label: 'ประชุมวางแผนทีม 🗣️' },
-    { x: 6.4, y: 15.6, label: 'แวะชงกาแฟ ☕' },
-    { x: 4.8, y: 5.5, label: 'ตรวจห้องเซิร์ฟเวอร์ 🖥️' },
-    { x: 16.0, y: 7.2, label: 'รายงานผลห้อง CEO 👑' },
-    { x: 16.0, y: 12.2, label: 'ซิงก์ข้อความห้อง LINE 💬' }
+    { x: 11.6, y: 10.2, label: 'ประชุมวางแผนทีม 🗣️' },
+    { x: 3.6, y: 11.5, label: 'แวะชงกาแฟ ☕' },
+    { x: 4.2, y: 3.6, label: 'ตรวจห้องเซิร์ฟเวอร์ 🖥️' },
+    { x: 17.8, y: 6.2, label: 'รายงานผลห้อง CEO 👑' },
+    { x: 17.6, y: 10.8, label: 'ซิงก์ข้อความห้อง LINE 💬' }
   ];
 
   const agents = AGENT_DEF.map((def, i) => ({
     ...def, x: def.home.x, y: def.home.y, tx: def.home.x, ty: def.home.y,
-    state: 'work', timer: 3 + i * 1.6 + Math.random() * 5,
+    state: 'work', timer: 3 + i * 1.5 + Math.random() * 5,
     bubbleText: '', bubbleUntil: 0,
     statusText: def.id === 'ceo' ? 'บริหาร AboutMeProcess HQ' : 'พร้อมทำงาน',
     screenX: 0, screenY: 0, elName: null, elBubble: null
@@ -203,7 +216,7 @@
         if (buildMode) return;
         focusAgent(a.id);
         if (a.id === 'ceo') {
-          if (typeof window.showMoToast === 'function') window.showMoToast('👑 ห้องผู้บริหาร CEO — AboutMeProcess HQ');
+          if (typeof window.showMoToast === 'function') window.showMoToast('👑 ห้องผู้บริหาร CEO — คลิกพื้นหรือกด WASD เพื่อเดินคุยกับเอเจนต์');
         } else if (typeof window.openAgent === 'function') {
           window.openAgent(a.id);
         }
@@ -212,7 +225,7 @@
       a.elName = np;
 
       const bb = document.createElement('div');
-      bb.className = 'mo3-bb';
+      bb.className = 'mo3-bb zyra-pixel-bb';
       bb.style.setProperty('--c', a.color);
       overlay.appendChild(bb);
       a.elBubble = bb;
@@ -220,366 +233,430 @@
   }
   initOverlays();
 
-  // Forward & Inverse Isometric Projection (for exact Drag & Drop!)
-  function iso(x, y, z) {
-    const cx = x - CX, cy = y - CY;
-    const sx = (cx - cy) * TW;
-    const sy = (cx + cy) * TH - (z || 0) * ZH;
+  // Orthogonal 2.5D Top-Down Projection (Classic Zyra World)
+  function toScreen(gx, gy) {
     const s = cam.z * baseScale;
-    return { x: W / 2 + (sx + cam.x) * s, y: H / 2 + (sy + cam.y) * s };
+    return {
+      x: W / 2 + ((gx - CX) * TILE + cam.x) * s,
+      y: H / 2 + ((gy - CY) * TILE + cam.y) * s
+    };
   }
-
   function screenToGrid(px, py) {
     const s = cam.z * baseScale;
-    const sx = (px - W / 2) / s - cam.x;
-    const sy = (py - H / 2) / s - cam.y;
-    const cx = (sx / TW + sy / TH) / 2;
-    const cy = (sy / TH - sx / TW) / 2;
-    return { x: cx + CX, y: cy + CY };
+    return {
+      x: ((px - W / 2) / s - cam.x) / TILE + CX,
+      y: ((py - H / 2) / s - cam.y) / TILE + CY
+    };
   }
-
   function snap(v) { return Math.round(v * 2) / 2; }
   function clampToRoom(x, y, w, d) {
     return {
-      x: Math.max(2.0, Math.min(22.4 - w, snap(x))),
-      y: Math.max(3.4, Math.min(17.4 - d, snap(y)))
+      x: Math.max(1.1, Math.min(MAP_W - 1.1 - w, snap(x))),
+      y: Math.max(1.5, Math.min(MAP_H - 1.0 - d, snap(y)))
     };
   }
 
   function shade(hex, pct) {
-    const n = parseInt(String(hex || '#64748b').replace('#', ''), 16);
-    if (isNaN(n)) return hex;
+    if (!hex || hex[0] !== '#') return hex;
+    const n = parseInt(hex.slice(1), 16);
     const r = Math.max(0, Math.min(255, ((n >> 16) & 255) + pct));
     const g = Math.max(0, Math.min(255, ((n >> 8) & 255) + pct));
     const b = Math.max(0, Math.min(255, (n & 255) + pct));
     return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
-  function box(x, y, z, w, d, h, cTop, cLeft, cRight, stroke) {
-    const p001 = iso(x, y, z + h), p101 = iso(x + w, y, z + h), p111 = iso(x + w, y + d, z + h), p011 = iso(x, y + d, z + h);
-    const p100 = iso(x + w, y, z), p110 = iso(x + w, y + d, z), p010 = iso(x, y + d, z);
-    ctx.beginPath();
-    ctx.moveTo(p001.x, p001.y); ctx.lineTo(p101.x, p101.y); ctx.lineTo(p111.x, p111.y); ctx.lineTo(p011.x, p011.y);
-    ctx.closePath(); ctx.fillStyle = cTop; ctx.fill();
-    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
-    if (h > 0.001) {
-      ctx.beginPath();
-      ctx.moveTo(p101.x, p101.y); ctx.lineTo(p111.x, p111.y); ctx.lineTo(p110.x, p110.y); ctx.lineTo(p100.x, p100.y);
-      ctx.closePath(); ctx.fillStyle = cRight; ctx.fill();
-      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
-      ctx.beginPath();
-      ctx.moveTo(p011.x, p011.y); ctx.lineTo(p111.x, p111.y); ctx.lineTo(p110.x, p110.y); ctx.lineTo(p010.x, p010.y);
-      ctx.closePath(); ctx.fillStyle = cLeft; ctx.fill();
-      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+  function pxRect(x, y, w, h, fill, stroke, lw) {
+    const p = toScreen(x, y);
+    const s = cam.z * baseScale * TILE;
+    ctx.fillStyle = fill;
+    ctx.fillRect(p.x, p.y, w * s, h * s);
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = lw || Math.max(1.2, 1.6 * cam.z * baseScale);
+      ctx.strokeRect(p.x, p.y, w * s, h * s);
+    }
+    return { px: p.x, py: p.y, pw: w * s, ph: h * s, u: s };
+  }
+
+  function drawChair(gx, gy, color) {
+    const p = toScreen(gx, gy), u = cam.z * baseScale * TILE;
+    ctx.fillStyle = 'rgba(0,0,0,0.16)';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y + 0.12 * u, 0.28 * u, 0.16 * u, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = color;
+    ctx.strokeStyle = INK; ctx.lineWidth = Math.max(1.2, 1.5 * cam.z * baseScale);
+    ctx.beginPath(); ctx.roundRect(p.x - 0.24 * u, p.y - 0.24 * u, 0.48 * u, 0.42 * u, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = shade(color, -24);
+    ctx.fillRect(p.x - 0.22 * u, p.y - 0.26 * u, 0.44 * u, 0.12 * u);
+    ctx.strokeRect(p.x - 0.22 * u, p.y - 0.26 * u, 0.44 * u, 0.12 * u);
+  }
+
+  function drawWallDecor(gx, gy, kind) {
+    const p = toScreen(gx, gy), u = cam.z * baseScale * TILE;
+    const lw = Math.max(1.1, 1.4 * cam.z * baseScale);
+    if (kind === 'corkboard') {
+      // Classic Zyra corkboard with sticky notes
+      ctx.fillStyle = '#b07d52'; ctx.strokeStyle = INK; ctx.lineWidth = lw;
+      ctx.fillRect(p.x, p.y, 1.5 * u, 0.65 * u); ctx.strokeRect(p.x, p.y, 1.5 * u, 0.65 * u);
+      ctx.fillStyle = '#d8b082';
+      ctx.fillRect(p.x + 0.08 * u, p.y + 0.08 * u, 1.34 * u, 0.49 * u);
+      [['#fef08a', 0.16, 0.14], ['#93c5fd', 0.56, 0.18], ['#fca5a5', 0.96, 0.13], ['#bbf7d0', 0.36, 0.34]].forEach(([c, ox, oy]) => {
+        ctx.fillStyle = c; ctx.fillRect(p.x + ox * u, p.y + oy * u, 0.24 * u, 0.19 * u);
+      });
+    } else if (kind === 'poster') {
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = INK; ctx.lineWidth = lw;
+      ctx.fillRect(p.x, p.y, 0.72 * u, 0.64 * u); ctx.strokeRect(p.x, p.y, 0.72 * u, 0.64 * u);
+      ctx.fillStyle = '#60a5fa'; ctx.fillRect(p.x + 0.09 * u, p.y + 0.09 * u, 0.54 * u, 0.32 * u);
+      ctx.fillStyle = '#4ade80'; ctx.fillRect(p.x + 0.09 * u, p.y + 0.41 * u, 0.54 * u, 0.14 * u);
+    } else if (kind === 'clock') {
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = INK; ctx.lineWidth = lw;
+      ctx.beginPath(); ctx.arc(p.x + 0.3 * u, p.y + 0.32 * u, 0.26 * u, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p.x + 0.3 * u, p.y + 0.32 * u); ctx.lineTo(p.x + 0.3 * u, p.y + 0.16 * u);
+      ctx.moveTo(p.x + 0.3 * u, p.y + 0.32 * u); ctx.lineTo(p.x + 0.43 * u, p.y + 0.36 * u); ctx.stroke();
     }
   }
 
-  function tile(x, y, w, d, color, stroke) { box(x, y, 0, w, d, 0, color, color, color, stroke); }
-
-  function lightPool(x, y, z, radius, rgbaInner) {
-    const s = cam.z * baseScale, p = iso(x, y, z), r = radius * s;
-    const grd = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, r);
-    grd.addColorStop(0, rgbaInner); grd.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
-  }
-
-  function drawSelectionOutline(x, y, w, d, color) {
-    const p0 = iso(x, y, 0.04), p1 = iso(x + w, y, 0.04), p2 = iso(x + w, y + d, 0.04), p3 = iso(x, y + d, 0.04);
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(249, 115, 22, 0.18)';
-    ctx.fill();
-    ctx.strokeStyle = color || '#f97316';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // Render any catalog furniture or partition item
   function drawItem(it, now) {
-    const s = cam.z * baseScale;
-    const { w, d, h } = itemDims(it);
-    const x = it.x, y = it.y, c = it.color || '#38bdf8';
-    const isSel = buildMode && selectedId === it.id;
-    if (isSel) drawSelectionOutline(x - 0.1, y - 0.1, w + 0.2, d + 0.2, '#f97316');
+    const dm = itemDims(it);
+    const x = it.x, y = it.y, w = dm.w, d = dm.d, c = it.color || '#60a5fa';
+    const p = toScreen(x, y), u = cam.z * baseScale * TILE;
+    const lw = Math.max(1.2, 1.6 * cam.z * baseScale);
+
+    // Build mode selection highlight
+    if (buildMode && selectedId === it.id) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(249,115,22,0.22)';
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([5, 3]);
+      ctx.fillRect(p.x - 3, p.y - 3, w * u + 6, d * u + 6);
+      ctx.strokeRect(p.x - 3, p.y - 3, w * u + 6, d * u + 6);
+      ctx.restore();
+    }
+
+    // Soft pixel shadow under furniture
+    if (!it.type.startsWith('wall_')) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.16)';
+      ctx.fillRect(p.x + 0.08 * u, p.y + 0.12 * u, w * u, d * u);
+    }
 
     if (it.type === 'desk') {
-      box(x, y, 0, 0.12, 0.12, 0.65, '#94a3b8', '#64748b', '#475569');
-      box(x + w - 0.12, y, 0, 0.12, 0.12, 0.65, '#94a3b8', '#64748b', '#475569');
-      box(x, y + d - 0.12, 0, 0.12, 0.12, 0.65, '#94a3b8', '#64748b', '#475569');
-      box(x + w - 0.12, y + d - 0.12, 0, 0.12, 0.12, 0.65, '#94a3b8', '#64748b', '#475569');
-      box(x, y, 0.65, w, d, 0.12, isNight ? '#cbd5e1' : '#f8fafc', '#cbd5e1', '#94a3b8');
-      if (!it.rot) {
-        box(x + 0.25, y + 0.15, 0.77, 0.62, 0.08, 0.46, '#1e293b', c, '#0f172a');
-        box(x + 1.0, y + 0.15, 0.77, 0.62, 0.08, 0.46, '#1e293b', '#38bdf8', '#0f172a');
-      } else {
-        box(x + 0.15, y + 0.25, 0.77, 0.08, 0.62, 0.46, '#1e293b', '#0f172a', c);
-        box(x + 0.15, y + 1.0, 0.77, 0.08, 0.62, 0.46, '#1e293b', '#0f172a', '#38bdf8');
-      }
-      if (isNight) lightPool(x + w / 2, y + d / 2, 0.9, 44, 'rgba(56, 189, 248, 0.16)');
+      // Chairs behind/front
+      drawChair(x + w * 0.5, y + d + 0.16, c);
+      // Warm classic oak desk top + front lip
+      pxRect(x, y, w, d * 0.82, isNight ? '#7c5c3e' : '#e4b97f', INK, lw);
+      pxRect(x, y + d * 0.82, w, d * 0.22, isNight ? '#5c4128' : '#c9975b', INK, lw);
+      // Dual monitors + keyboard + coffee mug
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = INK; ctx.lineWidth = lw * 0.85;
+      const mw = Math.min(0.62, w * 0.28);
+      ctx.fillRect(p.x + 0.22 * u, p.y + 0.12 * u, mw * u, 0.34 * u);
+      ctx.fillStyle = c; ctx.fillRect(p.x + 0.26 * u, p.y + 0.16 * u, (mw - 0.08) * u, 0.24 * u);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(p.x + (w - mw - 0.22) * u, p.y + 0.12 * u, mw * u, 0.34 * u);
+      ctx.fillStyle = '#38bdf8'; ctx.fillRect(p.x + (w - mw - 0.18) * u, p.y + 0.16 * u, (mw - 0.08) * u, 0.24 * u);
+      // Keyboard
+      ctx.fillStyle = '#e2e8f0'; ctx.fillRect(p.x + (w * 0.32) * u, p.y + 0.54 * u, (w * 0.36) * u, 0.14 * u);
+      // Tiny cup
+      ctx.fillStyle = '#f87171'; ctx.beginPath(); ctx.arc(p.x + (w - 0.24) * u, p.y + 0.62 * u, 0.08 * u, 0, Math.PI * 2); ctx.fill();
     } else if (it.type === 'ceo_desk') {
-      box(x, y, 0, w, d, 0.78, c, shade(c, -22), shade(c, -40));
-      box(x + w * 0.2, y + d * 0.18, 0.78, w * 0.26, 0.1, 0.48, '#1e293b', '#ffd166', '#0f172a');
-      box(x + w * 0.54, y + d * 0.18, 0.78, w * 0.26, 0.1, 0.48, '#1e293b', '#38bdf8', '#0f172a');
+      drawChair(x + w * 0.5, y + d + 0.2, '#f59e0b');
+      pxRect(x, y, w, d * 0.8, isNight ? shade(c, -30) : c, INK, lw);
+      pxRect(x, y + d * 0.8, w, d * 0.26, shade(c, -28), INK, lw);
+      // Gold nameplate + dual wide displays
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(p.x + 0.45 * u, p.y + 0.14 * u, 0.85 * u, 0.36 * u);
+      ctx.fillRect(p.x + (w - 1.3) * u, p.y + 0.14 * u, 0.85 * u, 0.36 * u);
+      ctx.fillStyle = '#38bdf8'; ctx.fillRect(p.x + 0.5 * u, p.y + 0.18 * u, 0.75 * u, 0.26 * u);
+      ctx.fillStyle = '#4ade80'; ctx.fillRect(p.x + (w - 1.25) * u, p.y + 0.18 * u, 0.75 * u, 0.26 * u);
+      ctx.fillStyle = '#fde047'; ctx.fillRect(p.x + (w * 0.4) * u, p.y + 0.62 * u, (w * 0.2) * u, 0.12 * u);
     } else if (it.type === 'server') {
-      box(x, y, 0, w, d, h, c, shade(c, -18), shade(c, -32));
-      for (let l = 0; l < 4; l++) {
-        const lp = iso(x + 0.2 + l * 0.14, y + d + 0.01, 1.7 - (l % 2) * 0.36);
-        const on = Math.floor(now * 4 + x + l) % 3 !== 0;
-        ctx.fillStyle = on ? (l === 0 ? '#22c55e' : l === 1 ? '#38bdf8' : '#f59e0b') : '#1e293b';
-        ctx.fillRect(lp.x, lp.y, 3.2 * s, 2.4 * s);
-      }
+      pxRect(x, y, w, d * 0.72, isNight ? '#1e293b' : c, INK, lw);
+      pxRect(x, y + d * 0.72, w, d * 0.34, '#0f172a', INK, lw);
+      const blink = Math.floor(now * 3 + x * 5) % 2 === 0;
+      ctx.fillStyle = blink ? '#22c55e' : '#38bdf8';
+      ctx.fillRect(p.x + 0.16 * u, p.y + 0.82 * u, 0.12 * u, 0.1 * u);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(p.x + 0.36 * u, p.y + 0.82 * u, 0.12 * u, 0.1 * u);
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(p.x + 0.16 * u, p.y + 0.2 * u, (w - 0.32) * u, 0.12 * u);
+      ctx.fillRect(p.x + 0.16 * u, p.y + 0.4 * u, (w - 0.32) * u, 0.12 * u);
     } else if (it.type === 'meeting') {
-      box(x, y, 0, w, d, 0.68, isNight ? shade(c, -30) : c, shade(c, -20), shade(c, -35));
+      // Multi-colored classic Zyra chairs around meeting table
+      const cols = ['#60a5fa', '#4ade80', '#c084fc', '#f472b6', '#fbbf24', '#38bdf8'];
+      drawChair(x + w * 0.22, y - 0.22, cols[0]);
+      drawChair(x + w * 0.5,  y - 0.22, cols[1]);
+      drawChair(x + w * 0.78, y - 0.22, cols[2]);
+      drawChair(x + w * 0.22, y + d + 0.22, cols[3]);
+      drawChair(x + w * 0.5,  y + d + 0.22, cols[4]);
+      drawChair(x + w * 0.78, y + d + 0.22, cols[5]);
+      pxRect(x, y, w, d * 0.86, isNight ? '#7c5c3e' : c, INK, lw);
+      pxRect(x, y + d * 0.86, w, d * 0.18, shade(c, -28), INK, lw);
+      // Center notepad & plant
+      ctx.fillStyle = '#f8fafc'; ctx.fillRect(p.x + 0.45 * u, p.y + 0.35 * u, 0.42 * u, 0.32 * u);
+      ctx.fillStyle = '#93c5fd'; ctx.fillRect(p.x + (w - 0.9) * u, p.y + 0.7 * u, 0.46 * u, 0.3 * u);
+      ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(p.x + w * 0.5 * u, p.y + d * 0.42 * u, 0.18 * u, 0, Math.PI * 2); ctx.fill();
     } else if (it.type === 'sofa') {
-      box(x, y, 0, w, d, 0.42, c, shade(c, -20), shade(c, -35));
-      if (!it.rot) box(x, y, 0.42, w, 0.22, 0.38, shade(c, 12), c, shade(c, -22));
-      else box(x, y, 0.42, 0.22, d, 0.38, shade(c, 12), c, shade(c, -22));
+      pxRect(x, y, w, d * 0.35, shade(c, -22), INK, lw); // backrest
+      pxRect(x, y + d * 0.35, w, d * 0.65, c, INK, lw);  // cushions
+      ctx.strokeStyle = INK; ctx.lineWidth = lw * 0.75;
+      ctx.beginPath(); ctx.moveTo(p.x + w * 0.5 * u, p.y + d * 0.35 * u); ctx.lineTo(p.x + w * 0.5 * u, p.y + d * u); ctx.stroke();
     } else if (it.type === 'bookshelf') {
-      box(x, y, 0, w, d, h, c, shade(c, -18), shade(c, -36));
-      box(x + 0.08, y + 0.12, 0.55, w - 0.16, d - 0.24, 0.25, '#38bdf8', '#f97316', '#22c55e');
-      box(x + 0.08, y + 0.12, 1.25, w - 0.16, d - 0.24, 0.25, '#ffd166', '#ec4899', '#a855f7');
-    } else if (it.type === 'vending') {
-      box(x, y, 0, w, d, h, c, shade(c, 22), shade(c, -28));
-      box(x + 0.15, y + d + 0.01, 0.6, Math.max(0.2, w - 0.3), 0.04, 1.0, '#e9d5ff', '#f3e8ff', '#d8b4fe');
-      if (isNight) lightPool(x + w / 2, y + d + 0.1, 1.1, 72, 'rgba(168, 85, 247, 0.40)');
-    } else if (it.type === 'coffee') {
-      box(x, y, 0, w, d, 0.85, c, shade(c, -20), shade(c, -35));
-      box(x + 0.25, y + 0.2, 0.85, 0.45, 0.4, 0.42, '#334155', '#1e293b', '#0f172a');
-    } else if (it.type === 'treadmill') {
-      box(x, y, 0, w, d, 0.15, '#334155', '#1e293b', '#0f172a');
-      if (!it.rot) box(x, y, 0.15, 0.2, d, 0.95, c, shade(c, -22), shade(c, -40));
-      else box(x, y, 0.15, w, 0.2, 0.95, c, shade(c, -22), shade(c, -40));
-    } else if (it.type === 'plant') {
-      box(x, y, 0, w, d, 0.48, '#c27849', '#a35d34', '#8a4c28');
-      const p = iso(x + w / 2, y + d / 2, 0.68), r = 11 * s;
-      ctx.fillStyle = isNight ? shade(c, -25) : c;
-      [[-6, -2], [6, -3], [0, -8], [-4, 3], [5, 2]].forEach(([ox, oy]) => {
-        ctx.beginPath(); ctx.ellipse(p.x + ox * s, p.y + oy * s, r * 0.65, r * 0.42, ox * 0.1, 0, Math.PI * 2); ctx.fill();
+      pxRect(x, y, w, d, isNight ? shade(c, -25) : c, INK, lw);
+      ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7'].forEach((bc, bi) => {
+        ctx.fillStyle = bc;
+        ctx.fillRect(p.x + (0.14 + bi * (w - 0.28) / 5) * u, p.y + 0.18 * u, 0.18 * u, (d - 0.34) * u);
       });
+    } else if (it.type === 'vending') {
+      pxRect(x, y, w, d, c, INK, lw);
+      ctx.fillStyle = '#e0f2fe'; ctx.fillRect(p.x + 0.14 * u, p.y + 0.14 * u, (w - 0.28) * u, (d * 0.45) * u);
+      ctx.fillStyle = '#1e293b'; ctx.fillRect(p.x + 0.2 * u, p.y + (d * 0.72) * u, (w - 0.4) * u, 0.16 * u);
+    } else if (it.type === 'coffee') {
+      pxRect(x, y, w, d, isNight ? shade(c, -25) : c, INK, lw);
+      ctx.fillStyle = '#334155'; ctx.fillRect(p.x + 0.22 * u, p.y + 0.16 * u, 0.52 * u, 0.48 * u);
+      ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(p.x + (w - 0.4) * u, p.y + 0.45 * u, 0.16 * u, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(p.x + (w - 0.85) * u, p.y + 0.45 * u, 0.12 * u, 0, Math.PI * 2); ctx.fill();
+    } else if (it.type === 'treadmill') {
+      pxRect(x, y, w, d, '#334155', INK, lw);
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(p.x + 0.14 * u, p.y + 0.16 * u, (w - 0.52) * u, (d - 0.32) * u);
+      ctx.fillStyle = c; ctx.fillRect(p.x + (w - 0.32) * u, p.y + 0.1 * u, 0.24 * u, (d - 0.2) * u);
+    } else if (it.type === 'plant') {
+      // Classic terracotta pot + pixel leafy bush
+      const cx = p.x + w * 0.5 * u, cy = p.y + d * 0.52 * u;
+      ctx.fillStyle = '#b45309'; ctx.strokeStyle = INK; ctx.lineWidth = lw;
+      ctx.fillRect(cx - 0.22 * u, cy + 0.04 * u, 0.44 * u, 0.32 * u); ctx.strokeRect(cx - 0.22 * u, cy + 0.04 * u, 0.44 * u, 0.32 * u);
+      ctx.fillStyle = isNight ? '#15803d' : c;
+      ctx.beginPath(); ctx.arc(cx, cy - 0.06 * u, 0.34 * u, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = isNight ? '#16a34a' : '#86efac';
+      ctx.beginPath(); ctx.arc(cx - 0.1 * u, cy - 0.14 * u, 0.14 * u, 0, Math.PI * 2); ctx.fill();
     } else if (it.type === 'lamp') {
-      box(x + 0.1, y + 0.1, 0, 0.2, 0.2, 1.05, c, shade(c, -18), shade(c, -32));
+      const cx = p.x + w * 0.5 * u, cy = p.y + d * 0.5 * u;
       if (it.on !== false) {
-        lightPool(x + 0.2, y + 0.2, 1.2, isNight ? 80 : 34, isNight ? 'rgba(251, 191, 36, 0.44)' : 'rgba(253, 224, 71, 0.18)');
+        const grd = ctx.createRadialGradient(cx, cy, 2, cx, cy, (isNight ? 2.4 : 1.1) * u);
+        grd.addColorStop(0, 'rgba(254, 240, 138, 0.48)');
+        grd.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.arc(cx, cy, (isNight ? 2.4 : 1.1) * u, 0, Math.PI * 2); ctx.fill();
       }
+      ctx.fillStyle = it.on !== false ? '#fde047' : '#64748b'; ctx.strokeStyle = INK; ctx.lineWidth = lw;
+      ctx.beginPath(); ctx.arc(cx, cy, 0.24 * u, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     } else if (it.type === 'wall_glass') {
-      const a0 = iso(x, y, 0), a1 = iso(x, y, h);
-      const bx2 = it.rot ? x : x + w, by2 = it.rot ? y + d : y;
-      const b0 = iso(bx2, by2, 0), b1 = iso(bx2, by2, h);
-      ctx.beginPath(); ctx.moveTo(a0.x, a0.y); ctx.lineTo(b0.x, b0.y); ctx.lineTo(b1.x, b1.y); ctx.lineTo(a1.x, a1.y); ctx.closePath();
-      ctx.fillStyle = isNight ? 'rgba(147, 197, 253, 0.15)' : 'rgba(186, 230, 253, 0.28)';
-      ctx.fill();
-      ctx.strokeStyle = '#1f2937'; ctx.lineWidth = Math.max(1.4, 2.1 * s); ctx.stroke();
-      for (let i = 1; i < 3; i++) {
-        const t = i / 3;
-        const m0 = iso(x + (bx2 - x) * t, y + (by2 - y) * t, 0);
-        const m1 = iso(x + (bx2 - x) * t, y + (by2 - y) * t, h);
-        ctx.beginPath(); ctx.moveTo(m0.x, m0.y); ctx.lineTo(m1.x, m1.y); ctx.stroke();
-      }
+      pxRect(x, y, w, d, 'rgba(147, 197, 253, 0.42)', INK, lw);
+      ctx.strokeStyle = 'rgba(255,255,255,0.65)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(p.x + 0.15 * u, p.y + 0.06 * u); ctx.lineTo(p.x + (w - 0.15) * u, p.y + (d - 0.06) * u); ctx.stroke();
     } else if (it.type === 'wall_wood') {
-      const slats = 6;
-      for (let i = 0; i < slats; i++) {
-        const t = i / slats;
-        if (!it.rot) box(x + w * t, y, 0, w / slats * 0.65, d, h, shade(c, 15), c, shade(c, -25));
-        else box(x, y + d * t, 0, w, d / slats * 0.65, h, shade(c, 15), c, shade(c, -25));
-      }
+      pxRect(x, y, w, d, isNight ? shade(c, -28) : c, INK, lw);
     } else if (it.type === 'wall_solid' || it.type === 'wall_half') {
-      box(x, y, 0, w, d, h, isNight ? shade(c, -45) : c, shade(c, -18), shade(c, -35));
+      pxRect(x, y, w, d, isNight ? shade(c, -45) : c, INK, lw);
     }
   }
 
-  function drawTree(x, y) {
-    const s = cam.z * baseScale;
-    box(x + 0.2, y + 0.2, 0, 0.32, 0.32, 0.85, '#784828', '#5c351c', '#4a2a16');
-    const p = iso(x + 0.36, y + 0.36, 1.4);
-    ctx.fillStyle = isNight ? '#14532d' : '#2f855a';
-    ctx.beginPath(); ctx.arc(p.x, p.y, 17 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = isNight ? '#166534' : '#38a169';
-    ctx.beginPath(); ctx.arc(p.x - 4 * s, p.y - 4 * s, 12 * s, 0, Math.PI * 2); ctx.fill();
-  }
+  // Classic Zyra-style Chibi Pixel-Art Character Renderer (shared by canvas & modal avatars!)
+  function renderChibi(g, cx, cy, scale, a, walkPhase) {
+    const u = scale;
+    const lw = Math.max(1.2, 1.55 * (u / 42));
+    const legOff = walkPhase ? Math.sin(walkPhase) * 0.09 * u : 0;
 
-  function drawScooter(v) {
-    const s = cam.z * baseScale;
-    box(v.x, v.y, 0.12, 0.9, 0.45, 0.36, v.color, v.color, '#1e293b');
-    box(v.x + 0.06, v.y + 0.06, 0.48, 0.4, 0.34, 0.36, v.accent, v.color, v.color);
-    const hp = iso(v.x + 0.58, v.y + 0.22, 0.95);
-    ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.arc(hp.x, hp.y, 6 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = v.color; ctx.beginPath(); ctx.arc(hp.x, hp.y - 2 * s, 6.2 * s, Math.PI, Math.PI * 2); ctx.fill();
-    if (isNight) lightPool(v.x + 1.05, v.y + 0.22, 0.2, 34, 'rgba(254, 240, 138, 0.45)');
+    // Ground shadow
+    g.fillStyle = 'rgba(15, 23, 42, 0.24)';
+    g.beginPath(); g.ellipse(cx, cy + 0.34 * u, 0.32 * u, 0.13 * u, 0, 0, Math.PI * 2); g.fill();
+
+    // Cute tiny legs
+    g.fillStyle = '#334155'; g.strokeStyle = INK; g.lineWidth = lw;
+    g.fillRect(cx - 0.17 * u, cy + 0.16 * u + legOff, 0.13 * u, 0.18 * u);
+    g.strokeRect(cx - 0.17 * u, cy + 0.16 * u + legOff, 0.13 * u, 0.18 * u);
+    g.fillRect(cx + 0.04 * u, cy + 0.16 * u - legOff, 0.13 * u, 0.18 * u);
+    g.strokeRect(cx + 0.04 * u, cy + 0.16 * u - legOff, 0.13 * u, 0.18 * u);
+
+    // Chibi torso / shirt
+    g.fillStyle = a.shirt || '#3b82f6';
+    g.beginPath(); g.roundRect(cx - 0.25 * u, cy - 0.12 * u, 0.5 * u, 0.32 * u, 0.09 * u); g.fill(); g.stroke();
+    // Little white collar V
+    g.fillStyle = '#f8fafc';
+    g.beginPath(); g.moveTo(cx - 0.08 * u, cy - 0.11 * u); g.lineTo(cx, cy - 0.01 * u); g.lineTo(cx + 0.08 * u, cy - 0.11 * u); g.closePath(); g.fill();
+
+    // Head
+    const hy = cy - 0.36 * u;
+    if (a.robot) {
+      g.fillStyle = '#7c3aed'; g.strokeStyle = INK; g.lineWidth = lw;
+      g.beginPath(); g.roundRect(cx - 0.28 * u, hy - 0.24 * u, 0.56 * u, 0.48 * u, 0.1 * u); g.fill(); g.stroke();
+      // Antenna
+      g.beginPath(); g.moveTo(cx, hy - 0.24 * u); g.lineTo(cx, hy - 0.38 * u); g.stroke();
+      g.fillStyle = '#38bdf8'; g.beginPath(); g.arc(cx, hy - 0.4 * u, 0.08 * u, 0, Math.PI * 2); g.fill(); g.stroke();
+      // Visor screen + glowing eyes
+      g.fillStyle = '#1e1b4b'; g.fillRect(cx - 0.2 * u, hy - 0.1 * u, 0.4 * u, 0.2 * u);
+      g.fillStyle = '#38bdf8';
+      g.fillRect(cx - 0.13 * u, hy - 0.04 * u, 0.09 * u, 0.09 * u);
+      g.fillRect(cx + 0.04 * u, hy - 0.04 * u, 0.09 * u, 0.09 * u);
+    } else {
+      g.fillStyle = '#fde0c2'; g.strokeStyle = INK; g.lineWidth = lw;
+      g.beginPath(); g.arc(cx, hy, 0.28 * u, 0, Math.PI * 2); g.fill(); g.stroke();
+
+      // Hair / Hat / Helmet cap
+      g.fillStyle = a.helmet || a.hat || a.hair || '#231710';
+      g.beginPath(); g.arc(cx, hy - 0.04 * u, 0.29 * u, Math.PI * 0.92, Math.PI * 2.08); g.closePath(); g.fill(); g.stroke();
+
+      // Crown for CEO
+      if (a.crown) {
+        g.fillStyle = '#facc15'; g.strokeStyle = INK; g.lineWidth = lw * 0.9;
+        g.beginPath();
+        g.moveTo(cx - 0.18 * u, hy - 0.26 * u); g.lineTo(cx - 0.12 * u, hy - 0.44 * u);
+        g.lineTo(cx, hy - 0.32 * u); g.lineTo(cx + 0.12 * u, hy - 0.44 * u);
+        g.lineTo(cx + 0.18 * u, hy - 0.26 * u); g.closePath(); g.fill(); g.stroke();
+      }
+
+      // Expressive pixel eyes + white sparkle + rosy cheeks
+      g.fillStyle = '#111827';
+      g.fillRect(cx - 0.12 * u, hy - 0.01 * u, 0.065 * u, 0.09 * u);
+      g.fillRect(cx + 0.055 * u, hy - 0.01 * u, 0.065 * u, 0.09 * u);
+      g.fillStyle = '#ffffff';
+      g.fillRect(cx - 0.11 * u, hy, 0.025 * u, 0.03 * u);
+      g.fillRect(cx + 0.065 * u, hy, 0.025 * u, 0.03 * u);
+      g.fillStyle = 'rgba(244, 114, 182, 0.45)';
+      g.fillRect(cx - 0.19 * u, hy + 0.07 * u, 0.07 * u, 0.04 * u);
+      g.fillRect(cx + 0.12 * u, hy + 0.07 * u, 0.07 * u, 0.04 * u);
+
+      if (a.helmet) {
+        g.fillStyle = 'rgba(56, 189, 248, 0.78)';
+        g.fillRect(cx - 0.19 * u, hy - 0.06 * u, 0.38 * u, 0.11 * u);
+        g.strokeRect(cx - 0.19 * u, hy - 0.06 * u, 0.38 * u, 0.11 * u);
+      } else if (a.glasses) {
+        g.strokeStyle = INK; g.lineWidth = lw * 0.9;
+        g.strokeRect(cx - 0.17 * u, hy - 0.04 * u, 0.14 * u, 0.12 * u);
+        g.strokeRect(cx + 0.03 * u, hy - 0.04 * u, 0.14 * u, 0.12 * u);
+        g.beginPath(); g.moveTo(cx - 0.03 * u, hy + 0.01 * u); g.lineTo(cx + 0.03 * u, hy + 0.01 * u); g.stroke();
+      }
+    }
   }
 
   function drawCharacter(a, now) {
-    const s = cam.z * baseScale;
+    const p = toScreen(a.x, a.y);
+    const u = cam.z * baseScale * TILE;
     const walking = a.state === 'walk' || a.state === 'back';
-    const bob = walking ? Math.abs(Math.sin(now * 10)) * 0.18 : Math.sin(now * 2.5 + a.x) * 0.03;
-    const baseZ = (a.state === 'work' && !a.sporty) ? 0.22 : 0;
-
-    const sh = iso(a.x, a.y, 0.02);
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
-    ctx.beginPath(); ctx.ellipse(sh.x, sh.y, 12 * s, 6 * s, 0, 0, Math.PI * 2); ctx.fill();
+    const bob = walking ? Math.abs(Math.sin(now * 10)) * 0.08 * u : Math.sin(now * 2.6 + a.x) * 0.02 * u;
+    a.screenX = p.x;
+    a.screenY = p.y - 0.36 * u - bob;
 
     if (!buildMode && hoveredAgent === a.id) {
       ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.ellipse(sh.x, sh.y, 18 * s, 9 * s, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 0.34 * u, 0.44 * u, 0.2 * u, 0, 0, Math.PI * 2); ctx.stroke();
     }
-
-    const bx = a.x - 0.26, by = a.y - 0.22;
-    box(bx, by, baseZ + 0.15 + bob, 0.52, 0.42, 0.6, a.shirt, a.shirt, '#111827');
-
-    const hp = iso(a.x, a.y, baseZ + 1.08 + bob), hr = 11.5 * s;
-    a.screenX = hp.x; a.screenY = hp.y;
-
-    if (a.robot) {
-      box(bx - 0.04, by - 0.04, baseZ + 0.76 + bob, 0.6, 0.5, 0.54, '#7c3aed', '#5b21b6', '#4c1d95');
-      const ant = iso(a.x, a.y, baseZ + 1.52 + bob);
-      ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(ant.x, ant.y, 4 * s, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#e0f2fe';
-      ctx.fillRect(hp.x - 5 * s, hp.y - 2 * s, 3.5 * s, 3.5 * s);
-      ctx.fillRect(hp.x + 1.5 * s, hp.y - 2 * s, 3.5 * s, 3.5 * s);
-    } else {
-      ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.arc(hp.x, hp.y, hr, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = a.helmet || a.hat || a.hair;
-      ctx.beginPath(); ctx.arc(hp.x, hp.y - 2 * s, hr * 1.03, Math.PI * 0.92, Math.PI * 2.08); ctx.fill();
-      if (a.crown) {
-        ctx.fillStyle = '#ffd166';
-        ctx.beginPath();
-        ctx.moveTo(hp.x - 7 * s, hp.y - 10 * s); ctx.lineTo(hp.x - 4 * s, hp.y - 17 * s);
-        ctx.lineTo(hp.x, hp.y - 12 * s); ctx.lineTo(hp.x + 4 * s, hp.y - 17 * s);
-        ctx.lineTo(hp.x + 7 * s, hp.y - 10 * s); ctx.closePath(); ctx.fill();
-      }
-      ctx.fillStyle = '#111827';
-      ctx.beginPath();
-      ctx.arc(hp.x - 3.6 * s, hp.y + 1.2 * s, 1.7 * s, 0, Math.PI * 2);
-      ctx.arc(hp.x + 3.6 * s, hp.y + 1.2 * s, 1.7 * s, 0, Math.PI * 2);
-      ctx.fill();
-      if (a.helmet) {
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
-        ctx.fillRect(hp.x - 7 * s, hp.y - 1.5 * s, 14 * s, 4 * s);
-      } else if (a.glasses) {
-        ctx.strokeStyle = '#111827'; ctx.lineWidth = 1.2;
-        ctx.strokeRect(hp.x - 6.5 * s, hp.y - 1 * s, 5 * s, 4 * s);
-        ctx.strokeRect(hp.x + 1.5 * s, hp.y - 1 * s, 5 * s, 4 * s);
-      }
-    }
+    renderChibi(ctx, p.x, p.y - bob, u, a, walking ? now * 12 : 0);
   }
 
-  function roomLabel(x, y, text, accent) {
-    const p = iso(x, y, 0.04), s = cam.z * baseScale;
+  function roomLabel(x, y, text, color) {
+    const p = toScreen(x, y), s = cam.z * baseScale;
     ctx.save();
-    ctx.font = '700 ' + Math.max(9, Math.round(11 * s)) + 'px var(--f), sans-serif';
+    ctx.font = '700 ' + Math.max(10, Math.round(11 * s)) + 'px var(--f), sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillStyle = accent || (isNight ? 'rgba(226,232,240,0.72)' : 'rgba(51,65,85,0.65)');
+    ctx.fillStyle = color;
     ctx.fillText(text, p.x, p.y);
     ctx.restore();
   }
 
   function drawScene(now) {
-    const s = cam.z * baseScale;
-    ctx.fillStyle = isNight ? '#070b14' : '#1b2434';
+    const s = cam.z * baseScale, u = s * TILE;
+    ctx.fillStyle = isNight ? '#0f172a' : '#cfd8e3';
     ctx.fillRect(0, 0, W, H);
 
-    // 1) Exterior Street
-    tile(0, 0, 24, 2.8, isNight ? '#1e293b' : '#475569');
-    for (let i = 0; i < 5; i++) tile(8.2 + i * 0.45, 0.35, 0.22, 1.9, isNight ? '#475569' : '#cbd5e1');
-    tile(0, 2.6, 24, 0.65, isNight ? '#334155' : '#94a3b8');
-    drawTree(1.2, 0.35); drawTree(22.2, 0.35);
-    [4.6, 13.0, 20.0].forEach(lx => {
-      box(lx, 2.7, 0, 0.14, 0.14, 2.3, '#64748b', '#475569', '#334155');
-      if (isNight) lightPool(lx + 0.1, 2.4, 2.1, 86, 'rgba(253, 224, 71, 0.35)');
-    });
-    vehicles.forEach(drawScooter);
-
-    // 2) Main Floor Slab (Customizable Floor!)
+    // 1) Main Floor Slab (Classic Zyra Tile Floor)
     const fl = FLOOR_STYLES[layout.floorIdx || 0] || FLOOR_STYLES[0];
-    box(1.8, 3.3, -0.4, 20.8, 14.3, 0.4, isNight ? fl.night : fl.day, '#64748b', '#475569');
+    pxRect(1.0, 1.4, MAP_W - 2.0, MAP_H - 2.0, isNight ? fl.night : fl.day, INK, 2.2);
 
-    // Zone Accent Rugs (Server, CEO, LINE)
-    tile(2.0, 3.4, 5.6, 5.6, isNight ? 'rgba(30,41,59,0.65)' : 'rgba(219,234,254,0.68)');
-    tile(16.4, 3.4, 6.0, 5.6, isNight ? 'rgba(124,77,37,0.75)' : 'rgba(198,147,99,0.78)');
-    tile(16.4, 9.4, 6.0, 5.4, isNight ? 'rgba(19,48,37,0.72)' : 'rgba(220,252,231,0.72)');
+    // Zone Floor Tints (Server cool-blue, CEO warm wood, LINE fresh mint)
+    pxRect(1.1, 1.5, 6.2, 5.2, isNight ? 'rgba(30, 58, 138, 0.35)' : '#d4e2f4');
+    pxRect(16.5, 1.5, 6.4, 5.5, isNight ? 'rgba(120, 53, 15, 0.38)' : '#e6c99e');
+    pxRect(16.5, 8.2, 6.4, 5.1, isNight ? 'rgba(6, 78, 59, 0.38)' : '#d4f0df');
 
-    // Build Mode Snap Grid
-    const gridStep = buildMode ? 1.0 : 2.0;
-    ctx.strokeStyle = buildMode ? 'rgba(249,115,22,0.22)' : (isNight ? 'rgba(15,23,42,0.10)' : 'rgba(148,163,184,0.18)');
+    // Classic Subtle Grid Tile Lines
+    ctx.strokeStyle = buildMode ? 'rgba(249,115,22,0.28)' : (isNight ? 'rgba(255,255,255,0.06)' : fl.line);
     ctx.lineWidth = 1;
-    for (let gx = 2.0; gx <= 22.4; gx += gridStep) {
-      const a = iso(gx, 3.3, 0.01), b = iso(gx, 17.6, 0.01);
+    for (let gx = 1; gx <= MAP_W - 1; gx++) {
+      const a = toScreen(gx, 1.4), b = toScreen(gx, MAP_H - 0.6);
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     }
-    if (buildMode) {
-      for (let gy = 3.4; gy <= 17.6; gy += 1.0) {
-        const a = iso(1.8, gy, 0.01), b = iso(22.6, gy, 0.01);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-      }
+    for (let gy = 2; gy <= MAP_H - 1; gy++) {
+      const a = toScreen(1.0, gy), b = toScreen(MAP_W - 1.0, gy);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     }
 
-    // Perimeter Cutaway Walls (Customizable Wall Color!)
-    const wc = layout.wallColor || '#ffffff';
-    box(1.8, 3.05, 0, 20.8, 0.26, 2.8, isNight ? shade(wc, -55) : wc, shade(wc, -18), shade(wc, -32));
-    box(1.56, 3.05, 0, 0.26, 14.55, 2.8, isNight ? shade(wc, -55) : wc, shade(wc, -24), shade(wc, -38));
+    // 2) Classic 2.5D Top Wall Band (with front wall face + corkboards + posters + clock)
+    const wc = layout.wallColor || '#b8c7dc';
+    pxRect(0.8, 0.4, MAP_W - 1.6, 0.4, isNight ? '#334155' : '#8b9bb4', INK, 2); // wall top cap
+    pxRect(1.0, 0.8, MAP_W - 2.0, 0.72, isNight ? shade(wc, -55) : wc, INK, 1.8); // front wall face
+    // Side & bottom outer borders
+    pxRect(0.8, 0.4, 0.25, MAP_H - 0.8, isNight ? '#334155' : '#8b9bb4', INK, 1.6);
+    pxRect(MAP_W - 1.05, 0.4, 0.25, MAP_H - 0.8, isNight ? '#334155' : '#8b9bb4', INK, 1.6);
+    pxRect(0.8, MAP_H - 0.65, MAP_W - 1.6, 0.28, isNight ? '#334155' : '#8b9bb4', INK, 1.6);
+
+    // Wall Decorations (just like Zyra World!)
+    drawWallDecor(8.4, 0.84, 'corkboard');
+    drawWallDecor(10.6, 0.84, 'poster');
+    drawWallDecor(12.2, 0.84, 'corkboard');
+    drawWallDecor(14.6, 0.84, 'clock');
+    drawWallDecor(18.6, 0.84, 'corkboard');
+    drawWallDecor(20.6, 0.84, 'poster');
+
+    // Solar Battery Monitor on Server Room Wall
+    const sp = toScreen(6.0, 0.86);
+    ctx.fillStyle = '#0f172a'; ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
+    ctx.fillRect(sp.x, sp.y, 1.05 * u, 0.6 * u); ctx.strokeRect(sp.x, sp.y, 1.05 * u, 0.6 * u);
+    const batt = (window.LASTD && window.LASTD.solar && window.LASTD.solar.battery) || 19;
+    ctx.fillStyle = '#4ade80'; ctx.font = '700 ' + Math.max(9, Math.round(10 * s)) + 'px var(--f), sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('☀️ ' + batt + '%', sp.x + 0.52 * u, sp.y + 0.39 * u);
 
     // Room Labels
-    roomLabel(4.8, 8.5, '🖥️ SERVER & SOLAR', isNight ? '#93c5fd' : '#1d4ed8');
-    roomLabel(19.4, 8.5, '👑 CEO OFFICE', '#fef08a');
-    roomLabel(19.4, 14.3, '💬 LINE OA HUB', isNight ? '#4ade80' : '#15803d');
+    roomLabel(4.2, 6.45, '🖥️ SERVER & SOLAR', isNight ? '#93c5fd' : '#1d4ed8');
+    roomLabel(19.7, 6.75, '👑 CEO OFFICE', isNight ? '#fde047' : '#78350f');
+    roomLabel(19.7, 13.05, '💬 LINE OA HUB', isNight ? '#4ade80' : '#15803d');
+    roomLabel(11.6, 13.15, '🤝 TEAM & MEETING HALL', isNight ? '#cbd5e1' : '#475569');
 
-    // Solar Wall Monitor inside Server Room
-    box(6.4, 3.36, 1.0, 1.0, 0.12, 0.95, '#0f172a', '#111827', '#090d16');
-    const mp = iso(6.9, 3.5, 1.5);
-    ctx.fillStyle = '#22c55e'; ctx.font = '700 ' + Math.round(10 * s) + 'px var(--f), sans-serif'; ctx.textAlign = 'center';
-    const batt = (window.LASTD && window.LASTD.solar && window.LASTD.solar.battery) || 19;
-    ctx.fillText(batt + '%', mp.x, mp.y);
-
-    // 3) Depth-sorted Furniture + Partitions + Characters + Zyra Proximity Ring
+    // 3) CEO Destination Marker & Zyra Proximity Connection Ring
     if (!buildMode && ceoTarget) {
-      const tp = iso(ceoTarget.x, ceoTarget.y, 0.03);
-      ctx.strokeStyle = 'rgba(250, 204, 21, 0.75)'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.ellipse(tp.x, tp.y, 12 * s, 6 * s, 0, 0, Math.PI * 2); ctx.stroke();
+      const tp = toScreen(ceoTarget.x, ceoTarget.y);
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(tp.x, tp.y, 0.28 * u, 0, Math.PI * 2); ctx.stroke();
     }
     if (!buildMode && proxAgent) {
       const ceo = agents[0];
-      const p1 = iso(ceo.x, ceo.y, 0.05), p2 = iso(proxAgent.x, proxAgent.y, 0.05);
+      const p1 = toScreen(ceo.x, ceo.y), p2 = toScreen(proxAgent.x, proxAgent.y);
       ctx.save();
-      ctx.strokeStyle = 'rgba(74, 222, 128, 0.72)'; ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2.5;
       ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.beginPath(); ctx.ellipse(p2.x, p2.y, 20 * s, 10 * s, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.14)';
+      ctx.beginPath(); ctx.arc(p2.x, p2.y, 0.65 * u, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.restore();
     }
+
+    // 4) Depth-sorted Furniture + Characters (by Y coordinate for clean 2.5D overlap)
     const drawables = [];
     layout.items.forEach(it => {
       const dm = itemDims(it);
-      drawables.push({ depth: it.x + it.y + (dm.w + dm.d) * 0.45, draw: () => drawItem(it, now) });
+      drawables.push({ depth: it.y + dm.d, draw: () => drawItem(it, now) });
     });
-    agents.forEach(a => drawables.push({ depth: a.x + a.y + 0.4, draw: () => drawCharacter(a, now) }));
+    agents.forEach(a => drawables.push({ depth: a.y + 0.35, draw: () => drawCharacter(a, now) }));
     drawables.sort((a, b) => a.depth - b.depth);
     drawables.forEach(d => d.draw());
 
-    // 4) Ghost preview while dragging from Build Palette
+    // 5) Build Mode Ghost Preview
     if (buildMode && ghost && CATALOG[ghost.type]) {
-      const def = CATALOG[ghost.type];
-      drawSelectionOutline(ghost.x, ghost.y, def.w, def.d, '#22c55e');
-    }
-
-    // 5) Night string lights
-    if (isNight) {
-      for (let i = 0; i < 6; i++) {
-        const lx = 8.4 + i * 1.4, lp = iso(lx, 9.2, 2.7);
-        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(lp.x, lp.y, 2.6 * s, 0, Math.PI * 2); ctx.fill();
-        lightPool(lx, 9.2, 2.65, 28, 'rgba(253, 224, 71, 0.20)');
-      }
+      const def = CATALOG[ghost.type], gp = toScreen(ghost.x, ghost.y);
+      ctx.save();
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2.5;
+      ctx.fillRect(gp.x, gp.y, def.w * u, def.d * u);
+      ctx.strokeRect(gp.x, gp.y, def.w * u, def.d * u);
+      ctx.restore();
     }
   }
 
+  // ---- Movement, Proximity Chat, and Animation Loop ----
   let lastTs = 0;
   let ceoTarget = null;
   let proxAgent = null;
   let lastProxId = null;
   const officeChatMsgs = [
-    { who: 'LINE OA', color: '#06c755', text: 'ระบบออฟฟิศเสมือนพร้อมใช้งาน — คลิกพื้นหรือกด WASD เพื่อเดินคุยกับเอเจนต์ได้เลย!' }
+    { who: 'LINE OA', color: '#06c755', text: 'ยินดีต้อนรับสู่ออฟฟิศ AboutMeProcess สไตล์คลาสสิก — คลิกพื้นหรือกด WASD เพื่อเดินคุยกับเอเจนต์ได้เลย!' }
   ];
 
   function addOfficeChat(who, color, text) {
@@ -610,7 +687,7 @@
     if (nearest && nearest.id !== lastProxId) {
       lastProxId = nearest.id;
       const msg = nearest.statusText || 'พร้อมรับคำสั่งครับ CEO!';
-      nearest.bubbleText = '💬 ' + msg;
+      nearest.bubbleText = msg;
       nearest.bubbleUntil = now + 4.5;
       addOfficeChat(nearest.name, nearest.color, 'เดินเข้ามาคุย: ' + msg);
     } else if (!nearest) {
@@ -635,15 +712,13 @@
     cam.x += (cam.tx - cam.x) * 0.14; cam.y += (cam.ty - cam.y) * 0.14; cam.z += (cam.tz - cam.z) * 0.14;
 
     if (!paused && !buildMode) {
-      vehicles.forEach(v => { v.x += v.speed * dt; if (v.x > 24.5) v.x = -1.8; });
-      // CEO direct WASD / click-to-walk movement
       const ceo = agents[0];
       if (ceo && ceoTarget) {
-        const dx = ceoTarget.x - ceo.x, dy = ceoTarget.y - ceo.y, d = Math.hypot(dx, dy), st = 2.9 * dt;
+        const dx = ceoTarget.x - ceo.x, dy = ceoTarget.y - ceo.y, d = Math.hypot(dx, dy), st = 3.2 * dt;
         if (d <= st) { ceo.x = ceoTarget.x; ceo.y = ceoTarget.y; ceo.state = 'work'; ceoTarget = null; }
         else { ceo.x += (dx / d) * st; ceo.y += (dy / d) * st; ceo.state = 'walk'; }
       }
-      const walkingCount = agents.filter(a => a.state === 'walk' || a.state === 'back').length;
+      const walkingCount = agents.filter(a => a.id !== 'ceo' && (a.state === 'walk' || a.state === 'back')).length;
       agents.forEach(a => {
         if (a.id === 'ceo') return;
         if (a.state === 'work') {
@@ -658,7 +733,7 @@
           }
         } else if (a.state === 'walk' || a.state === 'back') {
           const gx = a.state === 'walk' ? a.tx : a.home.x, gy = a.state === 'walk' ? a.ty : a.home.y;
-          const dx = gx - a.x, dy = gy - a.y, dist = Math.hypot(dx, dy), step = 1.85 * dt;
+          const dx = gx - a.x, dy = gy - a.y, dist = Math.hypot(dx, dy), step = 1.9 * dt;
           if (dist <= step) {
             a.x = gx; a.y = gy;
             if (a.state === 'walk') { a.state = 'chat'; a.timer = now + 3.8; }
@@ -676,7 +751,7 @@
       if (a.elName) {
         a.elName.style.opacity = buildMode ? '0.35' : '1';
         a.elName.style.pointerEvents = buildMode ? 'none' : 'auto';
-        a.elName.style.transform = `translate(${a.screenX.toFixed(1)}px, ${(a.screenY + 22 * s).toFixed(1)}px) translate(-50%, 0)`;
+        a.elName.style.transform = `translate(${a.screenX.toFixed(1)}px, ${(a.screenY + 32 * s).toFixed(1)}px) translate(-50%, 0)`;
       }
       if (a.elBubble) {
         const show = !buildMode && now < a.bubbleUntil && a.bubbleText;
@@ -693,8 +768,8 @@
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
     W = Math.max(320, Math.round(rect.width));
-    H = Math.max(500, Math.min(680, Math.round(W * 0.72)));
-    baseScale = Math.min(1.05, Math.min(W / 1280, H / 680));
+    H = Math.max(500, Math.min(680, Math.round(W * 0.65)));
+    baseScale = Math.min(1.08, Math.min(W / (MAP_W * TILE + 24), H / (MAP_H * TILE + 24)));
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = W * DPR; canvas.height = H * DPR;
     canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
@@ -703,31 +778,24 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // Hit testing
   function getPointer(ev) {
     const r = canvas.getBoundingClientRect();
     return { x: ev.clientX - r.left, y: ev.clientY - r.top };
   }
-
   function findItemAtGrid(gx, gy) {
-    // Check top-most items first
     for (let i = layout.items.length - 1; i >= 0; i--) {
       const it = layout.items[i], dm = itemDims(it);
-      if (gx >= it.x - 0.35 && gx <= it.x + dm.w + 0.35 && gy >= it.y - 0.35 && gy <= it.y + dm.d + 0.35) {
-        return it;
-      }
+      if (gx >= it.x - 0.2 && gx <= it.x + dm.w + 0.2 && gy >= it.y - 0.2 && gy <= it.y + dm.d + 0.2) return it;
     }
     return null;
   }
-
   function findAgentAt(px, py) {
     const s = cam.z * baseScale;
-    let best = null, bestD = 28 * s;
+    let best = null, bestD = 26 * s;
     agents.forEach(a => { const d = Math.hypot(px - a.screenX, py - a.screenY); if (d < bestD) { bestD = d; best = a; } });
     return best;
   }
 
-  // Pointer Events: Drag Furniture in Build Mode OR Pan Camera / Click Agent/Lamp in Live Mode
   canvas.addEventListener('pointerdown', ev => {
     const p = getPointer(ev);
     dragMoved = false;
@@ -740,9 +808,7 @@
         dragStart = { x: g.x, y: g.y, ox: hit.x, oy: hit.y };
         canvas.setPointerCapture(ev.pointerId);
         return;
-      } else {
-        selectItem(null);
-      }
+      } else selectItem(null);
     }
     draggingCam = true;
     dragStart = { x: p.x, y: p.y, cx: cam.tx, cy: cam.ty };
@@ -752,8 +818,7 @@
   canvas.addEventListener('pointermove', ev => {
     const p = getPointer(ev);
     if (draggingItem && buildMode) {
-      const g = screenToGrid(p.x, p.y);
-      const dm = itemDims(draggingItem);
+      const g = screenToGrid(p.x, p.y), dm = itemDims(draggingItem);
       const pos = clampToRoom(dragStart.ox + (g.x - dragStart.x), dragStart.oy + (g.y - dragStart.y), dm.w, dm.d);
       draggingItem.x = pos.x; draggingItem.y = pos.y;
       dragMoved = true;
@@ -763,7 +828,7 @@
       const s = cam.z * baseScale;
       const dx = (p.x - dragStart.x) / s, dy = (p.y - dragStart.y) / s;
       if (Math.hypot(dx, dy) > 4) dragMoved = true;
-      cam.tx = Math.max(-420, Math.min(420, dragStart.cx + dx));
+      cam.tx = Math.max(-440, Math.min(440, dragStart.cx + dx));
       cam.ty = Math.max(-280, Math.min(280, dragStart.cy + dy));
       return;
     }
@@ -778,11 +843,7 @@
   });
 
   canvas.addEventListener('pointerup', ev => {
-    if (draggingItem) {
-      if (dragMoved) saveLayout();
-      draggingItem = null;
-      return;
-    }
+    if (draggingItem) { if (dragMoved) saveLayout(); draggingItem = null; return; }
     if (!draggingCam) return;
     draggingCam = false;
     if (!dragMoved && !buildMode) {
@@ -791,18 +852,17 @@
       if (hit) {
         focusAgent(hit.id);
         if (hit.id === 'ceo') {
-          if (typeof window.showMoToast === 'function') window.showMoToast('👑 ห้องผู้บริหาร CEO — AboutMeProcess HQ');
+          if (typeof window.showMoToast === 'function') window.showMoToast('👑 ห้องผู้บริหาร CEO — คลิกพื้นหรือกด WASD เพื่อเดินคุยกับเอเจนต์');
         } else if (typeof window.openAgent === 'function') window.openAgent(hit.id);
         return;
       }
-      // Clickable lamps in Live Mode, otherwise walk CEO to clicked floor tile
       const g = screenToGrid(p.x, p.y);
       const lhit = findItemAtGrid(g.x, g.y);
       if (lhit && lhit.type === 'lamp') {
         lhit.on = lhit.on === false ? true : false;
         saveLayout();
         if (typeof window.showMoToast === 'function') window.showMoToast(lhit.on ? '💡 เปิดโคมไฟแล้ว' : '🌑 ปิดโคมไฟแล้ว');
-      } else if (g.x >= 2.0 && g.x <= 22.4 && g.y >= 3.4 && g.y <= 17.4) {
+      } else if (g.x >= 1.1 && g.x <= MAP_W - 1.1 && g.y >= 1.5 && g.y <= MAP_H - 1.0) {
         walkCeoTo(g.x, g.y);
       }
     }
@@ -813,7 +873,7 @@
     setZoom(cam.tz * (ev.deltaY < 0 ? 1.12 : 0.89));
   }, { passive: false });
 
-  // HTML5 Drag & Drop from Build Palette directly onto 3D Canvas!
+  // HTML5 Drag & Drop from Build Palette
   canvas.addEventListener('dragover', ev => {
     if (!buildMode) return;
     ev.preventDefault();
@@ -836,13 +896,14 @@
     layout.items.push(created);
     selectItem(created.id);
     saveLayout();
-    if (typeof window.showMoToast === 'function') window.showMoToast('✅ วาง ' + def.label + ' แล้ว (ลากย้ายหรือกดหมุน 90° ได้)');
+    if (typeof window.showMoToast === 'function') window.showMoToast('✨ วาง ' + def.label + ' เรียบร้อย');
   });
 
-  // Build Mode UI Controls
-  const bBtn = document.getElementById('moBuildBtn');
-  const bBar = document.getElementById('moBuildBar');
-  const bPal = document.getElementById('moBPalette');
+  // ---- Build Mode Toolbar UI ----
+  const buildBtn = document.getElementById('moBuildBtn');
+  const buildBar = document.getElementById('moBuildBar');
+  const bTabs = document.getElementById('moBTabs');
+  const bPalette = document.getElementById('moBPalette');
   const bSel = document.getElementById('moBSel');
   const bSelName = document.getElementById('moBSelName');
   const bSwatches = document.getElementById('moBSwatches');
@@ -853,44 +914,42 @@
     if (!bSel) return;
     if (!it || !buildMode) { bSel.hidden = true; return; }
     bSel.hidden = false;
-    const def = CATALOG[it.type];
-    if (bSelName) bSelName.textContent = (def ? def.label : it.type) + (it.rot ? ' (หมุน 90°)' : '');
+    if (bSelName) bSelName.textContent = (CATALOG[it.type] ? CATALOG[it.type].label : it.type) + (it.rot ? ' (หมุน 90°)' : '');
     if (bSwatches) {
       bSwatches.textContent = '';
-      ITEM_SWATCHES.forEach(col => {
+      ITEM_SWATCHES.forEach(hex => {
         const sw = document.createElement('button');
         sw.type = 'button';
-        sw.className = 'mo-sw' + (it.color === col ? ' on' : '');
-        sw.style.background = col;
-        sw.onclick = () => { it.color = col; saveLayout(); selectItem(it.id); };
+        sw.className = 'mo-sw' + (it.color === hex ? ' on' : '');
+        sw.style.background = hex;
+        sw.onclick = () => { it.color = hex; saveLayout(); selectItem(it.id); };
         bSwatches.appendChild(sw);
       });
     }
   }
 
   function renderPalette() {
-    if (!bPal) return;
-    bPal.textContent = '';
+    if (!bPalette) return;
+    bPalette.textContent = '';
     if (activeBTab === 'floor') {
       FLOOR_STYLES.forEach((f, idx) => {
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'mo-b-item' + (layout.floorIdx === idx ? ' on' : '');
-        b.innerHTML = '<span style="width:12px;height:12px;border-radius:3px;background:' + f.day + ';border:1px solid #64748b;display:inline-block"></span> พื้น: ' + f.name;
+        b.innerHTML = '<i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:' + f.day + ';border:1px solid #263042;margin-right:5px;vertical-align:-2px"></i>' + f.name;
         b.onclick = () => { layout.floorIdx = idx; saveLayout(); renderPalette(); };
-        bPal.appendChild(b);
+        bPalette.appendChild(b);
       });
-      WALL_COLORS.forEach(w => {
+      WALL_COLORS.forEach(wc => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'mo-b-item' + (layout.wallColor === w.c ? ' on' : '');
-        b.innerHTML = '<span style="width:12px;height:12px;border-radius:50%;background:' + w.c + ';border:1px solid #64748b;display:inline-block"></span> ผนัง: ' + w.name;
-        b.onclick = () => { layout.wallColor = w.c; saveLayout(); renderPalette(); };
-        bPal.appendChild(b);
+        b.className = 'mo-b-item' + (layout.wallColor === wc.hex ? ' on' : '');
+        b.innerHTML = '<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + wc.hex + ';border:1px solid #263042;margin-right:5px;vertical-align:-2px"></i>ผนัง: ' + wc.name;
+        b.onclick = () => { layout.wallColor = wc.hex; saveLayout(); renderPalette(); };
+        bPalette.appendChild(b);
       });
       return;
     }
-
     Object.keys(CATALOG).forEach(type => {
       const def = CATALOG[type];
       if (def.cat !== activeBTab) return;
@@ -899,81 +958,72 @@
       b.className = 'mo-b-item';
       b.draggable = true;
       b.textContent = def.label;
-      b.addEventListener('dragstart', ev => {
-        window._dragType = type;
-        ev.dataTransfer.setData('text/plain', type);
-      });
+      b.title = 'ลากไปวางบนแผนที่ หรือคลิกเพื่อเพิ่ม';
+      b.addEventListener('dragstart', ev => { window._dragType = type; ev.dataTransfer.setData('text/plain', type); });
       b.addEventListener('dragend', () => { ghost = null; window._dragType = null; });
-      // Also allow 1-click spawn at center for mobile/touch users!
       b.onclick = () => {
-        const created = mkItem(type, 11.0, 9.0, 0);
+        const pos = clampToRoom(CX - def.w / 2 + (Math.random() - 0.5) * 2, CY - def.d / 2 + (Math.random() - 0.5) * 2, def.w, def.d);
+        const created = mkItem(type, pos.x, pos.y, 0);
         layout.items.push(created);
         selectItem(created.id);
         saveLayout();
-        if (typeof window.showMoToast === 'function') window.showMoToast('✅ เพิ่ม ' + def.label + ' กลางห้องแล้ว — ลากย้ายได้เลย!');
       };
-      bPal.appendChild(b);
+      bPalette.appendChild(b);
     });
   }
 
-  if (bBtn && bBar) {
-    bBtn.onclick = () => {
+  if (buildBtn && buildBar) {
+    buildBtn.onclick = () => {
       buildMode = !buildMode;
-      bBar.hidden = !buildMode;
-      bBtn.setAttribute('aria-pressed', buildMode ? 'true' : 'false');
-      bBtn.textContent = buildMode ? '✅ เสร็จสิ้นแต่งห้อง' : '🛠️ แต่งออฟฟิศ';
+      buildBtn.classList.toggle('on', buildMode);
+      buildBtn.setAttribute('aria-pressed', String(buildMode));
+      buildBar.hidden = !buildMode;
       if (!buildMode) selectItem(null);
-      else {
-        renderPalette();
-        if (typeof window.showMoToast === 'function') window.showMoToast('🛠️ โหมดแต่งออฟฟิศแบบ The Sims: ลากเฟอร์นิเจอร์วาง/ย้าย/หมุนได้เลย!');
+      else renderPalette();
+      if (typeof window.showMoToast === 'function') {
+        window.showMoToast(buildMode ? '🛠️ โหมดแต่งออฟฟิศ — ลากวาง ย้าย หมุน เปลี่ยนสีพื้น/ผนังได้ทันที' : '✅ บันทึกผังออฟฟิศแล้ว');
       }
     };
   }
-
-  document.querySelectorAll('#moBTabs .mo-fbtn').forEach(tb => {
-    tb.onclick = () => {
-      activeBTab = tb.dataset.btab;
-      document.querySelectorAll('#moBTabs .mo-fbtn').forEach(x => x.classList.toggle('on', x === tb));
-      renderPalette();
-    };
-  });
-
+  if (bTabs) {
+    bTabs.querySelectorAll('[data-btab]').forEach(btn => {
+      btn.onclick = () => {
+        activeBTab = btn.dataset.btab;
+        bTabs.querySelectorAll('[data-btab]').forEach(x => x.classList.toggle('on', x === btn));
+        renderPalette();
+      };
+    });
+  }
   const rotBtn = document.getElementById('moRotBtn');
   if (rotBtn) rotBtn.onclick = () => {
     const it = layout.items.find(x => x.id === selectedId);
     if (!it) return;
     it.rot = it.rot ? 0 : 1;
-    saveLayout();
-    selectItem(it.id);
+    const dm = itemDims(it);
+    const pos = clampToRoom(it.x, it.y, dm.w, dm.d);
+    it.x = pos.x; it.y = pos.y;
+    saveLayout(); selectItem(it.id);
   };
-
   const dupBtn = document.getElementById('moDupBtn');
   if (dupBtn) dupBtn.onclick = () => {
     const it = layout.items.find(x => x.id === selectedId);
     if (!it) return;
     const dm = itemDims(it);
-    const pos = clampToRoom(it.x + 1.0, it.y + 1.0, dm.w, dm.d);
+    const pos = clampToRoom(it.x + 1, it.y + 1, dm.w, dm.d);
     const copy = mkItem(it.type, pos.x, pos.y, it.rot, it.color);
     layout.items.push(copy);
-    selectItem(copy.id);
-    saveLayout();
+    selectItem(copy.id); saveLayout();
   };
-
   const delBtn = document.getElementById('moDelBtn');
   if (delBtn) delBtn.onclick = () => {
-    if (!selectedId) return;
     layout.items = layout.items.filter(x => x.id !== selectedId);
-    selectItem(null);
-    saveLayout();
+    selectItem(null); saveLayout();
   };
-
   const resetBtn = document.getElementById('moResetLayout');
   if (resetBtn) resetBtn.onclick = () => {
     if (!confirm('รีเซ็ตผังออฟฟิศกลับเป็นค่าเริ่มต้น?')) return;
     layout = defaultLayout();
-    selectItem(null);
-    saveLayout();
-    renderPalette();
+    selectItem(null); saveLayout(); renderPalette();
     if (typeof window.showMoToast === 'function') window.showMoToast('↩️ รีเซ็ตผังออฟฟิศเรียบร้อยแล้ว');
   };
 
@@ -995,7 +1045,7 @@
     }
   });
 
-  // ---- Zyra-style Left Vertical Icon Rail & Floating Drawer (Team / Office Chat / CEO Avatar) ----
+  // ---- Zyra-style Left Vertical Icon Rail & Floating Drawer ----
   let activeZTab = 'map';
   const zRail = document.getElementById('zyraRail');
   const zDrawer = document.getElementById('zyraDrawer');
@@ -1029,19 +1079,14 @@
           '<div class="zyra-tcard-h" style="--c:' + a.color + '">' +
             '<i class="zyra-dot"></i><strong>' + a.name + '</strong>' +
             '<span class="zyra-role ' + roleCls + '">' + (a.roleTag || 'AGENT') + '</span>' +
-          '</div>' +
-          '<small>' + (a.statusText || 'พร้อมทำงาน') + '</small>';
+          '</div><small>' + (a.statusText || 'พร้อมทำงาน') + '</small>';
         const acts = document.createElement('div');
         acts.className = 'zyra-tacts';
         if (a.id !== 'ceo') {
           const walkBtn = document.createElement('button');
           walkBtn.type = 'button';
           walkBtn.textContent = '🚶 เดินไปหา';
-          walkBtn.onclick = () => {
-            walkCeoTo(a.x - 1.1, a.y + 0.4);
-            focusAgent(a.id);
-            setZTab('map');
-          };
+          walkBtn.onclick = () => { walkCeoTo(a.x - 1.1, a.y + 0.4); focusAgent(a.id); setZTab('map'); };
           acts.appendChild(walkBtn);
         }
         const infoBtn = document.createElement('button');
@@ -1063,28 +1108,22 @@
         const item = document.createElement('div');
         item.className = 'zyra-msg';
         item.style.setProperty('--c', m.color || '#22c55e');
-        const b = document.createElement('b');
-        b.textContent = m.who;
-        const t = document.createElement('span');
-        t.textContent = m.text;
-        item.appendChild(b);
-        item.appendChild(t);
+        const b = document.createElement('b'); b.textContent = m.who;
+        const t = document.createElement('span'); t.textContent = m.text;
+        item.appendChild(b); item.appendChild(t);
         log.appendChild(item);
       });
       zBody.appendChild(log);
       const form = document.createElement('form');
       form.className = 'zyra-chat-form';
       const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.placeholder = 'พิมพ์คำสั่ง (เช่น /brief, /ledger, /solar)...';
-      const btn = document.createElement('button');
-      btn.type = 'submit';
-      btn.textContent = 'ส่ง';
+      inp.type = 'text'; inp.placeholder = 'พิมพ์คำสั่ง (เช่น /brief, /ledger, /solar)...';
+      const btn = document.createElement('button'); btn.type = 'submit'; btn.textContent = 'ส่ง';
       form.onsubmit = async ev => {
         ev.preventDefault();
         const v = inp.value.trim();
         if (!v) return;
-        addOfficeChat('👑 CEO', '#ffd166', v);
+        addOfficeChat('👑 CEO', '#f59e0b', v);
         inp.value = '';
         if (typeof window.sendCmd === 'function') {
           const dummy = document.createElement('div');
@@ -1093,21 +1132,16 @@
           if (reply) addOfficeChat('LINE OA', '#06c755', reply.slice(0, 220));
         }
       };
-      form.appendChild(inp);
-      form.appendChild(btn);
+      form.appendChild(inp); form.appendChild(btn);
       zBody.appendChild(form);
       zBody.scrollTop = zBody.scrollHeight;
     } else if (activeZTab === 'avatar') {
       zTitle.textContent = '🎭 ปรับแต่งอวาตาร์ CEO';
       const ceo = agents[0];
       const mkSec = (lbl, items, curVal, onPick) => {
-        const box = document.createElement('div');
-        box.className = 'zyra-tcard';
-        const h = document.createElement('small');
-        h.textContent = lbl;
-        box.appendChild(h);
-        const row = document.createElement('div');
-        row.className = 'zyra-av-row';
+        const box = document.createElement('div'); box.className = 'zyra-tcard';
+        const h = document.createElement('small'); h.textContent = lbl; box.appendChild(h);
+        const row = document.createElement('div'); row.className = 'zyra-av-row';
         items.forEach(([val, text]) => {
           const b = document.createElement('button');
           b.type = 'button';
@@ -1121,37 +1155,24 @@
           };
           row.appendChild(b);
         });
-        box.appendChild(row);
-        zBody.appendChild(box);
+        box.appendChild(row); zBody.appendChild(box);
       };
-      mkSec('สีสูทผู้บริหาร', [
-        ['#1e293b', '🖤 ดำกรม'], ['#1d4ed8', '💙 น้ำเงิน'], ['#15803d', '💚 เขียว'],
-        ['#7c3aed', '💜 ม่วง'], ['#b91c1c', '❤️ แดง']
-      ], ceoCustom.shirt, v => { ceoCustom.shirt = v; if (ceo) ceo.shirt = v; });
-      mkSec('เครื่องประดับศีรษะ', [
-        ['crown', '👑 มงกุฎ'], ['glasses', '🕶️ แว่นตา'], ['hat', '🧢 หมวก'], ['none', '✨ ปกติ']
-      ], ceoCustom.acc, v => {
+      mkSec('สีสูทผู้บริหาร', [['#334155', '🖤 ดำกรม'], ['#2563eb', '💙 น้ำเงิน'], ['#16a34a', '💚 เขียว'], ['#7c3aed', '💜 ม่วง'], ['#dc2626', '❤️ แดง']], ceoCustom.shirt, v => { ceoCustom.shirt = v; if (ceo) ceo.shirt = v; });
+      mkSec('เครื่องประดับศีรษะ', [['crown', '👑 มงกุฎ'], ['glasses', '🕶️ แว่นตา'], ['hat', '🧢 หมวก'], ['none', '✨ ปกติ']], ceoCustom.acc, v => {
         ceoCustom.acc = v;
         if (ceo) { ceo.crown = v === 'crown'; ceo.glasses = v === 'glasses'; ceo.hat = v === 'hat' ? '#f97316' : ''; }
       });
-      mkSec('สีผม', [
-        ['#18181b', 'ดำ'], ['#5b3719', 'น้ำตาล'], ['#eab308', 'ทอง'], ['#94a3b8', 'เทาเงิน']
-      ], ceoCustom.hair, v => { ceoCustom.hair = v; if (ceo) ceo.hair = v; });
+      mkSec('สีผม', [['#231710', 'ดำ'], ['#6b4226', 'น้ำตาล'], ['#eab308', 'ทอง'], ['#94a3b8', 'เทาเงิน']], ceoCustom.hair, v => { ceoCustom.hair = v; if (ceo) ceo.hair = v; });
     }
   }
-
-  if (zRail) {
-    zRail.querySelectorAll('.zyra-rbtn').forEach(b => {
-      b.onclick = () => setZTab(b.dataset.ztab === activeZTab && b.dataset.ztab !== 'map' ? 'map' : b.dataset.ztab);
-    });
-  }
+  if (zRail) zRail.querySelectorAll('.zyra-rbtn').forEach(b => { b.onclick = () => setZTab(b.dataset.ztab === activeZTab && b.dataset.ztab !== 'map' ? 'map' : b.dataset.ztab); });
   if (zClose) zClose.onclick = () => setZTab('map');
 
   function updateZoomLabel() {
     const zv = document.getElementById('moZoomVal');
     if (zv) zv.textContent = Math.round(cam.tz * 100) + '%';
   }
-  function setZoom(z) { cam.tz = Math.max(0.75, Math.min(2.6, z)); updateZoomLabel(); }
+  function setZoom(z) { cam.tz = Math.max(0.75, Math.min(2.4, z)); updateZoomLabel(); }
   function setPreset(name) {
     const p = PRESETS[name] || PRESETS.overview;
     cam.tx = p.x; cam.ty = p.y; cam.tz = p.z;
@@ -1161,92 +1182,27 @@
   function focusAgent(id) {
     const a = agents.find(x => x.id === id);
     if (!a) return;
-    const cx = a.x - CX, cy = a.y - CY;
-    cam.tx = -(cx - cy) * TW; cam.ty = -(cx + cy) * TH + 18; cam.tz = 1.85;
+    cam.tx = -(a.x - CX) * TILE;
+    cam.ty = -(a.y - CY) * TILE;
+    cam.tz = 1.65;
     a.bubbleText = a.statusText || 'พร้อมทำงาน';
     a.bubbleUntil = performance.now() / 1000 + 4.5;
     updateZoomLabel();
     document.querySelectorAll('.mo-dbtn[data-cam]').forEach(b => b.classList.remove('on'));
   }
 
+  // Export crisp Zyra-style chibi avatar PNG for Agent Modals
   const avatarCache = {};
   function renderAgentAvatar(id) {
     if (avatarCache[id]) return avatarCache[id];
-    const a = AGENT_DEF.find(x => x.id === id);
+    const a = agents.find(x => x.id === id) || AGENT_DEF.find(x => x.id === id);
     if (!a) return '';
-    const dpr = 2, w = 160, h = 200, s = 3.15, ox = w / 2, oy = 152;
+    const dpr = 2, w = 160, h = 200;
     const c = document.createElement('canvas');
     c.width = w * dpr; c.height = h * dpr;
     const g = c.getContext('2d');
     g.scale(dpr, dpr);
-
-    const pIso = (x, y, z) => ({
-      x: ox + (x - y) * TW * s * 0.52,
-      y: oy + (x + y) * TH * s * 0.52 - (z || 0) * ZH * s * 0.82
-    });
-    const pPoly = (pts, fill) => {
-      g.beginPath();
-      g.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
-      g.closePath();
-      g.fillStyle = fill;
-      g.fill();
-    };
-    const pBox = (x, y, z, bw, bd, bh, topC, leftC, rightC) => {
-      const p000 = pIso(x, y, z), p100 = pIso(x + bw, y, z), p110 = pIso(x + bw, y + bd, z), p010 = pIso(x, y + bd, z);
-      const p001 = pIso(x, y, z + bh), p101 = pIso(x + bw, y, z + bh), p111 = pIso(x + bw, y + bd, z + bh), p011 = pIso(x, y + bd, z + bh);
-      pPoly([p010, p110, p111, p011], leftC);
-      pPoly([p100, p110, p111, p101], rightC);
-      pPoly([p001, p101, p111, p011], topC);
-    };
-
-    // Ground shadow
-    const sh = pIso(0, 0, 0.02);
-    g.fillStyle = 'rgba(0,0,0,0.34)';
-    g.beginPath();
-    g.ellipse(sh.x, sh.y, 12 * s, 5.5 * s, 0, 0, Math.PI * 2);
-    g.fill();
-
-    // Isometric 3D Torso (exact match with drawCharacter)
-    const bx = -0.34, by = -0.28;
-    pBox(bx, by, 0.14, 0.68, 0.56, 0.68, a.shirt, shade(a.shirt, -14), '#111827');
-
-    // Head
-    const hp = pIso(0, 0, 1.15), hr = 11.5 * s;
-    if (a.robot) {
-      pBox(bx - 0.05, by - 0.05, 0.82, 0.78, 0.66, 0.58, '#7c3aed', '#5b21b6', '#4c1d95');
-      const ant = pIso(0, 0, 1.62);
-      g.fillStyle = '#38bdf8';
-      g.beginPath(); g.arc(ant.x, ant.y, 4 * s, 0, Math.PI * 2); g.fill();
-      g.fillStyle = '#e0f2fe';
-      g.fillRect(hp.x - 5 * s, hp.y - 2 * s, 3.5 * s, 3.5 * s);
-      g.fillRect(hp.x + 1.5 * s, hp.y - 2 * s, 3.5 * s, 3.5 * s);
-    } else {
-      g.fillStyle = '#fed7aa';
-      g.beginPath(); g.arc(hp.x, hp.y, hr, 0, Math.PI * 2); g.fill();
-      g.fillStyle = a.helmet || a.hat || a.hair;
-      g.beginPath(); g.arc(hp.x, hp.y - 2 * s, hr * 1.03, Math.PI * 0.92, Math.PI * 2.08); g.fill();
-      if (a.crown) {
-        g.fillStyle = '#ffd166';
-        g.beginPath();
-        g.moveTo(hp.x - 7 * s, hp.y - 10 * s); g.lineTo(hp.x - 4 * s, hp.y - 17 * s);
-        g.lineTo(hp.x, hp.y - 12 * s); g.lineTo(hp.x + 4 * s, hp.y - 17 * s);
-        g.lineTo(hp.x + 7 * s, hp.y - 10 * s); g.closePath(); g.fill();
-      }
-      g.fillStyle = '#111827';
-      g.beginPath();
-      g.arc(hp.x - 3.6 * s, hp.y + 1.2 * s, 1.7 * s, 0, Math.PI * 2);
-      g.arc(hp.x + 3.6 * s, hp.y + 1.2 * s, 1.7 * s, 0, Math.PI * 2);
-      g.fill();
-      if (a.helmet) {
-        g.fillStyle = 'rgba(56, 189, 248, 0.85)';
-        g.fillRect(hp.x - 7 * s, hp.y - 1.5 * s, 14 * s, 4 * s);
-      } else if (a.glasses) {
-        g.strokeStyle = '#111827'; g.lineWidth = 2.6;
-        g.strokeRect(hp.x - 6.5 * s, hp.y - 1 * s, 5 * s, 4 * s);
-        g.strokeRect(hp.x + 1.5 * s, hp.y - 1 * s, 5 * s, 4 * s);
-      }
-    }
+    renderChibi(g, w / 2, 134, 132, a, 0);
     avatarCache[id] = c.toDataURL('image/png');
     return avatarCache[id];
   }
