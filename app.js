@@ -303,8 +303,9 @@ const AG = {
 };
 
 // ---------- ระบบปลดล็อกด้วยรหัสผ่าน 8 หลัก (จดจำ 15 นาที แล้วล็อกอัตโนมัติ) ----------
+const DEFAULT_EXEC_URL = 'https://script.google.com/macros/s/AKfycbzbmx546QsBole-aLJeaUjTrSzQ8CCHYEBBWupKzHPE2E2Ljbj1gqchl0NDicmTNUz9/exec';
 const SESSION_MS = 15 * 60 * 1000;
-const CFG = { url: '', key: '', exp: 0 };
+const CFG = { url: DEFAULT_EXEC_URL, key: '', exp: 0 };
 let lockTimer = null;
 
 function getCookieCfg(name) {
@@ -370,7 +371,7 @@ function lockSession(showPrompt) {
 }
 
 try {
-  CFG.url = localStorage.getItem('hq_url') || getCookieCfg('hq_url') || '';
+  CFG.url = localStorage.getItem('hq_url') || getCookieCfg('hq_url') || DEFAULT_EXEC_URL;
   const k = localStorage.getItem('hq_key') || getCookieCfg('hq_key') || '';
   const exp = Number(localStorage.getItem('hq_exp') || getCookieCfg('hq_exp') || 0);
   if (CFG.url) saveUrl(CFG.url);
@@ -599,9 +600,9 @@ function cfgOpen(notice) {
   const remMin = CFG.exp > Date.now() ? Math.ceil((CFG.exp - Date.now()) / 60000) : 0;
   $('cfgMsg').textContent = notice || (remMin > 0
     ? '✅ ปลดล็อกอยู่แล้ว (เหลือเวลาอีก ' + remMin + ' นาที)'
-    : (!CFG.url ? 'ℹ️ เปิดจากปุ่ม /dash ใน LINE OA ครั้งเดียว หรือวางลิงก์ /exec ด้านล่าง แล้วครั้งต่อไปกรอกแค่รหัส 8 หลัก' : ''));
+    : '');
   cd.classList.add('on');
-  setTimeout(() => { (CFG.url ? $('cfgKey') : $('cfgUrl')).focus(); }, 60);
+  setTimeout(() => { $('cfgKey').focus(); }, 60);
 }
 function cfgClose() { cd.classList.remove('on'); $('cfgBtn').focus(); }
 $('cfgBtn').onclick = () => cfgOpen();
