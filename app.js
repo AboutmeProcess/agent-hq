@@ -302,27 +302,48 @@ const AG = {
   }
 };
 
-// ---------- การเชื่อมข้อมูล ----------
+// ---------- การเชื่อมข้อมูลอัตโนมัติ (จำค่าข้ามเซสชัน + ดึงข้อมูลสดทุกครั้งโดยไม่ต้องกรอกซ้ำ) ----------
 const CFG = { url: '', key: '' };
+function getCookieCfg(name) {
+  try {
+    const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : '';
+  } catch (e) { return ''; }
+}
+function setCookieCfg(name, val, days) {
+  try {
+    const maxAge = days > 0 ? '; max-age=' + (days * 86400) : '; max-age=0';
+    document.cookie = name + '=' + encodeURIComponent(val || '') + maxAge + '; path=/; SameSite=Lax';
+  } catch (e) {}
+}
+function saveCfg(u, k) {
+  CFG.url = u; CFG.key = k;
+  try { localStorage.setItem('hq_url', u); localStorage.setItem('hq_key', k); } catch (e) {}
+  setCookieCfg('hq_url', u, 365);
+  setCookieCfg('hq_key', k, 365);
+}
+function clearCfg() {
+  CFG.url = ''; CFG.key = '';
+  try { localStorage.removeItem('hq_url'); localStorage.removeItem('hq_key'); } catch (e) {}
+  setCookieCfg('hq_url', '', 0);
+  setCookieCfg('hq_key', '', 0);
+}
 try {
-  CFG.url = localStorage.getItem('hq_url') || '';
-  CFG.key = localStorage.getItem('hq_key') || '';
+  CFG.url = localStorage.getItem('hq_url') || getCookieCfg('hq_url') || '';
+  CFG.key = localStorage.getItem('hq_key') || getCookieCfg('hq_key') || '';
+  if (CFG.url && CFG.key) saveCfg(CFG.url, CFG.key);
 } catch (e) {}
 
 (function () {
   try {
     const hp = new URLSearchParams(location.hash.replace(/^#/, ''));
-    const u = hp.get('u') || '';
-    const k = hp.get('k') || '';
+    const sp = new URLSearchParams(location.search);
+    const u = hp.get('u') || sp.get('u') || '';
+    const k = hp.get('k') || sp.get('k') || '';
     if (u.indexOf('https://script.google.com/macros/s/') === 0 && /\/exec$/.test(u) && k.length >= 16) {
-      CFG.url = u;
-      CFG.key = k;
+      saveCfg(u, k);
       try {
-        localStorage.setItem('hq_url', u);
-        localStorage.setItem('hq_key', k);
-      } catch (e2) {}
-      try {
-        history.replaceState(null, '', location.pathname + location.search);
+        history.replaceState(null, '', location.pathname);
       } catch (e3) {}
     }
   } catch (e) {}
@@ -465,17 +486,17 @@ function jsonp(u) {
 }
 
 let lastPull = 0;
-async function pull(force) {
+async function pull(force, fresh) {
   if (!CFG.url || !CFG.key) { showOff(); return; }
-  if (!force && Date.now() - lastPull < 20000) return;
+  if (!force && Date.now() - lastPull < 10000) return;
   lastPull = Date.now();
   const rb = $('refreshBtn');
   if (rb) rb.classList.add('spin');
-  const u = CFG.url + (CFG.url.indexOf('?') >= 0 ? '&' : '?') + 'action=status&k=' + encodeURIComponent(CFG.key);
+  const u = CFG.url + (CFG.url.indexOf('?') >= 0 ? '&' : '?') + 'action=status&k=' + encodeURIComponent(CFG.key) + (fresh !== false ? '&nocache=1' : '');
   let d = null;
   let err = '';
   try {
-    const r = await fetch(u, { redirect: 'follow' });
+    const r = await fetch(u, { redirect: 'follow', cache: 'no-store' });
     d = await r.json();
   } catch (e1) {
     try { d = await jsonp(u); } catch (e2) { err = e2.message || 'เชื่อมต่อไม่ได้'; }
@@ -496,12 +517,15 @@ async function pull(force) {
 let timer = null;
 function startPoll() {
   clearInterval(timer);
-  pull(true);
-  // รีเฟรชอัตโนมัติทุก 5 นาที (ประหยัดโควตา Apps Script กว่าเดิม 60% และยังกด 🔄 รีเฟรชได้ทันที)
-  timer = setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 300000);
+  pull(true, true);
+  // อัปเดตข้อมูลจริงจาก Apps Script อัตโนมัติทุก 60 วินาที
+  timer = setInterval(() => { if (document.visibilityState === 'visible') pull(true, true); }, 60000);
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && CFG.url && Date.now() - lastPull > 60000) pull();
+  if (document.visibilityState === 'visible' && CFG.url && CFG.key && Date.now() - lastPull > 10000) pull(true, true);
+});
+window.addEventListener('focus', () => {
+  if (CFG.url && CFG.key && Date.now() - lastPull > 10000) pull(true, true);
 });
 
 // Config dialog
@@ -527,17 +551,13 @@ $('cfgSave').onclick = () => {
     $('cfgMsg').textContent = 'รหัสสั้นเกินไป (ควรยาวอย่างน้อย 16 ตัวอักษร)';
     return;
   }
-  CFG.url = u;
-  CFG.key = k;
-  try { localStorage.setItem('hq_url', u); localStorage.setItem('hq_key', k); } catch (e) {}
+  saveCfg(u, k);
   cfgClose();
   startPoll();
 };
 $('cfgOff').onclick = () => {
-  CFG.url = '';
-  CFG.key = '';
+  clearCfg();
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-  try { localStorage.removeItem('hq_url'); localStorage.removeItem('hq_key'); } catch (e) {}
   clearInterval(timer);
   cfgClose();
   showOff();
@@ -1165,7 +1185,7 @@ async function sendCmd(text, o) {
     if (d && d.ok) {
       ok = true;
       showOut(out, d.out, true);
-      setTimeout(() => pull(true), 1500);
+      setTimeout(() => pull(true, true), 500);
     } else {
       showOut(out, 'ส่งไม่สำเร็จ: ' + (CMD_ERR[d && d.error] || (d && d.error) || 'ไม่ทราบสาเหตุ'));
     }
