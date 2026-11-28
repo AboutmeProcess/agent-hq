@@ -361,12 +361,27 @@ function scheduleLock() {
   }
   lockTimer = setTimeout(() => lockSession(true), rem);
 }
+let lastActTouch = 0;
+function touchActivity() {
+  if (!isSessionValid()) return;
+  const now = Date.now();
+  if (now - lastActTouch < 30000) return;
+  lastActTouch = now;
+  CFG.exp = now + SESSION_MS;
+  try { localStorage.setItem('hq_exp', String(CFG.exp)); } catch (e) {}
+  setCookieCfg('hq_exp', String(CFG.exp), SESSION_MS / 1000);
+  scheduleLock();
+}
+['pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel'].forEach(ev => {
+  window.addEventListener(ev, touchActivity, { passive: true });
+});
+
 function lockSession(showPrompt) {
   clearKey();
   if (typeof timer !== 'undefined') clearInterval(timer);
   if (typeof showOff === 'function') showOff();
   if (showPrompt && typeof cfgOpen === 'function') {
-    cfgOpen('🔒 หมดเวลา 15 นาทีแล้ว กรุณากรอกรหัสผ่าน 8 หลักใหม่เพื่อดูข้อมูลจริง');
+    cfgOpen('🔒 ไม่ได้ใช้งานเกิน 15 นาทีแล้ว กรุณากรอกรหัสผ่าน 8 หลักใหม่เพื่อดูข้อมูลจริง');
   }
 }
 
