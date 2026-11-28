@@ -302,36 +302,84 @@ const AG = {
   }
 };
 
-// ---------- การเชื่อมข้อมูลอัตโนมัติ (จำค่าข้ามเซสชัน + ดึงข้อมูลสดทุกครั้งโดยไม่ต้องกรอกซ้ำ) ----------
-const CFG = { url: '', key: '' };
+// ---------- ระบบปลดล็อกด้วยรหัสผ่าน 8 หลัก (จดจำ 15 นาที แล้วล็อกอัตโนมัติ) ----------
+const SESSION_MS = 15 * 60 * 1000;
+const CFG = { url: '', key: '', exp: 0 };
+let lockTimer = null;
+
 function getCookieCfg(name) {
   try {
     const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
     return m ? decodeURIComponent(m[1]) : '';
   } catch (e) { return ''; }
 }
-function setCookieCfg(name, val, days) {
+function setCookieCfg(name, val, sec) {
   try {
-    const maxAge = days > 0 ? '; max-age=' + (days * 86400) : '; max-age=0';
+    const maxAge = sec > 0 ? '; max-age=' + Math.round(sec) : '; max-age=0';
     document.cookie = name + '=' + encodeURIComponent(val || '') + maxAge + '; path=/; SameSite=Lax';
   } catch (e) {}
 }
+function saveUrl(u) {
+  CFG.url = u;
+  try { localStorage.setItem('hq_url', u); } catch (e) {}
+  setCookieCfg('hq_url', u, 365 * 86400);
+}
 function saveCfg(u, k) {
-  CFG.url = u; CFG.key = k;
-  try { localStorage.setItem('hq_url', u); localStorage.setItem('hq_key', k); } catch (e) {}
-  setCookieCfg('hq_url', u, 365);
-  setCookieCfg('hq_key', k, 365);
+  if (u) saveUrl(u);
+  CFG.key = k;
+  CFG.exp = Date.now() + SESSION_MS;
+  try {
+    localStorage.setItem('hq_key', k);
+    localStorage.setItem('hq_exp', String(CFG.exp));
+  } catch (e) {}
+  setCookieCfg('hq_key', k, SESSION_MS / 1000);
+  setCookieCfg('hq_exp', String(CFG.exp), SESSION_MS / 1000);
+  scheduleLock();
 }
-function clearCfg() {
-  CFG.url = ''; CFG.key = '';
-  try { localStorage.removeItem('hq_url'); localStorage.removeItem('hq_key'); } catch (e) {}
-  setCookieCfg('hq_url', '', 0);
+function clearKey() {
+  CFG.key = '';
+  CFG.exp = 0;
+  clearTimeout(lockTimer);
+  try {
+    localStorage.removeItem('hq_key');
+    localStorage.removeItem('hq_exp');
+  } catch (e) {}
   setCookieCfg('hq_key', '', 0);
+  setCookieCfg('hq_exp', '', 0);
 }
+function isSessionValid() {
+  return !!(CFG.url && CFG.key && CFG.exp > Date.now());
+}
+function scheduleLock() {
+  clearTimeout(lockTimer);
+  if (!CFG.exp) return;
+  const rem = CFG.exp - Date.now();
+  if (rem <= 0) {
+    lockSession(true);
+    return;
+  }
+  lockTimer = setTimeout(() => lockSession(true), rem);
+}
+function lockSession(showPrompt) {
+  clearKey();
+  if (typeof timer !== 'undefined') clearInterval(timer);
+  if (typeof showOff === 'function') showOff();
+  if (showPrompt && typeof cfgOpen === 'function') {
+    cfgOpen('🔒 หมดเวลา 15 นาทีแล้ว กรุณากรอกรหัสผ่าน 8 หลักใหม่เพื่อดูข้อมูลจริง');
+  }
+}
+
 try {
   CFG.url = localStorage.getItem('hq_url') || getCookieCfg('hq_url') || '';
-  CFG.key = localStorage.getItem('hq_key') || getCookieCfg('hq_key') || '';
-  if (CFG.url && CFG.key) saveCfg(CFG.url, CFG.key);
+  const k = localStorage.getItem('hq_key') || getCookieCfg('hq_key') || '';
+  const exp = Number(localStorage.getItem('hq_exp') || getCookieCfg('hq_exp') || 0);
+  if (CFG.url) saveUrl(CFG.url);
+  if (k && exp > Date.now()) {
+    CFG.key = k;
+    CFG.exp = exp;
+  } else {
+    clearKey();
+  }
 } catch (e) {}
 
 (function () {
@@ -340,8 +388,9 @@ try {
     const sp = new URLSearchParams(location.search);
     const u = hp.get('u') || sp.get('u') || '';
     const k = hp.get('k') || sp.get('k') || '';
-    if (u.indexOf('https://script.google.com/macros/s/') === 0 && /\/exec$/.test(u) && k.length >= 8) {
-      saveCfg(u, k);
+    if (u.indexOf('https://script.google.com/macros/s/') === 0 && /\/exec$/.test(u)) {
+      saveUrl(u);
+      if (k.length >= 8) saveCfg(u, k);
       try {
         history.replaceState(null, '', location.pathname);
       } catch (e3) {}
@@ -504,9 +553,13 @@ async function pull(force, fresh) {
     if (rb) rb.classList.remove('spin');
   }
   if (d && d.ok) { applyData(d); setConn('on', d.now); return; }
-  const msg = d
-    ? (d.error === 'unauthorized' ? 'รหัส DASH_KEY ไม่ถูกต้อง หรือยังไม่ได้ตั้งใน Script properties' : d.error || 'ตอบกลับไม่ถูกต้อง')
-    : err;
+  if (d && d.error === 'unauthorized') {
+    clearKey();
+    showOff();
+    cfgOpen('❌ รหัสผ่าน 8 หลักไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+    return;
+  }
+  const msg = d ? (d.error || 'ตอบกลับไม่ถูกต้อง') : err;
   setSt({});
   setEv([['#ff6b6b', msg]]);
   setLog(null, msg);
@@ -516,39 +569,57 @@ async function pull(force, fresh) {
 
 let timer = null;
 function startPoll() {
+  if (!isSessionValid()) { lockSession(true); return; }
+  scheduleLock();
   clearInterval(timer);
   pull(true, true);
   // อัปเดตข้อมูลจริงจาก Apps Script อัตโนมัติทุก 60 วินาที
-  timer = setInterval(() => { if (document.visibilityState === 'visible') pull(true, true); }, 60000);
+  timer = setInterval(() => {
+    if (!isSessionValid()) { lockSession(true); return; }
+    if (document.visibilityState === 'visible') pull(true, true);
+  }, 60000);
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && CFG.url && CFG.key && Date.now() - lastPull > 10000) pull(true, true);
+  if (document.visibilityState !== 'visible') return;
+  if (CFG.key && !isSessionValid()) { lockSession(true); return; }
+  if (isSessionValid() && Date.now() - lastPull > 10000) pull(true, true);
 });
 window.addEventListener('focus', () => {
-  if (CFG.url && CFG.key && Date.now() - lastPull > 10000) pull(true, true);
+  if (CFG.key && !isSessionValid()) { lockSession(true); return; }
+  if (isSessionValid() && Date.now() - lastPull > 10000) pull(true, true);
 });
 
-// Config dialog
+// Passcode / Config dialog (แสดงเฉพาะช่องรหัสผ่าน 8 หลักเมื่อมีลิงก์เซิร์ฟเวอร์บันทึกไว้แล้ว)
 const cd = $('cfgd');
-function cfgOpen() {
-  $('cfgUrl').value = CFG.url;
+function cfgOpen(notice) {
+  const urlWrap = $('cfgUrlWrap');
+  $('cfgUrl').value = CFG.url || '';
   $('cfgKey').value = '';
-  $('cfgMsg').textContent = CFG.key ? 'มีรหัสบันทึกไว้แล้ว (เว้นว่างช่องรหัสถ้าไม่ต้องการเปลี่ยน)' : '';
+  if (urlWrap) urlWrap.hidden = !!CFG.url;
+  const remMin = CFG.exp > Date.now() ? Math.ceil((CFG.exp - Date.now()) / 60000) : 0;
+  $('cfgMsg').textContent = notice || (remMin > 0
+    ? '✅ ปลดล็อกอยู่แล้ว (เหลือเวลาอีก ' + remMin + ' นาที)'
+    : (!CFG.url ? 'ℹ️ เปิดจากปุ่ม /dash ใน LINE OA ครั้งเดียว หรือวางลิงก์ /exec ด้านล่าง แล้วครั้งต่อไปกรอกแค่รหัส 8 หลัก' : ''));
   cd.classList.add('on');
-  $('cfgUrl').focus();
+  setTimeout(() => { (CFG.url ? $('cfgKey') : $('cfgUrl')).focus(); }, 60);
 }
 function cfgClose() { cd.classList.remove('on'); $('cfgBtn').focus(); }
-$('cfgBtn').onclick = cfgOpen;
+$('cfgBtn').onclick = () => cfgOpen();
 $('cfgClose').onclick = cfgClose;
+if ($('cfgAdvBtn') && $('cfgUrlWrap')) {
+  $('cfgAdvBtn').onclick = () => { $('cfgUrlWrap').hidden = !$('cfgUrlWrap').hidden; };
+}
+$('cfgKey').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('cfgSave').click(); } });
 $('cfgSave').onclick = () => {
-  const u = $('cfgUrl').value.trim();
-  const k = $('cfgKey').value.trim() || CFG.key;
+  const u = ($('cfgUrl').value.trim() || CFG.url || '').trim();
+  const k = $('cfgKey').value.trim();
   if (u.indexOf('https://script.google.com/macros/s/') !== 0 || !/\/exec$/.test(u)) {
-    $('cfgMsg').textContent = 'ลิงก์ต้องขึ้นต้นด้วย https://script.google.com/macros/s/ และลงท้ายด้วย /exec';
+    if ($('cfgUrlWrap')) $('cfgUrlWrap').hidden = false;
+    $('cfgMsg').textContent = '⚠️ กรุณาเปิดจาก /dash ใน LINE OA ครั้งแรก หรือใส่ลิงก์ /exec ก่อนครับ';
     return;
   }
   if (k.length < 8) {
-    $('cfgMsg').textContent = 'รหัสผ่านสั้นเกินไป (ต้องมีอย่างน้อย 8 ตัวอักษร)';
+    $('cfgMsg').textContent = '⚠️ กรุณากรอกรหัสผ่าน 8 หลักให้ครบ';
     return;
   }
   saveCfg(u, k);
@@ -556,11 +627,9 @@ $('cfgSave').onclick = () => {
   startPoll();
 };
 $('cfgOff').onclick = () => {
-  clearCfg();
-  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-  clearInterval(timer);
+  lockSession(false);
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
   cfgClose();
-  showOff();
 };
 
 // ---------- วาดหน้า ----------
@@ -2351,5 +2420,8 @@ function drawDriverLedger(d) {
   }
 }
 
-if (CFG.url && CFG.key) startPoll();
-else showOff();
+if (isSessionValid()) startPoll();
+else {
+  showOff();
+  cfgOpen();
+}
