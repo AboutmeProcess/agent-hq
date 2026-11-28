@@ -340,7 +340,7 @@ try {
     const sp = new URLSearchParams(location.search);
     const u = hp.get('u') || sp.get('u') || '';
     const k = hp.get('k') || sp.get('k') || '';
-    if (u.indexOf('https://script.google.com/macros/s/') === 0 && /\/exec$/.test(u) && k.length >= 16) {
+    if (u.indexOf('https://script.google.com/macros/s/') === 0 && /\/exec$/.test(u) && k.length >= 8) {
       saveCfg(u, k);
       try {
         history.replaceState(null, '', location.pathname);
@@ -547,8 +547,8 @@ $('cfgSave').onclick = () => {
     $('cfgMsg').textContent = 'ลิงก์ต้องขึ้นต้นด้วย https://script.google.com/macros/s/ และลงท้ายด้วย /exec';
     return;
   }
-  if (k.length < 16) {
-    $('cfgMsg').textContent = 'รหัสสั้นเกินไป (ควรยาวอย่างน้อย 16 ตัวอักษร)';
+  if (k.length < 8) {
+    $('cfgMsg').textContent = 'รหัสผ่านสั้นเกินไป (ต้องมีอย่างน้อย 8 ตัวอักษร)';
     return;
   }
   saveCfg(u, k);

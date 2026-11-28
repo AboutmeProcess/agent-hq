@@ -279,9 +279,9 @@
   <div id="cfgd" class="ov" role="dialog" aria-modal="true" aria-labelledby="cfgt">
     <div class="sheet">
       <div class="ahead"><div class="atxt"><h2 id="cfgt">เชื่อมข้อมูลจริง</h2></div></div>
-      <p class="muted">ใส่ลิงก์ Web app ของ Apps Script (ลงท้าย /exec) และรหัส DASH_KEY ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ ไม่ถูกส่งไปที่อื่นนอกจากลิงก์ที่คุณใส่ · ไม่อยากกรอกเอง: พิมพ์ /dash ในบอทแล้วกดปุ่มที่ส่งให้ หน้านี้จะเชื่อมเอง</p>
+      <p class="muted">ใส่รหัสผ่าน 8 หลัก (หรือ DASH_KEY) และลิงก์ Web app (/exec) ระบบจะจำไว้อัตโนมัติ ไม่ต้องกรอกซ้ำ · หรือเปิดจากปุ่ม /dash ใน LINE OA</p>
       <div class="frow"><input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" aria-label="ลิงก์ exec"></div>
-      <div class="frow"><input id="cfgKey" type="password" placeholder="DASH_KEY" autocomplete="off" aria-label="รหัส"></div>
+      <div class="frow"><input id="cfgKey" type="password" placeholder="รหัสผ่าน 8 หลัก" autocomplete="off" aria-label="รหัสผ่าน 8 หลัก"></div>
       <p id="cfgMsg" class="note"></p>
       <div class="frow">
         <button id="cfgSave" class="pri">บันทึกและเชื่อม</button>

@@ -40,14 +40,19 @@ const QUICK = [
 ];
 
 function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k); }
+function validDashAuth_(k) {
+  if (!k) return false;
+  const dk = prop_('DASH_KEY');
+  const pin = prop_('DASH_PIN');
+  return (!!dk && k === dk) || (!!pin && k === pin);
+}
 function ok_() { return ContentService.createTextOutput('ok'); }
 function doGet(e) {   // ?action=status&k=DASH_KEY → ข้อมูลสถานะให้หน้าแดชบอร์ด (ไม่เรียก API เที่ยวบิน ไม่เสียโควตา)
   const p = (e && e.parameter) || {};
   if (p.action === 'line') return ok_();   // ให้ LINE Developers กด Verify Webhook ผ่านทันที
   if (p.action !== 'status') return ContentService.createTextOutput('Driver HQ bot is running');
-  const key = prop_('DASH_KEY');
   let out;
-  if (!key || p.k !== key) out = { ok: false, error: 'unauthorized' };
+  if (!validDashAuth_(p.k)) out = { ok: false, error: 'unauthorized' };
   else {
     try {
       const cache = CacheService.getScriptCache();
@@ -760,8 +765,7 @@ function webCmd_(e) {
   const json = function (o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); };
   let b;
   try { b = JSON.parse(e.postData.contents); } catch (x) { return json({ ok: false, error: 'bad_request' }); }
-  const key = prop_('DASH_KEY');
-  if (!key || b.k !== key) return json({ ok: false, error: 'unauthorized' });
+  if (!validDashAuth_(b.k)) return json({ ok: false, error: 'unauthorized' });
   if (String(prop_('DASH_ALLOW_CMD') || '').toLowerCase() !== 'true') return json({ ok: false, error: 'cmd_disabled' });
   const text = String(b.text || '').trim().slice(0, 300);
   if (!text || /^\/dash\b|แดชบอร์ด/i.test(text)) return json({ ok: false, error: 'empty' });
